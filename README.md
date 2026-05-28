@@ -24,7 +24,7 @@ services:
     image: ray5378/handbrake-webui:latest
     container_name: handbrake-webui
     ports:
-      - "0:3000"  # 使用随机端口 (查看实际端口: docker ps)
+      - "3000:3000"  # 宿主机:内部端口，可以自行修改宿主机端口
     volumes:
       - ./config:/config
       - ./source:/source
@@ -68,8 +68,9 @@ docker-compose logs -f
 ```
 
 #### 3. 访问 Web UI
-- 查看端口: 运行 `docker ps` 找到实际映射的端口
-- 地址: http://localhost:[实际端口]
+- 默认地址: http://localhost:3000
+- 修改端口: 可以在 `docker-compose.yml` 中修改 `ports` 配置，例如改成 `8080:3000`
+- 自定义内部端口: 可以在 `environment` 中设置 `PORT=你的端口`
 - 默认账号: `admin` / `changeme123` (请务必修改密码!)
 
 ---
@@ -80,10 +81,10 @@ docker-compose logs -f
 # 拉取镜像
 docker pull ray5378/handbrake-webui:latest
 
-# 启动容器 (使用随机端口)
+# 启动容器
 docker run -d \
   --name handbrake-webui \
-  -p 0:3000 \
+  -p 3000:3000 \
   -v $(pwd)/config:/config \
   -v $(pwd)/source:/source \
   -v $(pwd)/output:/output \
@@ -94,9 +95,6 @@ docker run -d \
   -e MAX_CONCURRENT_JOBS=2 \
   --restart unless-stopped \
   ray5378/handbrake-webui:latest
-
-# 查看实际端口
-docker ps
 ```
 
 ---
