@@ -11,7 +11,7 @@ services:
     container_name: handbrake-webui
     # 端口映射: 用户可以设置自己想要的端口
     ports:
-      - "3000:3000"  # 默认映射到 3000
+      - "52389:52389"  # 默认映射到 52389
     volumes:
       - ./config:/config
       - ./source:/source
@@ -21,7 +21,7 @@ services:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme123
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - PORT=3000  # 固定内部端口为 3000，方便映射
+      - PORT=52389  # 固定内部端口为 52389，方便映射
       - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
     networks:

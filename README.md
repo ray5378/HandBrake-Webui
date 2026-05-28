@@ -24,7 +24,7 @@ services:
     image: ray5378/handbrake-webui:latest
     container_name: handbrake-webui
     ports:
-      - "3000:3000"  # 宿主机:内部端口，可以自行修改宿主机端口
+      - "52389:52389"  # 宿主机:内部端口，可以自行修改宿主机端口
     volumes:
       - ./config:/config
       - ./source:/source
@@ -34,7 +34,7 @@ services:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme123
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - PORT=3000
+      - PORT=52389
       - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
     networks:
@@ -62,8 +62,8 @@ docker-compose logs -f
 ```
 
 #### 3. 访问 Web UI
-- 默认地址: http://localhost:3000
-- 修改端口: 可以在 `docker-compose.yml` 中修改 `ports` 配置，例如改成 `8080:3000`
+- 默认地址: http://localhost:52389
+- 修改端口: 可以在 `docker-compose.yml` 中修改 `ports` 配置，例如改成 `8080:52389`
 - 自定义内部端口: 可以在 `environment` 中设置 `PORT=你的端口`
 - 默认账号: `admin` / `changeme123` (请务必修改密码!)
 
@@ -78,14 +78,14 @@ docker pull ray5378/handbrake-webui:latest
 # 启动容器
 docker run -d \
   --name handbrake-webui \
-  -p 3000:3000 \
+  -p 52389:52389 \
   -v $(pwd)/config:/config \
   -v $(pwd)/source:/source \
   -v $(pwd)/output:/output \
   -e ADMIN_USERNAME=admin \
   -e ADMIN_PASSWORD=changeme123 \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
-  -e PORT=3000 \
+  -e PORT=52389 \
   -e MAX_CONCURRENT_JOBS=2 \
   --restart unless-stopped \
   ray5378/handbrake-webui:latest

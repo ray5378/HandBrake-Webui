@@ -1,13 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// 生成随机的5位端口 (10000-65535)
-function generateRandomPort() {
-  return Math.floor(Math.random() * (65535 - 10000 + 1)) + 10000;
-}
-
 const config = {
-  port: process.env.PORT ? parseInt(process.env.PORT) : generateRandomPort(),
+  port: process.env.PORT ? parseInt(process.env.PORT) : 52389,
   jwtSecret: process.env.JWT_SECRET || generateSecret(),
   jwtExpiresIn: '1h',
   refreshTokenExpiresIn: '7d',
