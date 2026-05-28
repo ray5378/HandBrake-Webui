@@ -11,6 +11,7 @@ const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
 const logger = require('../utils/logger');
 const { PASSWORD_CONFIG } = require('../constants');
+const { getFullDefaultPresets } = require('../constants/presets');
 
 let db = null;
 
@@ -129,7 +130,7 @@ function createDefaultData() {
     .get();
 
   if (presetCount.count === 0) {
-    const defaultPresets = getDefaultPresets();
+    const defaultPresets = getFullDefaultPresets();
 
     const insertPreset = db.prepare(`
       INSERT INTO presets (id, name, description, settings, is_built_in)
@@ -142,114 +143,6 @@ function createDefaultData() {
 
     logger.info('Default presets created', { count: defaultPresets.length });
   }
-}
-
-/**
- * 获取默认预设列表
- * @returns {Array} 默认预设数组
- */
-function getDefaultPresets() {
-  return [
-    {
-      id: uuidv4(),
-      name: 'Fast 1080p',
-      description: '快速转码，适合分享',
-      settings: JSON.stringify({
-        format: 'mp4',
-        video: {
-          codec: 'libx264',
-          crf: 23,
-          preset: 'veryfast',
-          width: 1920,
-          height: 1080
-        },
-        audio: {
-          codec: 'aac',
-          bitrate: 128,
-          channels: 2
-        }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'Quality 1080p',
-      description: '高质量转码，适合存档',
-      settings: JSON.stringify({
-        format: 'mp4',
-        video: {
-          codec: 'libx264',
-          crf: 18,
-          preset: 'slow',
-          width: 1920,
-          height: 1080
-        },
-        audio: {
-          codec: 'aac',
-          bitrate: 256,
-          channels: 2
-        }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'Web 720p',
-      description: '网页播放优化，文件体积小',
-      settings: JSON.stringify({
-        format: 'mp4',
-        video: {
-          codec: 'libx264',
-          crf: 25,
-          preset: 'medium',
-          width: 1280,
-          height: 720
-        },
-        audio: {
-          codec: 'aac',
-          bitrate: 96,
-          channels: 2
-        }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'H.265 1080p',
-      description: 'H.265 编码，更高压缩率',
-      settings: JSON.stringify({
-        format: 'mkv',
-        video: {
-          codec: 'libx265',
-          crf: 24,
-          preset: 'medium',
-          width: 1920,
-          height: 1080
-        },
-        audio: {
-          codec: 'aac',
-          bitrate: 192,
-          channels: 2
-        }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'WebM VP9',
-      description: 'WebM 格式，适合网页嵌入',
-      settings: JSON.stringify({
-        format: 'webm',
-        video: {
-          codec: 'libvpx-vp9',
-          crf: 30,
-          width: 1920,
-          height: 1080
-        },
-        audio: {
-          codec: 'libopus',
-          bitrate: 128,
-          channels: 2
-        }
-      })
-    }
-  ];
 }
 
 /**

@@ -1,4 +1,4 @@
-const { spawn, exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { getDatabase } = require('../models/database');
@@ -10,68 +10,289 @@ let processingCount = 0;
 function buildHandBrakeArgs(job, settings) {
   const args = ['-i', job.source_file, '-o', job.output_file, '--json'];
 
-  if (settings.format === 'webm') {
-    if (settings.video?.codec === 'libvpx-vp9') {
-      args.push('--vcodec', 'libvpx-vp9');
-      if (settings.video.crf) {
-        args.push('--crf', settings.video.crf.toString());
-      }
-      if (settings.video.width && settings.video.height) {
-        args.push(
-          '--width',
-          settings.video.width.toString(),
-          '--height',
-          settings.video.height.toString()
-        );
-      }
+  // 容器格式
+  args.push('--format', settings.format || 'mp4');
+
+  // 容器优化
+  if (settings.optimize === 'fast-start') {
+    args.push('--optimize');
+  } else if (settings.optimize === 'fragmented') {
+    args.push('--fragmentation', '2');
+  }
+
+  const video = settings.video || {};
+  const dimensions = settings.dimensions || {};
+  const filters = settings.filters || {};
+  const audio = settings.audio || {};
+  const audioDefault = audio.default || {};
+  const subtitles = settings.subtitles || {};
+  const chapters = settings.chapters || {};
+
+  // 视频编码
+  if (video.codec) {
+    let encoder = video.codec;
+    if (encoder === 'x264') encoder = 'x264';
+    else if (encoder === 'x265') encoder = 'x265';
+    else if (encoder === 'svt-av1') encoder = 'svt_av1';
+    else if (encoder === 'vp9') encoder = 'VP9';
+
+    args.push('--encoder', encoder);
+
+    // 编码器预设
+    if (video.preset && video.preset !== 'default') {
+      args.push('--encoder-preset', video.preset);
     }
 
-    if (settings.audio?.codec === 'libopus') {
-      args.push('--acodec', 'libopus');
-      if (settings.audio.bitrate) {
-        args.push('--ab', `${settings.audio.bitrate}k`);
-      }
-    }
-  } else {
-    if (settings.video?.codec === 'libx265') {
-      args.push('--encoder', 'x265');
-      if (settings.video.crf) {
-        args.push('--crf', settings.video.crf.toString());
-      }
-      if (settings.video.preset && settings.video.preset !== 'default') {
-        args.push('--encoder-preset', settings.video.preset);
-      }
-    } else if (settings.video?.codec === 'libx264') {
-      args.push('--encoder', 'x264');
-      if (settings.video.crf) {
-        args.push('--cfr', settings.video.crf.toString());
-      }
-      if (settings.video.preset && settings.video.preset !== 'default') {
-        args.push('--encoder-preset', settings.video.preset);
-      }
+    // 编码器调优
+    if (video.tune) {
+      args.push('--encoder-tune', video.tune);
     }
 
-    if (settings.video?.width && settings.video?.height) {
-      args.push(
-        '--width',
-        settings.video.width.toString(),
-        '--height',
-        settings.video.height.toString()
-      );
+    // 编码器配置文件和级别
+    if (video.profile) {
+      args.push('--encoder-profile', video.profile);
+    }
+    if (video.level) {
+      args.push('--encoder-level', video.level);
     }
 
-    if (settings.audio?.codec) {
-      args.push('--aencoder', 'faac');
-      if (settings.audio.bitrate) {
-        args.push('--ab', `${settings.audio.bitrate}k`);
-      }
-      if (settings.audio.channels) {
-        args.push('--achannels', settings.audio.channels.toString());
-      }
+    // 码率控制
+    if (video.rateControl === 'crf') {
+      args.push('--quality', String(video.crf ?? 22));
+    } else if (video.rateControl === 'cbr' && video.bitrate) {
+      args.push('--vb', `${video.bitrate}`);
+    } else if (video.rateControl === 'vbr' && video.bitrate) {
+      args.push('--vb', `${video.bitrate}`);
+    } else if (video.rateControl === 'cqp' && video.qp) {
+      args.push('--qp', String(video.qp));
+    } else if (video.crf !== undefined) {
+      args.push('--quality', String(video.crf));
     }
   }
 
-  args.push('--format', settings.format || 'mp4');
+  // 帧率设置
+  if (video.framerate) {
+    args.push('--rate', String(video.framerate));
+    if (video.framerateMode === 'pfr') {
+      args.push('--pfr');
+    } else if (video.framerateMode === 'vfr') {
+      args.push('--vfr');
+    } else {
+      args.push('--cfr');
+    }
+  }
+
+  // 尺寸设置
+  if (dimensions.width) {
+    args.push('--width', String(dimensions.width));
+  }
+  if (dimensions.height) {
+    args.push('--height', String(dimensions.height));
+  }
+
+  // 模数设置
+  if (dimensions.scaling?.modulus) {
+    args.push('--modulus', String(dimensions.scaling.modulus));
+  }
+
+  // 裁剪设置
+  if (dimensions.cropping?.enabled) {
+    if (dimensions.cropping.autocrop) {
+      args.push('--autocrop');
+    } else {
+      const crop = dimensions.cropping;
+      args.push('--crop', `${crop.top}:${crop.bottom}:${crop.left}:${crop.right}`);
+    }
+  } else {
+    args.push('--crop', '0:0:0:0');
+  }
+
+  // 视频滤镜
+  let filterArgs = [];
+
+  // 反交错
+  if (filters.deinterlace?.enabled) {
+    let deinterlaceArgs = 'deinterlace';
+    if (filters.deinterlace.mode) {
+      deinterlaceArgs += `=mode=${filters.deinterlace.mode}`;
+      if (filters.deinterlace.parity) {
+        deinterlaceArgs += `:parity=${filters.deinterlace.parity}`;
+      }
+    }
+    filterArgs.push(deinterlaceArgs);
+  }
+
+  // Decomb
+  if (filters.decomb?.enabled) {
+    let decombArgs = 'decomb';
+    if (filters.decomb.mode) {
+      decombArgs += `=mode=${filters.decomb.mode}`;
+    }
+    filterArgs.push(decombArgs);
+  }
+
+  // 反电视电影
+  if (filters.detelecine?.enabled) {
+    let detelecineArgs = 'detelecine';
+    if (filters.detelecine.pattern) {
+      detelecineArgs += `=pattern=${filters.detelecine.pattern}`;
+    }
+    if (filters.detelecine.startFrame) {
+      detelecineArgs += `:start=${filters.detelecine.startFrame}`;
+    }
+    filterArgs.push(detelecineArgs);
+  }
+
+  // 降噪
+  if (filters.denoise?.enabled) {
+    if (filters.denoise.method === 'hqdn3d') {
+      let hqdn3dArgs = 'hqdn3d';
+      const hqdn3d = filters.denoise.hqdn3d || {};
+      const params = [
+        hqdn3d.lightSpatial ?? 4,
+        hqdn3d.lightTemporal ?? 6,
+        hqdn3d.heavySpatial ?? 6,
+        hqdn3d.heavyTemporal ?? 16
+      ].join(':');
+      hqdn3dArgs += `=${params}`;
+      filterArgs.push(hqdn3dArgs);
+    } else if (filters.denoise.method === 'nlmeans') {
+      let nlmeansArgs = 'nlmeans';
+      if (filters.denoise.preset) {
+        nlmeansArgs += `=preset=${filters.denoise.preset}`;
+      }
+      if (filters.denoise.tune && filters.denoise.tune !== 'none') {
+        nlmeansArgs += `:tune=${filters.denoise.tune}`;
+      }
+      filterArgs.push(nlmeansArgs);
+    }
+  }
+
+  // 去块
+  if (filters.deblock?.enabled) {
+    filterArgs.push(
+      `deblock=strength=${filters.deblock.strength ?? 4}:threshold=${filters.deblock.threshold ?? 4}`
+    );
+  }
+
+  // 锐化
+  if (filters.sharpen?.enabled) {
+    if (filters.sharpen.method === 'unsharp') {
+      const unsharp = filters.sharpen.unsharp || {};
+      let unsharpArgs = 'unsharp';
+      if (unsharp.lumaMatrix) {
+        unsharpArgs += `=${unsharp.lumaMatrix}`;
+        if (unsharp.chromaMatrix) {
+          unsharpArgs += `:${unsharp.chromaMatrix}`;
+        }
+      }
+      filterArgs.push(unsharpArgs);
+    } else if (filters.sharpen.method === 'lapsharp') {
+      const lapsharp = filters.sharpen.lapsharp || {};
+      filterArgs.push(`lapsharp=${lapsharp.sigma ?? 0.5}`);
+    }
+  }
+
+  // 色度平滑
+  if (filters.chromaSmooth?.enabled) {
+    filterArgs.push(
+      `chroma-smooth=tu=${filters.chromaSmooth.tuSize ?? 2}:strength=${filters.chromaSmooth.strength ?? 2}`
+    );
+  }
+
+  // 色彩空间
+  if (filters.colorspace?.enabled) {
+    let formatArgs = 'format';
+    const cs = filters.colorspace;
+    if (cs.matrix) formatArgs += `=colormatrix=${cs.matrix}`;
+    if (cs.primaries) formatArgs += `:colorprim=${cs.primaries}`;
+    if (cs.transfer) formatArgs += `:transfer=${cs.transfer}`;
+    if (cs.range) formatArgs += `:range=${cs.range}`;
+    if (formatArgs !== 'format') {
+      filterArgs.push(formatArgs);
+    }
+  }
+
+  // 旋转/翻转
+  if (filters.rotate?.enabled) {
+    let rotateArgs = 'rotate';
+    if (filters.rotate.angle) {
+      rotateArgs += `=angle=${filters.rotate.angle}`;
+    }
+    if (filters.rotate.hFlip) {
+      rotateArgs += `:hflip`;
+    }
+    if (filters.rotate.vFlip) {
+      rotateArgs += `:vflip`;
+    }
+    if (rotateArgs !== 'rotate') {
+      filterArgs.push(rotateArgs);
+    }
+  }
+
+  // 填充
+  if (filters.pad?.enabled) {
+    let padArgs = 'pad';
+    const pad = filters.pad;
+    if (pad.width) padArgs += `=width=${pad.width}`;
+    if (pad.height) padArgs += `:height=${pad.height}`;
+    if (pad.x !== null && pad.x !== undefined) padArgs += `:x=${pad.x}`;
+    if (pad.y !== null && pad.y !== undefined) padArgs += `:y=${pad.y}`;
+    if (pad.color) padArgs += `:color=${pad.color}`;
+    if (padArgs !== 'pad') {
+      filterArgs.push(padArgs);
+    }
+  }
+
+  if (filterArgs.length > 0) {
+    args.push('--vfilter', filterArgs.join(','));
+  }
+
+  // 音频编码
+  if (audioDefault.codec) {
+    let aencoder = audioDefault.codec;
+    if (aencoder === 'flac24') aencoder = 'flac16';
+    args.push('--aencoder', aencoder);
+  }
+
+  // 音频码率
+  if (audioDefault.bitrate) {
+    args.push('--ab', `${audioDefault.bitrate}`);
+  }
+
+  // 音频采样率
+  if (audioDefault.samplerate) {
+    args.push('--arate', String(audioDefault.samplerate));
+  }
+
+  // 混合声道
+  if (audioDefault.mixdown && audioDefault.mixdown !== 'none') {
+    args.push('--mixdown', audioDefault.mixdown);
+  }
+
+  // 动态范围压缩
+  if (audioDefault.drc && audioDefault.drc !== 'none') {
+    args.push('--drc', audioDefault.drc);
+  }
+
+  // 增益
+  if (audioDefault.gain) {
+    args.push('--gain', String(audioDefault.gain));
+  }
+
+  // 字幕设置
+  if (subtitles.scanForced) {
+    args.push('--subtitle-scan-forced');
+  }
+
+  // 章节设置
+  if (chapters.enabled !== false) {
+    if (chapters.useChapterMarkers !== false) {
+      args.push('--markers');
+    }
+  } else {
+    args.push('--no-markers');
+  }
 
   return args;
 }
@@ -111,10 +332,12 @@ async function startTranscode(job) {
     `
     UPDATE jobs SET status = 'processing', started_at = datetime('now')
     WHERE id = ?
-  `
+    `
   ).run(job.id);
 
   const args = buildHandBrakeArgs(job, settings);
+
+  console.log('Starting HandBrake with args:', args);
 
   const handbrake = spawn('HandBrakeCLI', args);
   activeJobs.set(job.id, handbrake);
@@ -141,7 +364,7 @@ async function startTranscode(job) {
         UPDATE jobs
         SET status = 'completed', progress = 100, completed_at = datetime('now')
         WHERE id = ?
-      `
+        `
       ).run(job.id);
 
       console.log(`Job ${job.id} completed successfully`);
@@ -153,7 +376,7 @@ async function startTranscode(job) {
         UPDATE jobs
         SET status = 'failed', error_log = ?, completed_at = datetime('now')
         WHERE id = ?
-      `
+        `
       ).run(errorData, job.id);
 
       console.error(`Job ${job.id} failed with code ${code}:`, errorData);
@@ -171,7 +394,7 @@ async function startTranscode(job) {
       UPDATE jobs
       SET status = 'failed', error_log = ?, completed_at = datetime('now')
       WHERE id = ?
-    `
+      `
     ).run(error.message, job.id);
 
     console.error(`Job ${job.id} error:`, error);
@@ -190,7 +413,7 @@ function parseProgress(jobId, data) {
     db.prepare(
       `
       UPDATE jobs SET progress = ? WHERE id = ?
-    `
+      `
     ).run(progress, jobId);
   }
 }
@@ -234,7 +457,7 @@ function processNextJob() {
     WHERE status = 'queued'
     ORDER BY created_at ASC
     LIMIT 1
-  `
+    `
     )
     .get();
 
