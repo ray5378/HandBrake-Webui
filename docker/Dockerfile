@@ -40,12 +40,13 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # 安装 HandBrake 和运行时依赖
-RUN apk add --no-cache \
-  --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
-  handbrake \
-  ffmpeg \
-  tzdata \
-  dumb-init
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
+    echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    apk add --no-cache \
+    handbrake \
+    ffmpeg \
+    tzdata \
+    dumb-init
 
 # 设置时区
 ENV TZ=Asia/Shanghai
