@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FolderOpen,
@@ -10,10 +10,12 @@ import {
   Grid,
   List,
   Search,
-  ChevronRight
+  ChevronRight,
+  PlayCircle
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import BatchTranscodeModal from '../components/BatchTranscodeModal';
 
 function Files() {
   const [files, setFiles] = useState([]);
@@ -23,6 +25,10 @@ function Files() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [selectedDirectory, setSelectedDirectory] = useState(null);
+  const contextMenuRef = useRef(null);
 
   useEffect(() => {
     fetchFiles();
@@ -111,6 +117,39 @@ function Files() {
     setCurrentPath(path);
     setSearchTerm('');
   };
+
+  // 右键菜单处理
+  const handleContextMenu = (e, directory) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      directory
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  const handleBatchTranscode = () => {
+    if (contextMenu && contextMenu.directory) {
+      setSelectedDirectory(contextMenu.directory);
+      setShowBatchModal(true);
+    }
+    closeContextMenu();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target)) {
+        closeContextMenu();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const filteredFiles = files.filter(file =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -203,8 +242,9 @@ function Files() {
                   <button
                     key={dir.path}
                     onClick={() => navigateToPath(dir.path)}
+                    onContextMenu={(e) => handleContextMenu(e, dir.path)}
                     className={clsx(
-                      'flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-left',
+                      'flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-left relative',
                       viewMode === 'grid' && 'flex-col text-center justify-center'
                     )}
                   >
@@ -317,6 +357,38 @@ function Files() {
             <p className="text-white">上传中...</p>
           </div>
         </div>
+      )}
+
+      {/* 右键菜单 */}
+      {contextMenu && (
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 py-1 min-w-[200px]"
+          style={{
+            left: Math.min(contextMenu.x, window.innerWidth - 220),
+            top: Math.min(contextMenu.y, window.innerHeight - 200)
+          }}
+        >
+          <button
+            onClick={handleBatchTranscode}
+            className="w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3"
+          >
+            <PlayCircle className="w-4 h-4 text-primary" />
+            <span>批量转码此文件夹</span>
+          </button>
+        </div>
+      )}
+
+      {/* 批量转码对话框 */}
+      {showBatchModal && selectedDirectory && (
+        <BatchTranscodeModal
+          directory={selectedDirectory}
+          onClose={() => {
+            setShowBatchModal(false);
+            setSelectedDirectory(null);
+          }}
+          onSuccess={() => navigate('/jobs')}
+        />
       )}
     </div>
   );

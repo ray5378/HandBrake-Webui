@@ -4,6 +4,8 @@ const { body, query } = require('express-validator');
 const { getDatabase } = require('../models/database');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
+const path = require('path');
+const fs = require('fs');
 const {
   startTranscode,
   cancelTranscode,
@@ -338,5 +340,133 @@ router.get('/stats/summary', authenticateToken, (req, res, next) => {
     next(error);
   }
 });
+
+// 批量转码 - 递归处理文件夹
+router.post(
+  '/batch',
+  authenticateToken,
+  body('sourceDirectory').notEmpty(),
+  body('outputDirectory').notEmpty(),
+  body('presetId').optional(),
+  validate,
+  async (req, res, next) => {
+    try {
+      const { sourceDirectory, outputDirectory, presetId, customSettings } = req.body;
+      const db = getDatabase();
+
+      const videoExtensions = [
+        '.mp4',
+        '.mkv',
+        '.avi',
+        '.mov',
+        '.wmv',
+        '.flv',
+        '.webm',
+        '.m4v',
+        '.mpg',
+        '.mpeg'
+      ];
+
+      // 递归查找所有视频文件
+      const findVideoFiles = (dir) => {
+        const videoFiles = [];
+        const items = fs.readdirSync(dir, { withFileTypes: true });
+        
+        for (const item of items) {
+          const itemPath = path.join(dir, item.name);
+          if (item.isDirectory()) {
+            videoFiles.push(...findVideoFiles(itemPath));
+          } else {
+            const ext = path.extname(item.name).toLowerCase();
+            if (videoExtensions.includes(ext)) {
+              videoFiles.push(itemPath);
+            }
+          }
+        }
+        return videoFiles;
+      };
+
+      if (!fs.existsSync(sourceDirectory)) {
+        return res.status(400).json({
+          success: false,
+          error: '源目录不存在'
+        });
+      }
+
+      const videoFiles = findVideoFiles(sourceDirectory);
+
+      if (videoFiles.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: '在源目录中未找到视频文件'
+        });
+      }
+
+      const jobIds = [];
+
+      // 获取预设信息
+      let settings = null;
+      let format = 'mp4';
+      if (presetId) {
+        const preset = db.prepare('SELECT settings FROM presets WHERE id = ?').get(presetId);
+        if (preset) {
+          settings = preset.settings;
+          const presetSettings = JSON.parse(settings);
+          format = presetSettings.format || 'mp4';
+        }
+      } else if (customSettings) {
+        settings = JSON.stringify(customSettings);
+      }
+
+      for (const sourceFile of videoFiles) {
+        // 计算相对路径
+        const relativePath = path.relative(sourceDirectory, path.dirname(sourceFile));
+        // 构建输出路径
+        const outputDir = path.join(outputDirectory, relativePath);
+        
+        // 确保输出目录存在
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        const fileName = path.basename(sourceFile, path.extname(sourceFile));
+        const outputFile = path.join(outputDir, `${fileName}_encoded.${format}`);
+
+        const jobId = uuidv4();
+
+        db.prepare(
+          `
+          INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status)
+          VALUES (?, ?, ?, ?, ?, ?, 'queued')
+        `
+        ).run(jobId, req.user.userId, sourceFile, outputFile, presetId || null, settings);
+
+        jobIds.push(jobId);
+      }
+
+      // 逐个启动转码任务
+      for (const jobId of jobIds) {
+        try {
+          const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(jobId);
+          if (job) {
+            await startTranscode(job);
+          }
+        } catch (startError) {
+          console.error(`Failed to start job ${jobId}:`, startError);
+        }
+      }
+
+      res.status(201).json({
+        success: true,
+        data: {
+          total: jobIds.length,
+          jobIds
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;
