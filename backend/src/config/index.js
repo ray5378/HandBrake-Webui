@@ -15,8 +15,6 @@ const config = {
   jwtSecret: process.env.JWT_SECRET || generateSecret(),
   jwtExpiresIn: '1h',
   refreshTokenExpiresIn: '7d',
-  adminUsername: process.env.ADMIN_USERNAME || 'admin',
-  adminPassword: process.env.ADMIN_PASSWORD || 'changeme123',
   maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS) || 2,
   uploadDir: process.env.UPLOAD_DIR || '/source',
   outputDir: process.env.OUTPUT_DIR || '/output',

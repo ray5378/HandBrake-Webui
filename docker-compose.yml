@@ -18,8 +18,6 @@ services:
       - ./output:/output
     environment:
       - NODE_ENV=production
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=changeme123
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - PORT=52389  # 固定内部端口为 52389，方便映射
       - MAX_CONCURRENT_JOBS=2

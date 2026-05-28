@@ -123,23 +123,6 @@ function createIndexes() {
  * 创建默认数据
  */
 function createDefaultData() {
-  // 创建默认管理员
-  const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
-
-  if (userCount.count === 0) {
-    const adminId = uuidv4();
-    const hashedPassword = bcrypt.hashSync(config.adminPassword, PASSWORD_CONFIG.BCRYPT_ROUNDS);
-
-    db.prepare(
-      `
-      INSERT INTO users (id, username, password, role)
-      VALUES (?, ?, ?, 'admin')
-    `
-    ).run(adminId, config.adminUsername, hashedPassword);
-
-    logger.info('Default admin user created', { username: config.adminUsername });
-  }
-
   // 创建默认预设
   const presetCount = db
     .prepare('SELECT COUNT(*) as count FROM presets WHERE is_built_in = 1')

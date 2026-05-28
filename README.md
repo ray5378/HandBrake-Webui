@@ -31,8 +31,6 @@ services:
       - ./output:/output
     environment:
       - NODE_ENV=production
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=changeme123
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - PORT=52389
       - MAX_CONCURRENT_JOBS=2
@@ -65,7 +63,7 @@ docker-compose logs -f
 - 默认地址: http://localhost:52389
 - 修改端口: 可以在 `docker-compose.yml` 中修改 `ports` 配置，例如改成 `8080:52389`
 - 自定义内部端口: 可以在 `environment` 中设置 `PORT=你的端口`
-- 默认账号: `admin` / `changeme123` (请务必修改密码!)
+- 首次访问: 请在页面上设置管理员账号密码
 
 ---
 
@@ -82,8 +80,6 @@ docker run -d \
   -v $(pwd)/config:/config \
   -v $(pwd)/source:/source \
   -v $(pwd)/output:/output \
-  -e ADMIN_USERNAME=admin \
-  -e ADMIN_PASSWORD=changeme123 \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
   -e PORT=52389 \
   -e MAX_CONCURRENT_JOBS=2 \
@@ -142,10 +138,8 @@ handbrake-webui/
 
 | 变量 | 描述 | 默认值 |
 |------|------|--------|
-| ADMIN_USERNAME | 管理员用户名 | admin |
-| ADMIN_PASSWORD | 管理员密码 | changeme |
 | JWT_SECRET | JWT 密钥 | (随机生成) |
-| PORT | 服务端口 | 3000 |
+| PORT | 服务端口 | 52389 |
 | MAX_CONCURRENT_JOBS | 最大并发转码数 | 2 |
 
 ### 目录映射
