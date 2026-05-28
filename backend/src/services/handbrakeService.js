@@ -31,10 +31,15 @@ function buildHandBrakeArgs(job, settings) {
   // 视频编码
   if (video.codec) {
     let encoder = video.codec;
-    if (encoder === 'x264') encoder = 'x264';
-    else if (encoder === 'x265') encoder = 'x265';
-    else if (encoder === 'svt-av1') encoder = 'svt_av1';
-    else if (encoder === 'vp9') encoder = 'VP9';
+    if (encoder === 'x264') {
+      encoder = 'x264';
+    } else if (encoder === 'x265') {
+      encoder = 'x265';
+    } else if (encoder === 'svt-av1') {
+      encoder = 'svt_av1';
+    } else if (encoder === 'vp9') {
+      encoder = 'VP9';
+    }
 
     args.push('--encoder', encoder);
 
@@ -108,7 +113,7 @@ function buildHandBrakeArgs(job, settings) {
   }
 
   // 视频滤镜
-  let filterArgs = [];
+  const filterArgs = [];
 
   // 反交错
   if (filters.deinterlace?.enabled) {
@@ -204,10 +209,18 @@ function buildHandBrakeArgs(job, settings) {
   if (filters.colorspace?.enabled) {
     let formatArgs = 'format';
     const cs = filters.colorspace;
-    if (cs.matrix) formatArgs += `=colormatrix=${cs.matrix}`;
-    if (cs.primaries) formatArgs += `:colorprim=${cs.primaries}`;
-    if (cs.transfer) formatArgs += `:transfer=${cs.transfer}`;
-    if (cs.range) formatArgs += `:range=${cs.range}`;
+    if (cs.matrix) {
+      formatArgs += `=colormatrix=${cs.matrix}`;
+    }
+    if (cs.primaries) {
+      formatArgs += `:colorprim=${cs.primaries}`;
+    }
+    if (cs.transfer) {
+      formatArgs += `:transfer=${cs.transfer}`;
+    }
+    if (cs.range) {
+      formatArgs += `:range=${cs.range}`;
+    }
     if (formatArgs !== 'format') {
       filterArgs.push(formatArgs);
     }
@@ -220,10 +233,10 @@ function buildHandBrakeArgs(job, settings) {
       rotateArgs += `=angle=${filters.rotate.angle}`;
     }
     if (filters.rotate.hFlip) {
-      rotateArgs += `:hflip`;
+      rotateArgs += ':hflip';
     }
     if (filters.rotate.vFlip) {
-      rotateArgs += `:vflip`;
+      rotateArgs += ':vflip';
     }
     if (rotateArgs !== 'rotate') {
       filterArgs.push(rotateArgs);
@@ -234,11 +247,21 @@ function buildHandBrakeArgs(job, settings) {
   if (filters.pad?.enabled) {
     let padArgs = 'pad';
     const pad = filters.pad;
-    if (pad.width) padArgs += `=width=${pad.width}`;
-    if (pad.height) padArgs += `:height=${pad.height}`;
-    if (pad.x !== null && pad.x !== undefined) padArgs += `:x=${pad.x}`;
-    if (pad.y !== null && pad.y !== undefined) padArgs += `:y=${pad.y}`;
-    if (pad.color) padArgs += `:color=${pad.color}`;
+    if (pad.width) {
+      padArgs += `=width=${pad.width}`;
+    }
+    if (pad.height) {
+      padArgs += `:height=${pad.height}`;
+    }
+    if (pad.x !== null && pad.x !== undefined) {
+      padArgs += `:x=${pad.x}`;
+    }
+    if (pad.y !== null && pad.y !== undefined) {
+      padArgs += `:y=${pad.y}`;
+    }
+    if (pad.color) {
+      padArgs += `:color=${pad.color}`;
+    }
     if (padArgs !== 'pad') {
       filterArgs.push(padArgs);
     }
@@ -251,7 +274,9 @@ function buildHandBrakeArgs(job, settings) {
   // 音频编码
   if (audioDefault.codec) {
     let aencoder = audioDefault.codec;
-    if (aencoder === 'flac24') aencoder = 'flac16';
+    if (aencoder === 'flac24') {
+      aencoder = 'flac16';
+    }
     args.push('--aencoder', aencoder);
   }
 
