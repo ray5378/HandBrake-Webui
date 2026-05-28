@@ -27,8 +27,8 @@ WORKDIR /app/frontend
 RUN npm ci
 
 # 复制源代码
-COPY backend ./backend
-COPY frontend ./frontend
+COPY backend /app/backend
+COPY frontend /app/frontend
 
 # 构建前端
 WORKDIR /app/frontend
