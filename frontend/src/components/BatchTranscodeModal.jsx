@@ -81,10 +81,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
             </h2>
             <p className="text-gray-400 mt-1">源目录: {directory}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
@@ -222,11 +219,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
             </div>
 
             <div className="flex space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn btn-secondary flex-1"
-              >
+              <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
                 取消
               </button>
               <button

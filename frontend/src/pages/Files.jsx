@@ -141,7 +141,7 @@ function Files() {
   };
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleClickOutside = e => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target)) {
         closeContextMenu();
       }
@@ -242,7 +242,7 @@ function Files() {
                   <button
                     key={dir.path}
                     onClick={() => navigateToPath(dir.path)}
-                    onContextMenu={(e) => handleContextMenu(e, dir.path)}
+                    onContextMenu={e => handleContextMenu(e, dir.path)}
                     className={clsx(
                       'flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-left relative',
                       viewMode === 'grid' && 'flex-col text-center justify-center'

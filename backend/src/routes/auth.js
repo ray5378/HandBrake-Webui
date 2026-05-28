@@ -68,17 +68,13 @@ router.post(
       logger.info('Admin user created', { username });
 
       // 自动登录
-      const token = jwt.sign(
-        { userId, username, role: 'admin' },
-        config.jwtSecret,
-        { expiresIn: config.jwtExpiresIn }
-      );
+      const token = jwt.sign({ userId, username, role: 'admin' }, config.jwtSecret, {
+        expiresIn: config.jwtExpiresIn
+      });
 
-      const refreshToken = jwt.sign(
-        { userId, type: 'refresh' },
-        config.jwtSecret,
-        { expiresIn: config.refreshTokenExpiresIn }
-      );
+      const refreshToken = jwt.sign({ userId, type: 'refresh' }, config.jwtSecret, {
+        expiresIn: config.refreshTokenExpiresIn
+      });
 
       saveRefreshToken(userId, refreshToken);
 

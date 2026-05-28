@@ -368,10 +368,10 @@ router.post(
       ];
 
       // 递归查找所有视频文件
-      const findVideoFiles = (dir) => {
+      const findVideoFiles = dir => {
         const videoFiles = [];
         const items = fs.readdirSync(dir, { withFileTypes: true });
-        
+
         for (const item of items) {
           const itemPath = path.join(dir, item.name);
           if (item.isDirectory()) {
@@ -423,7 +423,7 @@ router.post(
         const relativePath = path.relative(sourceDirectory, path.dirname(sourceFile));
         // 构建输出路径
         const outputDir = path.join(outputDirectory, relativePath);
-        
+
         // 确保输出目录存在
         if (!fs.existsSync(outputDir)) {
           fs.mkdirSync(outputDir, { recursive: true });
