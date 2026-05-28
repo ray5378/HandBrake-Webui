@@ -39,14 +39,34 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# 安装 HandBrake 和运行时依赖
+# 安装 HandBrake 和运行时依赖 (含硬件加速支持)
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
     echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
     apk add --no-cache \
     handbrake \
     ffmpeg \
     tzdata \
-    dumb-init
+    dumb-init \
+    # Intel/AMD VA-API 硬件加速
+    libva \
+    libva-intel-driver \
+    mesa-va-gallium \
+    # Intel QSV (Quick Sync Video)
+    intel-media-sdk \
+    libmfx \
+    # NVENC (NVIDIA) - 注意：还需 nvidia-docker2 运行时
+    libnvcuvid \
+    libnvidia-encode \
+    # 基础显卡工具
+    mesa-dri-gallium \
+    mesa-gl \
+    # 视频编解码库
+    libx264 \
+    libx265 \
+    libvpx \
+    libdav1d \
+    aom-libs
 
 # 设置时区
 ENV TZ=Asia/Shanghai

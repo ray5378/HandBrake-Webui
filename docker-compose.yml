@@ -22,7 +22,15 @@ services:
       - PORT=52389  # 固定内部端口为 52389，方便映射
       - MAX_CONCURRENT_JOBS=2
     devices:
-      - /dev/dri:/dev/dri  # 硬件转码支持
+      - /dev/dri:/dev/dri  # Intel/AMD 硬件转码支持
+    # NVIDIA 硬件加速支持 (取消注释并配置 nvidia-docker2 运行时)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
     restart: unless-stopped
     networks:
       - handbrake-network

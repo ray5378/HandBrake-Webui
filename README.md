@@ -9,6 +9,7 @@
 - 📊 实时进度 - 实时监控转码进度
 - 🐳 Docker 部署 - 一键部署,开箱即用
 - 📁 文件管理 - 直观的文件浏览器
+- ⚡ 硬件加速 - 支持 Intel/AMD/NVIDIA 硬件转码
 
 ## 快速开始
 
@@ -34,6 +35,16 @@ services:
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - PORT=52389
       - MAX_CONCURRENT_JOBS=2
+    devices:
+      - /dev/dri:/dev/dri  # Intel/AMD 硬件转码支持
+    # NVIDIA 硬件加速支持 (需先配置 nvidia-docker2 运行时)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
     restart: unless-stopped
     networks:
       - handbrake-network
@@ -147,6 +158,24 @@ handbrake-webui/
 - `/source`: 源视频文件目录
 - `/output`: 转码输出目录
 - `/config`: 数据库和配置目录
+
+### 硬件加速配置
+
+#### Intel/AMD GPU (VA-API/QSV)
+默认已启用，通过 `/dev/dri` 设备映射提供支持。
+
+#### NVIDIA GPU (NVENC)
+需要先在主机上安装 `nvidia-docker2` 运行时，然后在 `docker-compose.yml` 中取消注释 NVIDIA 配置。
+
+安装 nvidia-docker2 的步骤：
+```bash
+# 详细步骤请参考 NVIDIA 官方文档
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+```
 
 ## 支持的格式
 
