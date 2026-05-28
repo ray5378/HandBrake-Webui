@@ -37,12 +37,6 @@ services:
       - PORT=3000
       - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     networks:
       - handbrake-network
 
