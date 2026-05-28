@@ -1,0 +1,72 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run Backend Linting
+        run: |
+          cd backend
+          npx eslint src/ --format stylish
+
+      - name: Check Backend Formatting
+        run: |
+          cd backend
+          npx prettier --check src/
+
+      - name: Run Frontend Linting
+        run: |
+          cd frontend
+          npx eslint src/ --format stylish
+
+      - name: Check Frontend Formatting
+        run: |
+          cd frontend
+          npx prettier --check src/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install --production

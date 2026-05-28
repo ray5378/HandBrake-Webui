@@ -1,0 +1,118 @@
+# 使用 GitHub Container Registry (GHCR) 的版本
+# 同时支持 Docker Hub 和 GHCR，可根据需要切换
+
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Push Docker Images
+
+    strategy:
+      fail-fast: false
+      matrix:
+        registry:
+          - dockerhub
+          - ghcr
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: matrix.registry == 'dockerhub' && github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        if: matrix.registry == 'ghcr' && github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ matrix.registry == 'dockerhub' && format('{0}/{1}', secrets.DOCKERHUB_USERNAME, 'handbrake-webui') || '' }}
+            ${{ matrix.registry == 'ghcr' && format('ghcr.io/{0}/{1}', github.repository_owner, 'handbrake-webui') || '' }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,format=long
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test Docker Image
+    needs: build
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          tags: handbrake-webui:test
+          load: true
+          cache-from: type=gha
+
+      - name: Test container can start
+        run: |
+          docker run -d -p 3000:3000 --name test-container handbrake-webui:test
+          sleep 15
+          
+          # 检查容器是否运行
+          docker ps | grep test-container || (
+            echo "Container failed to start!" && 
+            docker logs test-container && 
+            exit 1
+          )
+          
+          # 健康检查
+          HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' test-container 2>/dev/null || echo "unhealthy")
+          echo "Health status: $HEALTH_STATUS"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop test-container || true
+          docker rm test-container || true
