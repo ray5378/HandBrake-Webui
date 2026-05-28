@@ -63,7 +63,7 @@ RUN npm ci --only=production
 
 # 设置环境变量
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=52389
 ENV UPLOAD_DIR=/source
 ENV OUTPUT_DIR=/output
 ENV CONFIG_DIR=/config
@@ -72,7 +72,7 @@ ENV CONFIG_DIR=/config
 RUN mkdir -p /config /source /output
 
 # 暴露端口
-EXPOSE 3000
+EXPOSE 52389
 
 # 使用 dumb-init 作为 PID 1
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]

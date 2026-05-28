@@ -78,7 +78,7 @@ jobs:
 
       - name: Test container can start
         run: |
-          docker run -d -p 3000:3000 --name test-container handbrake-webui:test
+          docker run -d -p 52389:52389 --name test-container handbrake-webui:test
           sleep 10
           docker ps | grep test-container || (docker logs test-container && exit 1)
 

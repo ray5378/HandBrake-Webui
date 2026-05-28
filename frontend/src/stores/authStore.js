@@ -78,7 +78,8 @@ export const useAuthStore = create(
             success: false,
             error: error.response?.data?.error || 'Login failed'
           };
-        },
+        }
+      },
 
       logout: async () => {
         try {

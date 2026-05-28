@@ -101,7 +101,7 @@ jobs:
 
       - name: Test container can start
         run: |
-          docker run -d -p 3000:3000 --name test-container handbrake-webui:test
+          docker run -d -p 52389:52389 --name test-container handbrake-webui:test
           sleep 15
           
           # 检查容器是否运行
@@ -110,10 +110,6 @@ jobs:
             docker logs test-container && 
             exit 1
           )
-          
-          # 健康检查
-          HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' test-container 2>/dev/null || echo "unhealthy")
-          echo "Health status: $HEALTH_STATUS"
 
       - name: Cleanup
         if: always()
