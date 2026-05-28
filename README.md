@@ -12,22 +12,102 @@
 
 ## 快速开始
 
-### 使用 Docker Compose 部署
+### 使用 Docker Compose 部署 (推荐)
+
+#### 1. 创建 docker-compose.yml
+
+```yaml
+version: '3.8'
+
+services:
+  handbrake-webui:
+    image: ray5378/handbrake-webui:latest
+    container_name: handbrake-webui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/config
+      - ./source:/source
+      - ./output:/output
+    environment:
+      - NODE_ENV=production
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme123
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - PORT=3000
+      - MAX_CONCURRENT_JOBS=2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - handbrake-network
+
+networks:
+  handbrake-network:
+    driver: bridge
+```
+
+#### 2. 启动服务
 
 ```bash
-# 克隆项目
-git clone https://github.com/yourusername/handbrake-webui.git
-cd handbrake-webui
-
 # 创建必要目录
 mkdir -p config source output
 
-# 启动服务
+# 启动容器
 docker-compose up -d
 
-# 访问 Web UI
-# http://localhost:3000
-# 默认管理员账号: admin / changeme
+# 查看日志
+docker-compose logs -f
+```
+
+#### 3. 访问 Web UI
+- 地址: http://localhost:3000
+- 默认账号: `admin` / `changeme123` (请务必修改密码!)
+
+---
+
+### 使用 Docker 直接部署
+
+```bash
+# 拉取镜像
+docker pull ray5378/handbrake-webui:latest
+
+# 启动容器
+docker run -d \
+  --name handbrake-webui \
+  -p 3000:3000 \
+  -v $(pwd)/config:/config \
+  -v $(pwd)/source:/source \
+  -v $(pwd)/output:/output \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_PASSWORD=changeme123 \
+  -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
+  -e PORT=3000 \
+  -e MAX_CONCURRENT_JOBS=2 \
+  --restart unless-stopped \
+  ray5378/handbrake-webui:latest
+```
+
+---
+
+### 本地构建
+
+如果您想自己构建镜像：
+
+```bash
+# 克隆项目
+git clone https://github.com/ray5378/handbrake-webui.git
+cd handbrake-webui
+
+# 构建镜像
+docker-compose build
+
+# 启动服务
+docker-compose up -d
 ```
 
 ### 手动部署
