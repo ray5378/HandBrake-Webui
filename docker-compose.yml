@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  handbrake-webui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: handbrake-webui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/config
+      - ./source:/source
+      - ./output:/output
+    environment:
+      - NODE_ENV=production
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme123
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - PORT=3000
+      - MAX_CONCURRENT_JOBS=2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - handbrake-network
+
+networks:
+  handbrake-network:
+    driver: bridge

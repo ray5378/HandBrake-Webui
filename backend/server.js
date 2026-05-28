@@ -1,0 +1,77 @@
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+const fs = require('fs');
+
+const config = require('./src/config');
+const errorHandler = require('./src/middleware/errorHandler');
+const authRoutes = require('./src/routes/auth');
+const fileRoutes = require('./src/routes/files');
+const jobRoutes = require('./src/routes/jobs');
+const presetRoutes = require('./src/routes/presets');
+const userRoutes = require('./src/routes/users');
+const systemRoutes = require('./src/routes/system');
+
+const app = express();
+
+config.initialize();
+
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? false : '*',
+  credentials: true
+}));
+
+app.use(morgan('combined'));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { success: false, error: 'Too many requests, please try again later.' }
+});
+app.use('/api', limiter);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+app.use('/api/auth', authRoutes);
+app.use('/api/files', fileRoutes);
+app.use('/api/jobs', jobRoutes);
+app.use('/api/presets', presetRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/system', systemRoutes);
+
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  } else {
+    res.status(404).json({ success: false, error: 'API endpoint not found' });
+  }
+});
+
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`HandBrake Web UI server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});

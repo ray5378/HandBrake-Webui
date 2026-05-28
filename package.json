@@ -1,0 +1,37 @@
+{
+  "name": "handbrake-webui",
+  "version": "1.0.0",
+  "description": "HandBrake Web UI - 基于 Web 的视频转码管理界面",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "build": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm install --production",
+    "start": "cd backend && npm start",
+    "docker:build": "docker-compose build",
+    "docker:buildx": "docker buildx build -f docker/Dockerfile -t handbrake-webui:local --load .",
+    "docker:buildx-multi": "docker buildx build -f docker/Dockerfile --platform linux/amd64,linux/arm64 -t handbrake-webui:local .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:restart": "docker-compose restart",
+    "docker:logs": "docker-compose logs -f",
+    "docker:test": "docker run -p 3000:3000 --rm handbrake-webui:local",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npx eslint src/",
+    "lint:frontend": "cd frontend && npx eslint src/",
+    "format": "npm run format:backend && npm run format:frontend",
+    "format:backend": "cd backend && npx prettier --write src/",
+    "format:frontend": "cd frontend && npx prettier --write src/",
+    "check": "npm run lint && npm run format"
+  },
+  "keywords": [
+    "handbrake",
+    "video",
+    "transcode",
+    "webui",
+    "ffmpeg"
+  ],
+  "author": "",
+  "license": "MIT"
+}
