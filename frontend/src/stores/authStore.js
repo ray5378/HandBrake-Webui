@@ -9,6 +9,49 @@ export const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       isLoading: false,
+      isInitialized: null,
+
+      checkInitialization: async () => {
+        try {
+          const response = await api.get('/auth/check-initialization');
+          const initialized = response.data.data.initialized;
+          set({ isInitialized: initialized });
+          return initialized;
+        } catch (error) {
+          console.error('Check initialization error:', error);
+          return null;
+        }
+      },
+
+      setupAdmin: async (username, password, confirmPassword) => {
+        set({ isLoading: true });
+        try {
+          const response = await api.post('/auth/setup-admin', {
+            username,
+            password,
+            confirmPassword
+          });
+          const { token, refreshToken, user } = response.data.data;
+
+          localStorage.setItem('refreshToken', refreshToken);
+
+          set({
+            user,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+            isInitialized: true
+          });
+
+          return { success: true };
+        } catch (error) {
+          set({ isLoading: false });
+          return {
+            success: false,
+            error: error.response?.data?.error || 'Setup failed'
+          };
+        }
+      },
 
       login: async (username, password) => {
         set({ isLoading: true });
@@ -35,36 +78,7 @@ export const useAuthStore = create(
             success: false,
             error: error.response?.data?.error || 'Login failed'
           };
-        }
-      },
-
-      register: async (username, password) => {
-        set({ isLoading: true });
-        try {
-          const response = await api.post('/auth/register', {
-            username,
-            password
-          });
-          const { token, refreshToken, user } = response.data.data;
-
-          localStorage.setItem('refreshToken', refreshToken);
-
-          set({
-            user,
-            token,
-            isAuthenticated: true,
-            isLoading: false
-          });
-
-          return { success: true };
-        } catch (error) {
-          set({ isLoading: false });
-          return {
-            success: false,
-            error: error.response?.data?.error || 'Registration failed'
-          };
-        }
-      },
+        },
 
       logout: async () => {
         try {

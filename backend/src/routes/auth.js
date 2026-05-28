@@ -7,44 +7,78 @@ const { getDatabase } = require('../models/database');
 const config = require('../config');
 const { validate } = require('../middleware/validator');
 const { authenticateToken } = require('../middleware/auth');
+const logger = require('../utils/logger');
+const { PASSWORD_CONFIG } = require('../constants');
 
 const router = express.Router();
 
+// 检查是否已初始化（是否已有管理员）
+router.get('/check-initialization', (req, res, next) => {
+  try {
+    const db = getDatabase();
+    const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
+
+    res.json({
+      success: true,
+      data: {
+        initialized: userCount.count > 0
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 设置管理员（仅在未初始化时允许）
 router.post(
-  '/register',
+  '/setup-admin',
   body('username').isLength({ min: 3 }).trim().escape(),
   body('password').isLength({ min: 6 }),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match');
+    }
+    return true;
+  }),
   validate,
   async (req, res, next) => {
     try {
       const { username, password } = req.body;
       const db = getDatabase();
 
-      const existingUser = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
-      if (existingUser) {
+      // 检查是否已初始化
+      const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
+      if (userCount.count > 0) {
         return res.status(400).json({
           success: false,
-          error: 'Username already exists'
+          error: 'System already initialized'
         });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = await bcrypt.hash(password, PASSWORD_CONFIG.BCRYPT_ROUNDS);
       const userId = uuidv4();
 
       db.prepare(
         `
         INSERT INTO users (id, username, password, role)
-        VALUES (?, ?, ?, 'user')
+        VALUES (?, ?, ?, 'admin')
       `
       ).run(userId, username, hashedPassword);
 
-      const token = jwt.sign({ userId, username, role: 'user' }, config.jwtSecret, {
-        expiresIn: config.jwtExpiresIn
-      });
+      logger.info('Admin user created', { username });
 
-      const refreshToken = jwt.sign({ userId, type: 'refresh' }, config.jwtSecret, {
-        expiresIn: config.refreshTokenExpiresIn
-      });
+      // 自动登录
+      const token = jwt.sign(
+        { userId, username, role: 'admin' },
+        config.jwtSecret,
+        { expiresIn: config.jwtExpiresIn }
+      );
+
+      const refreshToken = jwt.sign(
+        { userId, type: 'refresh' },
+        config.jwtSecret,
+        { expiresIn: config.refreshTokenExpiresIn }
+      );
 
       saveRefreshToken(userId, refreshToken);
 
@@ -55,7 +89,8 @@ router.post(
           refreshToken,
           user: {
             id: userId,
-            username
+            username,
+            role: 'admin'
           }
         }
       });
