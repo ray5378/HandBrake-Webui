@@ -8,30 +8,31 @@ const { validate } = require('../middleware/validator');
 
 const router = express.Router();
 
-router.get('/',
-  authenticateToken,
-  requireAdmin,
-  (req, res, next) => {
-    try {
-      const db = getDatabase();
-      
-      const users = db.prepare(`
+router.get('/', authenticateToken, requireAdmin, (req, res, next) => {
+  try {
+    const db = getDatabase();
+
+    const users = db
+      .prepare(
+        `
         SELECT id, username, role, created_at, updated_at
         FROM users
         ORDER BY created_at DESC
-      `).all();
-      
-      res.json({
-        success: true,
-        data: { users }
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-);
+      `
+      )
+      .all();
 
-router.put('/:id/password',
+    res.json({
+      success: true,
+      data: { users }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put(
+  '/:id/password',
   authenticateToken,
   body('currentPassword').notEmpty(),
   body('newPassword').isLength({ min: 6 }),
@@ -40,23 +41,23 @@ router.put('/:id/password',
     try {
       const db = getDatabase();
       const userId = req.params.id;
-      
+
       if (req.user.role !== 'admin' && req.user.userId !== userId) {
         return res.status(403).json({
           success: false,
           error: 'Access denied'
         });
       }
-      
+
       const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-      
+
       if (!user) {
         return res.status(404).json({
           success: false,
           error: 'User not found'
         });
       }
-      
+
       if (req.user.role !== 'admin' && req.user.userId === userId) {
         const isValidPassword = await bcrypt.compare(req.body.currentPassword, user.password);
         if (!isValidPassword) {
@@ -66,15 +67,17 @@ router.put('/:id/password',
           });
         }
       }
-      
+
       const hashedPassword = await bcrypt.hash(req.body.newPassword, 12);
-      
-      db.prepare(`
+
+      db.prepare(
+        `
         UPDATE users
         SET password = ?, updated_at = datetime('now')
         WHERE id = ?
-      `).run(hashedPassword, userId);
-      
+      `
+      ).run(hashedPassword, userId);
+
       res.json({
         success: true,
         message: 'Password updated successfully'
@@ -85,39 +88,35 @@ router.put('/:id/password',
   }
 );
 
-router.delete('/:id',
-  authenticateToken,
-  requireAdmin,
-  (req, res, next) => {
-    try {
-      const db = getDatabase();
-      
-      if (req.params.id === req.user.userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'Cannot delete your own account'
-        });
-      }
-      
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
-      
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          error: 'User not found'
-        });
-      }
-      
-      db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
-      
-      res.json({
-        success: true,
-        message: 'User deleted successfully'
+router.delete('/:id', authenticateToken, requireAdmin, (req, res, next) => {
+  try {
+    const db = getDatabase();
+
+    if (req.params.id === req.user.userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot delete your own account'
       });
-    } catch (error) {
-      next(error);
     }
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 module.exports = router;

@@ -41,7 +41,8 @@ WORKDIR /app
 
 # 安装 HandBrake 和运行时依赖
 RUN apk add --no-cache \
-  handbrake-cli \
+  --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+  handbrake \
   ffmpeg \
   tzdata \
   dumb-init

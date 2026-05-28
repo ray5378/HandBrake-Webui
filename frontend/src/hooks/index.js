@@ -16,7 +16,7 @@ export function usePagination(initialPage = 1, initialLimit = 20) {
 
   const nextPage = () => setPage(p => p + 1);
   const prevPage = () => setPage(p => Math.max(1, p - 1));
-  const goToPage = (pageNum) => setPage(Math.max(1, pageNum));
+  const goToPage = pageNum => setPage(Math.max(1, pageNum));
   const resetPagination = () => setPage(1);
 
   return {
@@ -92,7 +92,7 @@ export function useLocalStorage(key, initialValue) {
     }
   });
 
-  const setValue = (value) => {
+  const setValue = value => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
 

@@ -10,30 +10,30 @@ function Login() {
   const [error, setError] = useState('');
   const { login, register, isLoading } = useAuthStore();
   const navigate = useNavigate();
-  
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async e => {
     e.preventDefault();
     setError('');
-    
+
     if (!username || !password) {
       setError('请填写所有字段');
       return;
     }
-    
+
     let result;
     if (isLogin) {
       result = await login(username, password);
     } else {
       result = await register(username, password);
     }
-    
+
     if (result.success) {
       navigate('/');
     } else {
       setError(result.error);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
@@ -44,7 +44,7 @@ function Login() {
           <h1 className="text-3xl font-bold text-white mb-2">HandBrake Web UI</h1>
           <p className="text-gray-400">基于 Web 的视频转码管理</p>
         </div>
-        
+
         <div className="bg-dark-800 rounded-xl p-8 shadow-xl">
           <div className="flex mb-6 bg-dark-700 rounded-lg p-1">
             <button
@@ -64,37 +64,37 @@ function Login() {
               注册
             </button>
           </div>
-          
+
           {error && (
             <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
               <AlertCircle className="w-4 h-4" />
               <span>{error}</span>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label">用户名</label>
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
                 className="input"
                 placeholder="输入用户名"
               />
             </div>
-            
+
             <div>
               <label className="label">密码</label>
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className="input"
                 placeholder="输入密码"
               />
             </div>
-            
+
             <button
               type="submit"
               disabled={isLoading}
@@ -110,7 +110,7 @@ function Login() {
               )}
             </button>
           </form>
-          
+
           {!isLogin && (
             <p className="mt-4 text-xs text-gray-400 text-center">
               注册后自动登录。管理员账号: admin / changeme123

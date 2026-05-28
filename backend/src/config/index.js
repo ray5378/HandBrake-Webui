@@ -26,10 +26,12 @@ function generateSecret() {
 }
 
 function initialize() {
-  if (config.initialized) return;
-  
+  if (config.initialized) {
+    return;
+  }
+
   const configPath = path.join(config.configDir, 'config.json');
-  
+
   if (fs.existsSync(configPath)) {
     const savedConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     Object.assign(config, savedConfig);
@@ -37,18 +39,18 @@ function initialize() {
     if (!fs.existsSync(config.configDir)) {
       fs.mkdirSync(config.configDir, { recursive: true });
     }
-    
+
     const initialConfig = {
       jwtSecret: config.jwtSecret,
       maxConcurrentJobs: config.maxConcurrentJobs
     };
-    
+
     fs.writeFileSync(configPath, JSON.stringify(initialConfig, null, 2));
   }
-  
+
   config.databasePath = path.join(config.configDir, 'database.sqlite');
   config.initialized = true;
-  
+
   console.log('Configuration initialized');
   console.log(`Database path: ${config.databasePath}`);
   console.log(`Max concurrent jobs: ${config.maxConcurrentJobs}`);

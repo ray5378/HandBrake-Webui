@@ -15,15 +15,15 @@ const Settings = lazy(() => import('./pages/Settings'));
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, checkAuth } = useAuthStore();
-  
+
   React.useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 }
 

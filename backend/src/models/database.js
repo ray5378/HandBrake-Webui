@@ -19,7 +19,9 @@ let db = null;
  * @returns {Database} 数据库实例
  */
 function initializeDatabase() {
-  if (db) return db;
+  if (db) {
+    return db;
+  }
 
   const dbPath = config.databasePath;
   const dbDir = path.dirname(dbPath);
@@ -126,23 +128,22 @@ function createDefaultData() {
 
   if (userCount.count === 0) {
     const adminId = uuidv4();
-    const hashedPassword = bcrypt.hashSync(
-      config.adminPassword,
-      PASSWORD_CONFIG.BCRYPT_ROUNDS
-    );
+    const hashedPassword = bcrypt.hashSync(config.adminPassword, PASSWORD_CONFIG.BCRYPT_ROUNDS);
 
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO users (id, username, password, role)
       VALUES (?, ?, ?, 'admin')
-    `).run(adminId, config.adminUsername, hashedPassword);
+    `
+    ).run(adminId, config.adminUsername, hashedPassword);
 
     logger.info('Default admin user created', { username: config.adminUsername });
   }
 
   // 创建默认预设
-  const presetCount = db.prepare(
-    'SELECT COUNT(*) as count FROM presets WHERE is_built_in = 1'
-  ).get();
+  const presetCount = db
+    .prepare('SELECT COUNT(*) as count FROM presets WHERE is_built_in = 1')
+    .get();
 
   if (presetCount.count === 0) {
     const defaultPresets = getDefaultPresets();

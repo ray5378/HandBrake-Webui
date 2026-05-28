@@ -15,42 +15,62 @@ import api from '../services/api';
 function Dashboard() {
   const [stats, setStats] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
-  
+
   useEffect(() => {
     fetchDashboardData();
     const interval = setInterval(fetchDashboardData, 10000);
     return () => clearInterval(interval);
   }, []);
-  
+
   const fetchDashboardData = async () => {
     try {
       const [jobsRes, systemRes] = await Promise.all([
         api.get('/jobs/stats/summary'),
         api.get('/system/info')
       ]);
-      
+
       setStats(jobsRes.data.data);
       setSystemInfo(systemRes.data.data);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     }
   };
-  
-  const formatBytes = (bytes) => {
+
+  const formatBytes = bytes => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
-  
+
   const statCards = [
-    { label: '总任务数', value: stats?.total || 0, icon: Video, color: 'text-primary' },
-    { label: '排队中', value: stats?.queued || 0, icon: Clock, color: 'text-warning' },
-    { label: '转码中', value: stats?.processing || 0, icon: Play, color: 'text-secondary' },
-    { label: '已完成', value: stats?.completed || 0, icon: CheckCircle, color: 'text-success' },
+    {
+      label: '总任务数',
+      value: stats?.total || 0,
+      icon: Video,
+      color: 'text-primary'
+    },
+    {
+      label: '排队中',
+      value: stats?.queued || 0,
+      icon: Clock,
+      color: 'text-warning'
+    },
+    {
+      label: '转码中',
+      value: stats?.processing || 0,
+      icon: Play,
+      color: 'text-secondary'
+    },
+    {
+      label: '已完成',
+      value: stats?.completed || 0,
+      icon: CheckCircle,
+      color: 'text-success'
+    }
   ];
-  
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -63,9 +83,9 @@ function Dashboard() {
           <span>开始转码</span>
         </Link>
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
+        {statCards.map(stat => (
           <div key={stat.label} className="card">
             <div className="flex items-center justify-between mb-4">
               <span className="text-gray-400 text-sm">{stat.label}</span>
@@ -75,20 +95,23 @@ function Dashboard() {
           </div>
         ))}
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-white">最近任务</h2>
-            <Link to="/jobs" className="text-primary hover:text-primary/80 text-sm flex items-center space-x-1">
+            <Link
+              to="/jobs"
+              className="text-primary hover:text-primary/80 text-sm flex items-center space-x-1"
+            >
               <span>查看全部</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          
+
           {stats?.recentJobs && stats.recentJobs.length > 0 ? (
             <div className="space-y-3">
-              {stats.recentJobs.map((job) => (
+              {stats.recentJobs.map(job => (
                 <Link
                   key={job.id}
                   to={`/jobs/${job.id}`}
@@ -126,10 +149,10 @@ function Dashboard() {
             </div>
           )}
         </div>
-        
+
         <div className="card">
           <h2 className="text-xl font-semibold text-white mb-4">系统信息</h2>
-          
+
           {systemInfo ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -142,7 +165,7 @@ function Dashboard() {
                   <p className="text-white font-mono">{systemInfo.nodeVersion}</p>
                 </div>
               </div>
-              
+
               <div>
                 <p className="text-sm text-gray-400 mb-2">存储空间</p>
                 <div className="space-y-2">
@@ -156,34 +179,38 @@ function Dashboard() {
                     <div
                       className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
                       style={{
-                        width: `${systemInfo.diskUsage?.total > 0
-                          ? (systemInfo.diskUsage.used / systemInfo.diskUsage.total * 100).toFixed(1)
-                          : 0}%`
+                        width: `${
+                          systemInfo.diskUsage?.total > 0
+                            ? (
+                                (systemInfo.diskUsage.used / systemInfo.diskUsage.total) *
+                                100
+                              ).toFixed(1)
+                            : 0
+                        }%`
                       }}
                     />
                   </div>
                   <p className="text-xs text-gray-400">
-                    共 {formatBytes(systemInfo.diskUsage?.total || 0)}，
-                    可用 {formatBytes(systemInfo.diskUsage?.free || 0)}
+                    共 {formatBytes(systemInfo.diskUsage?.total || 0)}， 可用{' '}
+                    {formatBytes(systemInfo.diskUsage?.free || 0)}
                   </p>
                 </div>
               </div>
-              
+
               <div>
                 <p className="text-sm text-gray-400 mb-2">运行时间</p>
                 <p className="text-white font-mono">
-                  {Math.floor(systemInfo.uptime / 3600)} 小时 {Math.floor((systemInfo.uptime % 3600) / 60)} 分钟
+                  {Math.floor(systemInfo.uptime / 3600)} 小时{' '}
+                  {Math.floor((systemInfo.uptime % 3600) / 60)} 分钟
                 </p>
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-400">
-              加载中...
-            </div>
+            <div className="text-center py-8 text-gray-400">加载中...</div>
           )}
         </div>
       </div>
-      
+
       <div className="card">
         <h2 className="text-xl font-semibold text-white mb-4">快捷操作</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -197,7 +224,7 @@ function Dashboard() {
               <p className="text-sm text-gray-400">浏览和上传视频文件</p>
             </div>
           </Link>
-          
+
           <Link
             to="/presets"
             className="flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors"
@@ -208,7 +235,7 @@ function Dashboard() {
               <p className="text-sm text-gray-400">创建和管理转码预设</p>
             </div>
           </Link>
-          
+
           <Link
             to="/settings"
             className="flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors"

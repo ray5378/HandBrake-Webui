@@ -23,11 +23,11 @@ function Files() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [uploading, setUploading] = useState(false);
-  
+
   useEffect(() => {
     fetchFiles();
   }, [currentPath]);
-  
+
   const fetchFiles = async () => {
     setLoading(true);
     try {
@@ -42,24 +42,24 @@ function Files() {
       setLoading(false);
     }
   };
-  
-  const handleUpload = async (e) => {
+
+  const handleUpload = async e => {
     const uploadedFiles = e.target.files;
     if (!uploadedFiles.length) return;
-    
+
     setUploading(true);
-    
+
     try {
       for (const file of uploadedFiles) {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('directory', currentPath);
-        
+
         await api.post('/files/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
-      
+
       fetchFiles();
     } catch (error) {
       console.error('Upload failed:', error);
@@ -68,10 +68,10 @@ function Files() {
       e.target.value = '';
     }
   };
-  
-  const handleDelete = async (filePath) => {
+
+  const handleDelete = async filePath => {
     if (!confirm('确定要删除这个文件吗？')) return;
-    
+
     try {
       await api.delete('/files', { params: { path: filePath } });
       fetchFiles();
@@ -79,14 +79,14 @@ function Files() {
       console.error('Delete failed:', error);
     }
   };
-  
+
   const handleDownload = async (filePath, fileName) => {
     try {
       const response = await api.get('/files/download', {
         params: { path: filePath },
         responseType: 'blob'
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -98,26 +98,26 @@ function Files() {
       console.error('Download failed:', error);
     }
   };
-  
-  const formatSize = (bytes) => {
+
+  const formatSize = bytes => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
-  
-  const navigateToPath = (path) => {
+
+  const navigateToPath = path => {
     setCurrentPath(path);
     setSearchTerm('');
   };
-  
+
   const filteredFiles = files.filter(file =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   const pathParts = currentPath.split('/').filter(Boolean);
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -137,7 +137,7 @@ function Files() {
             ))}
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -145,11 +145,11 @@ function Files() {
               type="text"
               placeholder="搜索文件..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="input pl-10 w-48"
             />
           </div>
-          
+
           <div className="flex items-center space-x-1 bg-dark-700 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
@@ -170,7 +170,7 @@ function Files() {
               <List className="w-4 h-4" />
             </button>
           </div>
-          
+
           <label className="btn btn-primary cursor-pointer inline-flex items-center space-x-2">
             <Upload className="w-4 h-4" />
             <span>上传</span>
@@ -185,7 +185,7 @@ function Files() {
           </label>
         </div>
       </div>
-      
+
       {loading ? (
         <div className="text-center py-12 text-gray-400">加载中...</div>
       ) : (
@@ -193,11 +193,13 @@ function Files() {
           {directories.length > 0 && (
             <div className="mb-6">
               <h2 className="text-sm font-medium text-gray-400 mb-3">文件夹</h2>
-              <div className={clsx(
-                'grid gap-4',
-                viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
-              )}>
-                {directories.map((dir) => (
+              <div
+                className={clsx(
+                  'grid gap-4',
+                  viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
+                )}
+              >
+                {directories.map(dir => (
                   <button
                     key={dir.path}
                     onClick={() => navigateToPath(dir.path)}
@@ -213,15 +215,17 @@ function Files() {
               </div>
             </div>
           )}
-          
+
           {filteredFiles.length > 0 ? (
-            <div className={clsx(
-              'grid gap-4',
-              viewMode === 'grid'
-                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                : 'grid-cols-1'
-            )}>
-              {filteredFiles.map((file) => (
+            <div
+              className={clsx(
+                'grid gap-4',
+                viewMode === 'grid'
+                  ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                  : 'grid-cols-1'
+              )}
+            >
+              {filteredFiles.map(file => (
                 <div
                   key={file.path}
                   className="card hover:border-primary/50 transition-colors group"
@@ -237,7 +241,9 @@ function Files() {
                       <p className="text-xs text-gray-400 mb-3">{formatSize(file.size)}</p>
                       <div className="flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          onClick={() => navigate(`/transcode?file=${encodeURIComponent(file.path)}`)}
+                          onClick={() =>
+                            navigate(`/transcode?file=${encodeURIComponent(file.path)}`)
+                          }
                           className="btn btn-primary text-xs py-1 px-3"
                         >
                           转码
@@ -269,7 +275,9 @@ function Files() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => navigate(`/transcode?file=${encodeURIComponent(file.path)}`)}
+                          onClick={() =>
+                            navigate(`/transcode?file=${encodeURIComponent(file.path)}`)
+                          }
                           className="btn btn-primary text-xs"
                         >
                           转码
@@ -301,7 +309,7 @@ function Files() {
           )}
         </>
       )}
-      
+
       {uploading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-dark-800 rounded-lg p-6 text-center">

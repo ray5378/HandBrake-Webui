@@ -9,22 +9,25 @@ export const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       isLoading: false,
-      
+
       login: async (username, password) => {
         set({ isLoading: true });
         try {
-          const response = await api.post('/auth/login', { username, password });
+          const response = await api.post('/auth/login', {
+            username,
+            password
+          });
           const { token, refreshToken, user } = response.data.data;
-          
+
           localStorage.setItem('refreshToken', refreshToken);
-          
+
           set({
             user,
             token,
             isAuthenticated: true,
             isLoading: false
           });
-          
+
           return { success: true };
         } catch (error) {
           set({ isLoading: false });
@@ -34,22 +37,25 @@ export const useAuthStore = create(
           };
         }
       },
-      
+
       register: async (username, password) => {
         set({ isLoading: true });
         try {
-          const response = await api.post('/auth/register', { username, password });
+          const response = await api.post('/auth/register', {
+            username,
+            password
+          });
           const { token, refreshToken, user } = response.data.data;
-          
+
           localStorage.setItem('refreshToken', refreshToken);
-          
+
           set({
             user,
             token,
             isAuthenticated: true,
             isLoading: false
           });
-          
+
           return { success: true };
         } catch (error) {
           set({ isLoading: false });
@@ -59,14 +65,14 @@ export const useAuthStore = create(
           };
         }
       },
-      
+
       logout: async () => {
         try {
           await api.post('/auth/logout');
         } catch (error) {
           console.error('Logout error:', error);
         }
-        
+
         localStorage.removeItem('refreshToken');
         set({
           user: null,
@@ -74,14 +80,14 @@ export const useAuthStore = create(
           isAuthenticated: false
         });
       },
-      
+
       checkAuth: async () => {
         const token = get().token;
         if (!token) {
           set({ isAuthenticated: false });
           return;
         }
-        
+
         try {
           const response = await api.get('/auth/me');
           set({
@@ -92,11 +98,13 @@ export const useAuthStore = create(
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
             try {
-              const response = await api.post('/auth/refresh', { refreshToken });
+              const response = await api.post('/auth/refresh', {
+                refreshToken
+              });
               const { token } = response.data.data;
-              
+
               set({ token });
-              
+
               const userResponse = await api.get('/auth/me');
               set({
                 user: userResponse.data.data,
@@ -119,12 +127,12 @@ export const useAuthStore = create(
           }
         }
       },
-      
-      setToken: (token) => set({ token })
+
+      setToken: token => set({ token })
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated

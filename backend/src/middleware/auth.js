@@ -4,14 +4,14 @@ const config = require('../config');
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  
+
   if (!token) {
     return res.status(401).json({
       success: false,
       error: 'Access token required'
     });
   }
-  
+
   try {
     const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;

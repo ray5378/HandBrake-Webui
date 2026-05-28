@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Layers,
-  Plus,
-  Edit,
-  Trash2,
-  CheckCircle,
-  AlertCircle,
-  Star
-} from 'lucide-react';
+import { Layers, Plus, Edit, Trash2, CheckCircle, AlertCircle, Star } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 
@@ -33,11 +25,11 @@ function Presets() {
       }
     }
   });
-  
+
   useEffect(() => {
     fetchPresets();
   }, []);
-  
+
   const fetchPresets = async () => {
     try {
       const response = await api.get('/presets');
@@ -48,17 +40,17 @@ function Presets() {
       setLoading(false);
     }
   };
-  
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     try {
       if (editingPreset) {
         await api.put(`/presets/${editingPreset.id}`, formData);
       } else {
         await api.post('/presets', formData);
       }
-      
+
       setShowModal(false);
       resetForm();
       fetchPresets();
@@ -67,8 +59,8 @@ function Presets() {
       alert(error.response?.data?.error || '保存失败');
     }
   };
-  
-  const handleEdit = (preset) => {
+
+  const handleEdit = preset => {
     setEditingPreset(preset);
     setFormData({
       name: preset.name,
@@ -77,10 +69,10 @@ function Presets() {
     });
     setShowModal(true);
   };
-  
-  const handleDelete = async (presetId) => {
+
+  const handleDelete = async presetId => {
     if (!confirm('确定要删除这个预设吗？')) return;
-    
+
     try {
       await api.delete(`/presets/${presetId}`);
       fetchPresets();
@@ -89,7 +81,7 @@ function Presets() {
       alert(error.response?.data?.error || '删除失败');
     }
   };
-  
+
   const resetForm = () => {
     setEditingPreset(null);
     setFormData({
@@ -110,18 +102,18 @@ function Presets() {
       }
     });
   };
-  
-  const getCodecLabel = (codec) => {
+
+  const getCodecLabel = codec => {
     const labels = {
       libx264: 'H.264',
       libx265: 'H.265/HEVC',
-      libvpx-vp9: 'VP9',
+      'libvpx-vp9': 'VP9',
       aac: 'AAC',
       libopus: 'Opus'
     };
     return labels[codec] || codec;
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -129,7 +121,7 @@ function Presets() {
           <h1 className="text-3xl font-bold text-white">转码预设</h1>
           <p className="text-gray-400 mt-1">管理和创建转码预设方案</p>
         </div>
-        
+
         <button
           onClick={() => {
             resetForm();
@@ -141,33 +133,27 @@ function Presets() {
           <span>创建预设</span>
         </button>
       </div>
-      
+
       {loading ? (
         <div className="text-center py-12 text-gray-400">加载中...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {presets.map((preset) => (
+          {presets.map(preset => (
             <div key={preset.id} className="card hover:border-primary/50 transition-colors">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-2">
-                  {preset.isBuiltIn && (
-                    <Star className="w-5 h-5 text-warning" />
-                  )}
+                  {preset.isBuiltIn && <Star className="w-5 h-5 text-warning" />}
                   <h3 className="text-lg font-semibold text-white">{preset.name}</h3>
                 </div>
-                <span className="text-xs text-gray-400 uppercase">
-                  {preset.settings.format}
-                </span>
+                <span className="text-xs text-gray-400 uppercase">{preset.settings.format}</span>
               </div>
-              
+
               <p className="text-sm text-gray-400 mb-4">{preset.description}</p>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">视频编码</span>
-                  <span className="text-white">
-                    {getCodecLabel(preset.settings.video?.codec)}
-                  </span>
+                  <span className="text-white">{getCodecLabel(preset.settings.video?.codec)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">质量 (CRF)</span>
@@ -175,20 +161,16 @@ function Presets() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">音频编码</span>
-                  <span className="text-white">
-                    {getCodecLabel(preset.settings.audio?.codec)}
-                  </span>
+                  <span className="text-white">{getCodecLabel(preset.settings.audio?.codec)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">音频码率</span>
                   <span className="text-white">
-                    {preset.settings.audio?.bitrate
-                      ? `${preset.settings.audio.bitrate} kbps`
-                      : '-'}
+                    {preset.settings.audio?.bitrate ? `${preset.settings.audio.bitrate} kbps` : '-'}
                   </span>
                 </div>
               </div>
-              
+
               {!preset.isBuiltIn && (
                 <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-dark-700">
                   <button
@@ -210,7 +192,7 @@ function Presets() {
           ))}
         </div>
       )}
-      
+
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-dark-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -219,40 +201,43 @@ function Presets() {
                 {editingPreset ? '编辑预设' : '创建预设'}
               </h2>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div>
                 <label className="label">预设名称</label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
                   className="input"
                   placeholder="输入预设名称"
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="label">描述</label>
                 <input
                   type="text"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
                   className="input"
                   placeholder="输入预设描述"
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="label">输出格式</label>
                   <select
                     value={formData.settings.format}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({
                         ...formData,
-                        settings: { ...formData.settings, format: e.target.value }
+                        settings: {
+                          ...formData.settings,
+                          format: e.target.value
+                        }
                       })
                     }
                     className="input"
@@ -262,17 +247,20 @@ function Presets() {
                     <option value="webm">WebM</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="label">视频编码</label>
                   <select
                     value={formData.settings.video.codec}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({
                         ...formData,
                         settings: {
                           ...formData.settings,
-                          video: { ...formData.settings.video, codec: e.target.value }
+                          video: {
+                            ...formData.settings.video,
+                            codec: e.target.value
+                          }
                         }
                       })
                     }
@@ -283,7 +271,7 @@ function Presets() {
                     <option value="libvpx-vp9">VP9</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="label">质量 (CRF)</label>
                   <input
@@ -291,12 +279,15 @@ function Presets() {
                     min="0"
                     max="51"
                     value={formData.settings.video.crf}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({
                         ...formData,
                         settings: {
                           ...formData.settings,
-                          video: { ...formData.settings.video, crf: parseInt(e.target.value) }
+                          video: {
+                            ...formData.settings.video,
+                            crf: parseInt(e.target.value)
+                          }
                         }
                       })
                     }
@@ -304,17 +295,20 @@ function Presets() {
                   />
                   <p className="text-xs text-gray-400 mt-1">0=最佳, 51=最小</p>
                 </div>
-                
+
                 <div>
                   <label className="label">编码预设</label>
                   <select
                     value={formData.settings.video.preset}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({
                         ...formData,
                         settings: {
                           ...formData.settings,
-                          video: { ...formData.settings.video, preset: e.target.value }
+                          video: {
+                            ...formData.settings.video,
+                            preset: e.target.value
+                          }
                         }
                       })
                     }
@@ -331,17 +325,20 @@ function Presets() {
                     <option value="veryslow">veryslow (最佳)</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="label">音频编码</label>
                   <select
                     value={formData.settings.audio.codec}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({
                         ...formData,
                         settings: {
                           ...formData.settings,
-                          audio: { ...formData.settings.audio, codec: e.target.value }
+                          audio: {
+                            ...formData.settings.audio,
+                            codec: e.target.value
+                          }
                         }
                       })
                     }
@@ -352,18 +349,21 @@ function Presets() {
                     <option value="mp3">MP3</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="label">音频码率 (kbps)</label>
                   <input
                     type="number"
                     value={formData.settings.audio.bitrate}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({
                         ...formData,
                         settings: {
                           ...formData.settings,
-                          audio: { ...formData.settings.audio, bitrate: parseInt(e.target.value) }
+                          audio: {
+                            ...formData.settings.audio,
+                            bitrate: parseInt(e.target.value)
+                          }
                         }
                       })
                     }
@@ -371,7 +371,7 @@ function Presets() {
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 pt-4">
                 <button
                   type="button"

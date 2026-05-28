@@ -17,19 +17,19 @@ function JobDetail() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     fetchJobDetail();
-    
+
     const interval = setInterval(() => {
       if (job && (job.status === 'queued' || job.status === 'processing')) {
         fetchJobDetail();
       }
     }, 2000);
-    
+
     return () => clearInterval(interval);
   }, [id, job?.status]);
-  
+
   const fetchJobDetail = async () => {
     try {
       const response = await api.get(`/jobs/${id}`);
@@ -40,10 +40,10 @@ function JobDetail() {
       setLoading(false);
     }
   };
-  
+
   const handleCancel = async () => {
     if (!confirm('确定要取消这个任务吗？')) return;
-    
+
     try {
       await api.post(`/jobs/${id}/cancel`);
       fetchJobDetail();
@@ -51,10 +51,10 @@ function JobDetail() {
       console.error('Failed to cancel job:', error);
     }
   };
-  
+
   const handleDelete = async () => {
     if (!confirm('确定要删除这个任务记录吗？')) return;
-    
+
     try {
       await api.delete(`/jobs/${id}`);
       window.location.href = '/jobs';
@@ -62,16 +62,16 @@ function JobDetail() {
       console.error('Failed to delete job:', error);
     }
   };
-  
+
   const handleDownload = async () => {
     if (!job?.output_file) return;
-    
+
     try {
       const response = await api.get('/files/download', {
         params: { path: job.output_file },
         responseType: 'blob'
       });
-      
+
       const fileName = job.output_file.split('/').pop();
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -84,7 +84,7 @@ function JobDetail() {
       console.error('Download failed:', error);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -92,7 +92,7 @@ function JobDetail() {
       </div>
     );
   }
-  
+
   if (!job) {
     return (
       <div className="text-center py-12">
@@ -104,7 +104,7 @@ function JobDetail() {
       </div>
     );
   }
-  
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center space-x-4">
@@ -116,12 +116,14 @@ function JobDetail() {
           <p className="text-gray-400 text-sm mt-1">ID: {job.id}</p>
         </div>
       </div>
-      
+
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             {job.status === 'queued' && <Clock className="w-8 h-8 text-warning" />}
-            {job.status === 'processing' && <Play className="w-8 h-8 text-secondary animate-pulse" />}
+            {job.status === 'processing' && (
+              <Play className="w-8 h-8 text-secondary animate-pulse" />
+            )}
             {job.status === 'completed' && <CheckCircle className="w-8 h-8 text-success" />}
             {job.status === 'failed' && <XCircle className="w-8 h-8 text-error" />}
             {job.status === 'cancelled' && <XCircle className="w-8 h-8 text-gray-500" />}
@@ -138,7 +140,7 @@ function JobDetail() {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {job.status === 'processing' && (
               <button onClick={handleCancel} className="btn btn-danger">
@@ -146,15 +148,17 @@ function JobDetail() {
                 <span className="hidden sm:inline ml-2">取消</span>
               </button>
             )}
-            
+
             {job.status === 'completed' && (
               <button onClick={handleDownload} className="btn btn-primary">
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline ml-2">下载</span>
               </button>
             )}
-            
-            {(job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') && (
+
+            {(job.status === 'completed' ||
+              job.status === 'failed' ||
+              job.status === 'cancelled') && (
               <button onClick={handleDelete} className="btn btn-secondary">
                 <Trash2 className="w-4 h-4" />
                 <span className="hidden sm:inline ml-2">删除</span>
@@ -162,7 +166,7 @@ function JobDetail() {
             )}
           </div>
         </div>
-        
+
         {job.status === 'processing' && (
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm mb-2">
@@ -177,51 +181,45 @@ function JobDetail() {
             </div>
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-400 mb-1">源文件</p>
             <p className="text-white font-mono text-sm break-all">{job.source_file}</p>
           </div>
-          
+
           <div>
             <p className="text-sm text-gray-400 mb-1">输出文件</p>
             <p className="text-white font-mono text-sm break-all">{job.output_file}</p>
           </div>
-          
+
           {job.preset_name && (
             <div>
               <p className="text-sm text-gray-400 mb-1">预设</p>
               <p className="text-white">{job.preset_name}</p>
             </div>
           )}
-          
+
           <div>
             <p className="text-sm text-gray-400 mb-1">创建时间</p>
-            <p className="text-white">
-              {new Date(job.created_at).toLocaleString('zh-CN')}
-            </p>
+            <p className="text-white">{new Date(job.created_at).toLocaleString('zh-CN')}</p>
           </div>
-          
+
           {job.started_at && (
             <div>
               <p className="text-sm text-gray-400 mb-1">开始时间</p>
-              <p className="text-white">
-                {new Date(job.started_at).toLocaleString('zh-CN')}
-              </p>
+              <p className="text-white">{new Date(job.started_at).toLocaleString('zh-CN')}</p>
             </div>
           )}
-          
+
           {job.completed_at && (
             <div>
               <p className="text-sm text-gray-400 mb-1">完成时间</p>
-              <p className="text-white">
-                {new Date(job.completed_at).toLocaleString('zh-CN')}
-              </p>
+              <p className="text-white">{new Date(job.completed_at).toLocaleString('zh-CN')}</p>
             </div>
           )}
         </div>
-        
+
         {job.error_log && (
           <div className="mt-6">
             <p className="text-sm text-error mb-2">错误日志:</p>

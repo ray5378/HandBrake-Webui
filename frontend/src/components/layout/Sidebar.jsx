@@ -21,19 +21,19 @@ const navItems = [
   { path: '/transcode', icon: Play, label: '转码' },
   { path: '/jobs', icon: ListTodo, label: '任务队列' },
   { path: '/presets', icon: Layers, label: '预设' },
-  { path: '/settings', icon: Settings, label: '设置' },
+  { path: '/settings', icon: Settings, label: '设置' }
 ];
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
-  
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
-  
+
   return (
     <>
       <button
@@ -42,18 +42,18 @@ function Sidebar() {
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
-      
+
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
-      
+
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-dark-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          'fixed inset-y-0 left-0 z-40 w-64 bg-dark-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
@@ -68,19 +68,19 @@ function Sidebar() {
               </div>
             </div>
           </div>
-          
+
           <nav className="flex-1 p-4 space-y-1">
-            {navItems.map((item) => (
+            {navItems.map(item => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
                   clsx(
-                    "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                    'flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors',
                     isActive
-                      ? "bg-primary text-white"
-                      : "text-gray-300 hover:bg-dark-700 hover:text-white"
+                      ? 'bg-primary text-white'
+                      : 'text-gray-300 hover:bg-dark-700 hover:text-white'
                   )
                 }
               >
@@ -89,7 +89,7 @@ function Sidebar() {
               </NavLink>
             ))}
           </nav>
-          
+
           <div className="p-4 border-t border-dark-700">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
