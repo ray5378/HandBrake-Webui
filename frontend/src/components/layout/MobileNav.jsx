@@ -14,7 +14,7 @@ function MobileNav() {
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-800 border-t border-dark-700 z-30">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-800 border-t border-dark-700 z-30 pb-[env(safe-area-inset-bottom,0px)]">
       <div className="flex justify-around items-center py-2">
         {navItems.map(item => (
           <NavLink
