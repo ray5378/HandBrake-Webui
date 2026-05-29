@@ -138,7 +138,12 @@
     "clearAll": "Clear All",
     "confirmClearAll": "Are you sure you want to clear all jobs?\n\nProcessing jobs will also be cancelled.",
     "clearHistory": "Clear History",
-    "confirmClearHistory": "Are you sure you want to clear all completed/failed/cancelled history?"
+    "confirmClearHistory": "Are you sure you want to clear all completed/failed/cancelled history?",
+    "clearCache": "Clear Transcode Cache",
+    "confirmClearCache": "Are you sure you want to clear the transcode cache directory? Active transcoding jobs may be affected.",
+    "confirmClearAllTitle": "Clear All Jobs",
+    "confirmClearHistoryTitle": "Clear Job History",
+    "confirmClearCacheTitle": "Clear Transcode Cache"
   },
   "files": {
     "title": "Files",
