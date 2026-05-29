@@ -254,18 +254,32 @@ function Presets() {
 
             {formData.settings.video?.rateControl === 'crf' && (
               <div>
-                <label className="label">
-                  恒定质量 (RF): {formData.settings.video?.crf || 22}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="51"
-                  step="0.5"
-                  value={formData.settings.video?.crf || 22}
-                  onChange={e => updateSettings('video.crf', parseFloat(e.target.value))}
-                  className="w-full"
-                />
+                <label className="label">恒定质量 (RF)</label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="number"
+                    min="0"
+                    max="51"
+                    step="0.5"
+                    value={formData.settings.video?.crf ?? 22}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val) && val >= 0 && val <= 51) {
+                        updateSettings('video.crf', val);
+                      }
+                    }}
+                    className="input w-24"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="51"
+                    step="0.5"
+                    value={formData.settings.video?.crf ?? 22}
+                    onChange={e => updateSettings('video.crf', parseFloat(e.target.value))}
+                    className="flex-1"
+                  />
+                </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>体积更小</span>
                   <span>画质更高</span>
@@ -279,24 +293,43 @@ function Presets() {
                 <label className="label">目标码率 (kbps)</label>
                 <input
                   type="number"
-                  value={formData.settings.video?.bitrate || 1500}
-                  onChange={e => updateSettings('video.bitrate', parseInt(e.target.value))}
+                  min="8"
+                  max="80000"
+                  step="50"
+                  value={formData.settings.video?.bitrate || ''}
+                  onChange={e => updateSettings('video.bitrate', parseInt(e.target.value) || 0)}
                   className="input"
+                  placeholder="输入码率 (8-80000)"
                 />
               </div>
             )}
 
             {formData.settings.video?.rateControl === 'cqp' && (
               <div>
-                <label className="label">恒定量化参数: {formData.settings.video?.qp || 22}</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="51"
-                  value={formData.settings.video?.qp || 22}
-                  onChange={e => updateSettings('video.qp', parseInt(e.target.value))}
-                  className="w-full"
-                />
+                <label className="label">恒定量化参数 (QP)</label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="number"
+                    min="0"
+                    max="51"
+                    value={formData.settings.video?.qp ?? 22}
+                    onChange={e => {
+                      const val = parseInt(e.target.value);
+                      if (!isNaN(val) && val >= 0 && val <= 51) {
+                        updateSettings('video.qp', val);
+                      }
+                    }}
+                    className="input w-24"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="51"
+                    value={formData.settings.video?.qp ?? 22}
+                    onChange={e => updateSettings('video.qp', parseInt(e.target.value))}
+                    className="flex-1"
+                  />
+                </div>
               </div>
             )}
 
@@ -417,8 +450,16 @@ function Presets() {
               <div>
                 <label className="label">帧率 (FPS)</label>
                 <select
-                  value={formData.settings.video?.framerate || ''}
-                  onChange={e => updateSettings('video.framerate', e.target.value || null)}
+                  value={formData.settings.video?.framerate === null || formData.settings.video?.framerate === undefined ? '' : 'custom'}
+                  onChange={e => {
+                    if (e.target.value === '') {
+                      updateSettings('video.framerate', null);
+                    } else if (e.target.value === 'custom') {
+                      updateSettings('video.framerate', 30);
+                    } else {
+                      updateSettings('video.framerate', parseFloat(e.target.value));
+                    }
+                  }}
                   className="input"
                 >
                   <option value="">与源文件相同</option>
@@ -430,7 +471,22 @@ function Presets() {
                   <option value="50">50</option>
                   <option value="59.94">59.94</option>
                   <option value="60">60</option>
+                  <option value="custom">自定义</option>
                 </select>
+                {formData.settings.video?.framerate !== null && formData.settings.video?.framerate !== undefined && (
+                  <div className="mt-2">
+                    <input
+                      type="number"
+                      step="0.001"
+                      min="1"
+                      max="240"
+                      value={formData.settings.video?.framerate || 30}
+                      onChange={e => updateSettings('video.framerate', parseFloat(e.target.value) || null)}
+                      className="input"
+                      placeholder="输入帧率"
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -440,7 +496,7 @@ function Presets() {
                   onChange={e => updateSettings('video.framerateMode', e.target.value)}
                   className="input"
                 >
-                  <option value="cfr">恒定帧率 (CFR)</option>
+                  <option value="cfr">固定帧率 (CFR)</option>
                   <option value="vfr">可变帧率 (VFR)</option>
                   <option value="pfr">峰值帧率 (PFR)</option>
                 </select>
