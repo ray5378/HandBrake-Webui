@@ -19,6 +19,17 @@ const app = express();
 
 config.initialize();
 
+const cacheDir = process.env.CACHE_DIR || '/cache';
+const cacheTempDir = `${cacheDir}/handbrake-temp`;
+try {
+  if (fs.existsSync(cacheDir)) {
+    fs.rmSync(cacheTempDir, { recursive: true, force: true });
+    fs.mkdirSync(cacheTempDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('Failed to clean cache directory:', e.message);
+}
+
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,

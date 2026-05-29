@@ -348,10 +348,10 @@ async function startTranscode(job) {
     }
   }
 
-  const outputDir = path.dirname(job.output_file);
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
+  const cacheDir = process.env.CACHE_DIR || '/cache';
+  const jobTempDir = `${cacheDir}/handbrake-temp/${job.id}`;
+  fs.mkdirSync(jobTempDir, { recursive: true });
+  const tempOutputFile = path.join(jobTempDir, path.basename(job.output_file));
 
   db.prepare(
     `
@@ -361,6 +361,8 @@ async function startTranscode(job) {
   ).run(job.id);
 
   const args = buildHandBrakeArgs(job, settings);
+  const oIdx = args.indexOf('-o');
+  if (oIdx !== -1) args[oIdx + 1] = tempOutputFile;
 
   console.log('Starting HandBrake with args:', args);
 
@@ -384,6 +386,21 @@ async function startTranscode(job) {
     processingCount--;
 
     if (code === 0) {
+      const finalDir = path.dirname(job.output_file);
+      if (!fs.existsSync(finalDir)) {
+        fs.mkdirSync(finalDir, { recursive: true });
+      }
+      try {
+        fs.renameSync(tempOutputFile, job.output_file);
+      } catch (e) {
+        console.error(`Failed to move temp file for job ${job.id}:`, e);
+      }
+      try {
+        fs.rmSync(jobTempDir, { recursive: true, force: true });
+      } catch (e) {
+        // ignore cleanup error
+      }
+
       db.prepare(
         `
         UPDATE jobs
@@ -394,8 +411,18 @@ async function startTranscode(job) {
 
       console.log(`Job ${job.id} completed successfully`);
     } else if (code === null) {
+      try {
+        fs.rmSync(jobTempDir, { recursive: true, force: true });
+      } catch (e) {
+        // ignore cleanup error
+      }
       console.log(`Job ${job.id} was cancelled`);
     } else {
+      try {
+        fs.rmSync(jobTempDir, { recursive: true, force: true });
+      } catch (e) {
+        // ignore cleanup error
+      }
       db.prepare(
         `
         UPDATE jobs
@@ -413,6 +440,12 @@ async function startTranscode(job) {
   handbrake.on('error', error => {
     activeJobs.delete(job.id);
     processingCount--;
+
+    try {
+      fs.rmSync(jobTempDir, { recursive: true, force: true });
+    } catch (e) {
+      // ignore cleanup error
+    }
 
     db.prepare(
       `
