@@ -121,24 +121,39 @@ router.get(
       }
 
       const stats = fs.statSync(filePath);
-      const ffprobe = require('child_process').execFile;
+      const { execFile } = require('child_process');
 
-      ffprobe(
+      let ffprobeProcess = null;
+      let timeoutId = null;
+      let hasResponded = false;
+
+      const fallbackResponse = () => {
+        if (!hasResponded) {
+          hasResponded = true;
+          res.json({
+            success: true,
+            data: {
+              name: path.basename(filePath),
+              path: filePath,
+              size: stats.size,
+              extension: path.extname(filePath),
+              createdAt: stats.birthtime.toISOString(),
+              modifiedAt: stats.mtime.toISOString()
+            }
+          });
+        }
+      };
+
+      ffprobeProcess = execFile(
         'ffprobe',
         ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', filePath],
+        { timeout: 10000 }, // 10秒超时
         (error, stdout) => {
+          clearTimeout(timeoutId);
+          
           if (error) {
-            return res.json({
-              success: true,
-              data: {
-                name: path.basename(filePath),
-                path: filePath,
-                size: stats.size,
-                extension: path.extname(filePath),
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString()
-              }
-            });
+            fallbackResponse();
+            return;
           }
 
           try {
@@ -146,51 +161,52 @@ router.get(
             const videoStream = info.streams.find(s => s.codec_type === 'video');
             const audioStreams = info.streams.filter(s => s.codec_type === 'audio');
 
-            res.json({
-              success: true,
-              data: {
-                name: path.basename(filePath),
-                path: filePath,
-                size: stats.size,
-                extension: path.extname(filePath),
-                duration: parseFloat(info.format.duration) || 0,
-                format: info.format.format_name,
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString(),
-                video: videoStream
-                  ? {
-                      codec: videoStream.codec_name,
-                      width: videoStream.width,
-                      height: videoStream.height,
-                      fps: videoStream.r_frame_rate
-                        ? videoStream.r_frame_rate.split('/').reduce((a, b) => a / b, 0)
-                        : 0,
-                      bitrate: parseInt(videoStream.bit_rate) || 0
-                    }
-                  : null,
-                audio: audioStreams.map(a => ({
-                  codec: a.codec_name,
-                  channels: a.channels,
-                  language: a.tags?.language || 'unknown',
-                  bitrate: parseInt(a.bit_rate) || 0
-                }))
-              }
-            });
+            if (!hasResponded) {
+              hasResponded = true;
+              res.json({
+                success: true,
+                data: {
+                  name: path.basename(filePath),
+                  path: filePath,
+                  size: stats.size,
+                  extension: path.extname(filePath),
+                  duration: parseFloat(info.format.duration) || 0,
+                  format: info.format.format_name,
+                  createdAt: stats.birthtime.toISOString(),
+                  modifiedAt: stats.mtime.toISOString(),
+                  video: videoStream
+                    ? {
+                        codec: videoStream.codec_name,
+                        width: videoStream.width,
+                        height: videoStream.height,
+                        fps: videoStream.r_frame_rate
+                          ? videoStream.r_frame_rate.split('/').reduce((a, b) => a / b, 0)
+                          : 0,
+                        bitrate: parseInt(videoStream.bit_rate) || 0
+                      }
+                    : null,
+                  audio: audioStreams.map(a => ({
+                    codec: a.codec_name,
+                    channels: a.channels,
+                    language: a.tags?.language || 'unknown',
+                    bitrate: parseInt(a.bit_rate) || 0
+                  }))
+                }
+              });
+            }
           } catch (parseError) {
-            res.json({
-              success: true,
-              data: {
-                name: path.basename(filePath),
-                path: filePath,
-                size: stats.size,
-                extension: path.extname(filePath),
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString()
-              }
-            });
+            fallbackResponse();
           }
         }
       );
+
+      // 备用超时机制，双重保障
+      timeoutId = setTimeout(() => {
+        if (ffprobeProcess && !hasResponded) {
+          ffprobeProcess.kill('SIGTERM');
+          fallbackResponse();
+        }
+      }, 12000); // 12秒备用超时
     } catch (error) {
       next(error);
     }

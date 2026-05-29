@@ -14,6 +14,7 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
+import { formatFileSize } from '../utils/format';
 
 function Files() {
   const { t } = useTranslation();
@@ -55,13 +56,8 @@ function Files() {
     }
   };
 
-  const formatSize = bytes => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
+  // formatSize 已弃用，请使用 formatFileSize
+  const formatSize = formatFileSize;
 
   const navigateToPath = path => {
     setCurrentPath(path);

@@ -16,10 +16,10 @@ const config = {
   jwtExpiresIn: '24h',
   refreshTokenExpiresIn: '90d',
   maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS) || 2,
-  uploadDir: '/drive',
-  outputDir: '/drive/转码/转码后',
+  uploadDir: process.env.UPLOAD_DIR || '/drive',
+  outputDir: process.env.OUTPUT_DIR || '/drive/转码/转码后',
   configDir: process.env.CONFIG_DIR || '/config',
-  cacheDir: null,
+  cacheDir: process.env.CACHE_DIR || null,
   databasePath: null,
   initialized: false,
 
@@ -35,11 +35,21 @@ const config = {
       Object.assign(config, savedConfig);
     }
 
+    // 环境变量优先级高于配置文件
     if (process.env.MAX_CONCURRENT_JOBS) {
       config.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS) || 2;
     }
     if (process.env.JWT_SECRET) {
       config.jwtSecret = process.env.JWT_SECRET;
+    }
+    if (process.env.UPLOAD_DIR) {
+      config.uploadDir = process.env.UPLOAD_DIR;
+    }
+    if (process.env.OUTPUT_DIR) {
+      config.outputDir = process.env.OUTPUT_DIR;
+    }
+    if (process.env.CACHE_DIR) {
+      config.cacheDir = process.env.CACHE_DIR;
     }
 
     if (!fs.existsSync(configPath)) {
@@ -68,7 +78,9 @@ const config = {
     const configToSave = {
       jwtSecret: config.jwtSecret,
       maxConcurrentJobs: config.maxConcurrentJobs,
-      cacheDir: config.cacheDir
+      cacheDir: config.cacheDir,
+      uploadDir: config.uploadDir,
+      outputDir: config.outputDir
     };
     fs.writeFileSync(configPath, JSON.stringify(configToSave, null, 2));
   }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,6 +14,7 @@ import {
   ListTodo
 } from 'lucide-react';
 import api from '../services/api';
+import { formatFileSize } from '../utils/format';
 
 function Dashboard() {
   const { t } = useTranslation();
@@ -23,15 +24,26 @@ function Dashboard() {
   const [modalJobs, setModalJobs] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
   const abortRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  // 根据是否有活动任务动态调整轮询频率
+  const hasActiveTasks = useMemo(() => {
+    return stats ? (stats.queued > 0 || stats.processing > 0) : false;
+  }, [stats]);
 
   useEffect(() => {
     fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 30000);
+
+    // 有活动任务时每30秒轮询，无活动任务时每120秒轮询
+    const intervalTime = hasActiveTasks ? 30000 : 120000;
+    
+    intervalRef.current = setInterval(fetchDashboardData, intervalTime);
+    
     return () => {
-      clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, []);
+  }, [hasActiveTasks]);
 
   const fetchDashboardData = async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -66,13 +78,8 @@ function Dashboard() {
     }
   }, []);
 
-  const formatBytes = bytes => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
+  // formatBytes 已弃用，请使用 formatFileSize
+  const formatBytes = formatFileSize;
 
   const statCards = [
     {

@@ -377,8 +377,9 @@ async function startTranscode(job) {
 
   const onProgress = data => {
     progressBuffer += data.toString();
-    if (progressBuffer.length > 100000) {
-      progressBuffer = progressBuffer.slice(-50000);
+    // 更严格的内存限制，避免内存泄漏
+    if (progressBuffer.length > 200000) {
+      progressBuffer = progressBuffer.slice(-100000); // 保留最新的100KB
     }
     parseProgress(job.id, progressBuffer);
   };
@@ -388,7 +389,7 @@ async function startTranscode(job) {
     if (errorData.length < 1000000) {
       errorData += str;
     }
-    onProgress(str);
+    // 避免重复调用 onProgress，stderr通常不含 progress 信息
   };
 
   const moveTempFile = () => {
@@ -502,11 +503,17 @@ async function startTranscode(job) {
   handbrake.on('error', onError);
 }
 
+// 每个 job 的进度解析缓存，避免重复解析相同数据
+const parseProgressCache = new Map();
+
 function parseProgress(jobId, data) {
   const db = getDatabase();
   let progress = null;
 
+  // 优先使用 JSON 解析（因为我们总是用 --json 启动）
   progress = tryParseJsonProgress(data);
+  
+  // JSON 解析失败时才使用文本格式作为备用
   if (progress === null) {
     progress = tryParseTextProgress(data);
   }

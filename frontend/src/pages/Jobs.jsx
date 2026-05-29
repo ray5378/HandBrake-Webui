@@ -25,6 +25,7 @@ function Jobs() {
   const [refreshing, setRefreshing] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const abortRef = useRef(null);
+  const intervalRef = useRef(null);
 
   const fetchJobs = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -41,15 +42,24 @@ function Jobs() {
     }
   }, [filter]);
 
+  // 根据是否有活动任务动态调整轮询频率
+  const hasActiveTasks = useMemo(() => {
+    return jobs.some(job => job.status === 'processing' || job.status === 'queued');
+  }, [jobs]);
+
   useEffect(() => {
     fetchJobs();
 
-    const interval = setInterval(fetchJobs, 10000);
+    // 有活动任务时每10秒轮询，无活动任务时每60秒轮询
+    const intervalTime = hasActiveTasks ? 10000 : 60000;
+    
+    intervalRef.current = setInterval(fetchJobs, intervalTime);
+    
     return () => {
-      clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [fetchJobs]);
+  }, [fetchJobs, hasActiveTasks]);
 
   const handleRefresh = () => {
     setRefreshing(true);
