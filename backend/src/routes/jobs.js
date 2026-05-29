@@ -351,7 +351,7 @@ router.post(
   validate,
   async (req, res, next) => {
     try {
-      const { sourceDirectory, outputDirectory, presetId, customSettings } = req.body;
+      const { sourceDirectory, outputDirectory, presetId, customSettings, copyNonVideoFiles } = req.body;
       const db = getDatabase();
 
       const videoExtensions = [
@@ -454,6 +454,27 @@ router.post(
         } catch (startError) {
           console.error(`Failed to start job ${jobId}:`, startError);
         }
+      }
+
+      if (copyNonVideoFiles) {
+        const copyNonVideoRecursive = (src, dest) => {
+          const entries = fs.readdirSync(src, { withFileTypes: true });
+          for (const entry of entries) {
+            const srcPath = path.join(src, entry.name);
+            const destPath = path.join(dest, entry.name);
+            if (entry.isDirectory()) {
+              fs.mkdirSync(destPath, { recursive: true });
+              copyNonVideoRecursive(srcPath, destPath);
+            } else {
+              const ext = path.extname(entry.name).toLowerCase();
+              if (!videoExtensions.includes(ext)) {
+                fs.mkdirSync(path.dirname(destPath), { recursive: true });
+                fs.copyFileSync(srcPath, destPath);
+              }
+            }
+          }
+        };
+        copyNonVideoRecursive(sourceDirectory, outputDirectory);
       }
 
       res.status(201).json({

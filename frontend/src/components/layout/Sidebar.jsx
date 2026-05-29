@@ -12,22 +12,23 @@ import {
   Video
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
+import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 import clsx from 'clsx';
 
-const navItems = [
-  { path: '/', icon: Home, label: '首页' },
-  { path: '/files', icon: FolderOpen, label: '文件管理' },
-
-  { path: '/jobs', icon: ListTodo, label: '任务队列' },
-  { path: '/presets', icon: Layers, label: '预设' },
-  { path: '/settings', icon: Settings, label: '设置' }
-];
-
 function Sidebar() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+
+  const navItems = [
+    { path: '/', icon: Home, label: t('nav.dashboard') },
+    { path: '/files', icon: FolderOpen, label: t('nav.files') },
+    { path: '/jobs', icon: ListTodo, label: t('nav.jobs') },
+    { path: '/presets', icon: Layers, label: t('nav.presets') },
+    { path: '/settings', icon: Settings, label: t('nav.settings') }
+  ];
 
   const handleLogout = async () => {
     await logout();
@@ -112,7 +113,7 @@ function Sidebar() {
               className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>退出登录</span>
+              <span>{t('nav.logout')}</span>
             </button>
           </div>
         </div>

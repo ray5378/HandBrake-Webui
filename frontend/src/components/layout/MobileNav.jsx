@@ -1,16 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, FolderOpen, ListTodo } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
-const navItems = [
-  { path: '/', icon: Home, label: '首页' },
-  { path: '/files', icon: FolderOpen, label: '文件' },
-
-  { path: '/jobs', icon: ListTodo, label: '任务' }
-];
-
 function MobileNav() {
+  const { t } = useTranslation();
+
+  const navItems = [
+    { path: '/', icon: Home, label: t('nav.dashboard') },
+    { path: '/files', icon: FolderOpen, label: t('nav.files') },
+    { path: '/jobs', icon: ListTodo, label: t('nav.jobs') }
+  ];
+
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-800 border-t border-dark-700 z-30">
       <div className="flex justify-around items-center py-2">

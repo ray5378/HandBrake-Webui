@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { useTranslation } from 'react-i18next';
 import { Video, Loader2, AlertCircle } from 'lucide-react';
 
 function Login() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,7 +35,7 @@ function Login() {
     setError('');
 
     if (!username || !password) {
-      setError('请填写所有字段');
+      setError(t('auth.fillAllFields'));
       return;
     }
 
@@ -51,17 +53,17 @@ function Login() {
     setError('');
 
     if (!username || !password || !confirmPassword) {
-      setError('请填写所有字段');
+      setError(t('auth.fillAllFields'));
       return;
     }
 
     if (password.length < 6) {
-      setError('密码至少需要 6 个字符');
+      setError(t('auth.passwordTooShort'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('两次密码输入不一致');
+      setError(t('auth.fillAllFields'));
       return;
     }
 
@@ -91,7 +93,7 @@ function Login() {
               <Video className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">HandBrake Web UI</h1>
-            <p className="text-gray-400">首次使用，请设置管理员账号</p>
+            <p className="text-gray-400">{t('auth.setupTitle')}</p>
           </div>
 
           <div className="bg-dark-800 rounded-xl p-8 shadow-xl">
@@ -104,35 +106,35 @@ function Login() {
 
             <form onSubmit={handleSetupSubmit} className="space-y-4">
               <div>
-                <label className="label">用户名</label>
+                <label className="label">{t('auth.username')}</label>
                 <input
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   className="input"
-                  placeholder="设置用户名"
+                  placeholder={t('auth.placeholderSetupUsername')}
                 />
               </div>
 
               <div>
-                <label className="label">密码</label>
+                <label className="label">{t('auth.password')}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   className="input"
-                  placeholder="设置密码 (至少 6 位)"
+                  placeholder={t('auth.placeholderSetupPassword')}
                 />
               </div>
 
               <div>
-                <label className="label">确认密码</label>
+                <label className="label">{t('auth.confirmPassword')}</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   className="input"
-                  placeholder="再次输入密码"
+                  placeholder={t('auth.placeholderConfirmPassword')}
                 />
               </div>
 
@@ -144,10 +146,10 @@ function Login() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>处理中...</span>
+                    <span>{t('common.saving')}</span>
                   </>
                 ) : (
-                  <span>创建管理员</span>
+                  <span>{t('auth.setupButton')}</span>
                 )}
               </button>
             </form>
@@ -165,7 +167,7 @@ function Login() {
             <Video className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">HandBrake Web UI</h1>
-          <p className="text-gray-400">基于 Web 的视频转码管理</p>
+          <p className="text-gray-400">{t('auth.subtitle')}</p>
         </div>
 
         <div className="bg-dark-800 rounded-xl p-8 shadow-xl">
@@ -178,24 +180,24 @@ function Login() {
 
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
-              <label className="label">用户名</label>
+              <label className="label">{t('auth.username')}</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 className="input"
-                placeholder="输入用户名"
+                placeholder={t('auth.placeholderUsername')}
               />
             </div>
 
             <div>
-              <label className="label">密码</label>
+              <label className="label">{t('auth.password')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="input"
-                placeholder="输入密码"
+                placeholder={t('auth.placeholderPassword')}
               />
             </div>
 
@@ -207,10 +209,10 @@ function Login() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>处理中...</span>
+                  <span>{t('common.loading')}</span>
                 </>
               ) : (
-                <span>登录</span>
+                <span>{t('auth.login')}</span>
               )}
             </button>
           </form>

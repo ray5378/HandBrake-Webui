@@ -37,7 +37,7 @@ function Jobs() {
   useEffect(() => {
     fetchJobs();
 
-    const interval = setInterval(fetchJobs, 3000);
+    const interval = setInterval(fetchJobs, 10000);
     return () => clearInterval(interval);
   }, [filter, fetchJobs]);
 

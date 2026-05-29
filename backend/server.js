@@ -31,12 +31,22 @@ app.use(cors({
 
 app.use(morgan('combined'));
 
-const limiter = rateLimit({
+const authStrictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 20,
+  message: { success: false, error: 'Too many attempts, please try again later.' }
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 600,
   message: { success: false, error: 'Too many requests, please try again later.' }
 });
-app.use('/api', limiter);
+
+app.use('/api/auth/login', authStrictLimiter);
+app.use('/api/auth/setup-admin', authStrictLimiter);
+app.use('/api/auth/logout', authStrictLimiter);
+app.use('/api', apiLimiter);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

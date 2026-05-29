@@ -80,10 +80,21 @@
     "login": "Login",
     "username": "Username",
     "password": "Password",
+    "confirmPassword": "Confirm Password",
     "loginSuccess": "Login successful",
     "loginFailed": "Login failed",
     "invalidCredentials": "Invalid username or password",
-    "logoutSuccess": "Logout successful"
+    "logoutSuccess": "Logout successful",
+    "subtitle": "Web-based video transcoding management",
+    "fillAllFields": "Please fill in all fields",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "setupTitle": "First time setup, please create an admin account",
+    "setupButton": "Create Admin",
+    "placeholderUsername": "Enter username",
+    "placeholderPassword": "Enter password",
+    "placeholderSetupUsername": "Set username",
+    "placeholderSetupPassword": "Set password (min 6 characters)",
+    "placeholderConfirmPassword": "Re-enter password"
   },
   "dashboard": {
     "title": "Dashboard",

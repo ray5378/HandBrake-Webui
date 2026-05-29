@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Video, Settings, Loader2, CheckCircle, FolderOpen } from 'lucide-react';
+import { X, Video, Settings, Loader2, CheckCircle, FolderOpen, ChevronRight, GitBranch, Plus } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 
@@ -7,6 +7,13 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState('');
   const [outputDirectory, setOutputDirectory] = useState('/output');
+  const [browsePath, setBrowsePath] = useState('/output');
+  const [browseDirs, setBrowseDirs] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const [sourceTree, setSourceTree] = useState([]);
+  const [showNewDirInput, setShowNewDirInput] = useState(false);
+  const [newDirName, setNewDirName] = useState('');
+  const [copyNonVideoFiles, setCopyNonVideoFiles] = useState(false);
   const [customSettings, setCustomSettings] = useState(false);
   const [settings, setSettings] = useState({
     crf: 23,
@@ -16,26 +23,55 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [directories, setDirectories] = useState([]);
-  const [loadingDirs, setLoadingDirs] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  const fetchBrowseDirs = async (path) => {
+    setBrowseLoading(true);
+    try {
+      const res = await api.get('/files', { params: { directory: path } });
+      setBrowseDirs(res.data.data.directories);
+    } catch (err) {
+      console.error('Failed to fetch directories:', err);
+    } finally {
+      setBrowseLoading(false);
+    }
+  };
+
   const fetchData = async () => {
     try {
-      const [presetsRes, filesRes] = await Promise.all([
+      const [presetsRes, treeRes] = await Promise.all([
         api.get('/presets'),
-        api.get('/files', { params: { directory: '/output' } })
+        api.get('/files/tree', { params: { path: directory } })
       ]);
 
       setPresets(presetsRes.data.data.presets);
-      setDirectories(filesRes.data.data.directories);
+      setSourceTree(treeRes.data.data.directories || []);
+
+      await fetchBrowseDirs('/output');
     } catch (error) {
       console.error('Failed to fetch data:', error);
-    } finally {
-      setLoadingDirs(false);
+    }
+  };
+
+  const handleBrowse = (path) => {
+    setBrowsePath(path);
+    setOutputDirectory(path);
+    fetchBrowseDirs(path);
+  };
+
+  const handleCreateDir = async () => {
+    if (!newDirName.trim()) return;
+    try {
+      const newPath = `${browsePath}/${newDirName.trim()}`;
+      await api.post('/files/mkdir', { path: newPath });
+      setShowNewDirInput(false);
+      setNewDirName('');
+      fetchBrowseDirs(browsePath);
+    } catch (err) {
+      setError(err.response?.data?.error || '创建目录失败');
     }
   };
 
@@ -55,7 +91,8 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
         sourceDirectory: directory,
         outputDirectory,
         presetId: selectedPreset || undefined,
-        customSettings: customSettings ? settings : undefined
+        customSettings: customSettings ? settings : undefined,
+        copyNonVideoFiles
       });
 
       setSuccess(true);
@@ -69,6 +106,47 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setSubmitting(false);
     }
   };
+
+  const pathParts = (browsePath || '/output').split('/').filter(Boolean);
+
+  const buildTree = (paths) => {
+    const tree = {};
+    for (const p of paths) {
+      if (!p) continue;
+      const parts = p.split('/');
+      let current = tree;
+      for (const part of parts) {
+        if (!current[part]) current[part] = {};
+        current = current[part];
+      }
+    }
+    return tree;
+  };
+
+  const renderTree = (node, prefix = '', depth = 0) => {
+    const entries = Object.entries(node).sort(([a], [b]) => a.localeCompare(b));
+    return entries.map(([name, children], idx) => {
+      const isLast = idx === entries.length - 1;
+      const connector = isLast ? '└── ' : '├── ';
+      const childPrefix = prefix + (isLast ? '    ' : '│   ');
+      const hasChildren = Object.keys(children).length > 0;
+      return (
+        <React.Fragment key={name}>
+          <div className="text-xs text-gray-400 flex items-center space-x-1 font-mono"
+               style={{ paddingLeft: depth * 20 }}>
+            <span className="text-gray-600 shrink-0">{connector}</span>
+            <FolderOpen className="w-3 h-3 text-warning shrink-0" />
+            <span className="truncate">{name}</span>
+            <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />
+            <span className="text-primary truncate">{outputDirectory}/{prefix}{name}</span>
+          </div>
+          {hasChildren && renderTree(children, prefix + name + '/', depth + 1)}
+        </React.Fragment>
+      );
+    });
+  };
+
+  const treeData = buildTree(sourceTree);
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -110,14 +188,100 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
               <div className="space-y-4">
                 <div>
                   <label className="label">输出目录</label>
-                  <input
-                    type="text"
-                    value={outputDirectory}
-                    onChange={e => setOutputDirectory(e.target.value)}
-                    className="input"
-                    placeholder="例如: /output/converted"
-                  />
+
+                  {browseLoading ? (
+                    <div className="flex items-center space-x-2 text-gray-400 py-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">加载中...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center space-x-1 text-sm mb-3 flex-wrap">
+                        <button type="button" onClick={() => handleBrowse('/output')}
+                          className={clsx('hover:underline', browsePath === '/output' ? 'text-white font-medium' : 'text-primary')}>
+                          output
+                        </button>
+                        {pathParts.slice(1).map((part, i) => {
+                          const fullPath = '/output/' + pathParts.slice(1, i + 2).join('/');
+                          return (
+                            <React.Fragment key={i}>
+                              <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />
+                              <button type="button" onClick={() => handleBrowse(fullPath)}
+                                className={clsx('hover:underline', browsePath === fullPath ? 'text-white font-medium' : 'text-primary')}>
+                                {part}
+                              </button>
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto">
+                        {browseDirs.map(dir => (
+                          <button type="button" key={dir.path}
+                            onClick={() => handleBrowse(dir.path)}
+                            onDoubleClick={(e) => { e.preventDefault(); setOutputDirectory(dir.path); }}
+                            className={clsx(
+                              'flex items-center space-x-2 p-2 rounded-lg transition-colors text-left',
+                              outputDirectory === dir.path
+                                ? 'bg-primary/20 border border-primary'
+                                : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
+                            )}
+                          >
+                            <FolderOpen className="w-4 h-4 text-warning shrink-0" />
+                            <span className="text-white text-xs truncate">{dir.name}</span>
+                          </button>
+                        ))}
+                        {browseDirs.length === 0 && (
+                          <p className="col-span-full text-gray-500 text-xs py-2">空目录</p>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-400">
+                      已选: <span className="text-primary">{outputDirectory}</span>
+                    </p>
+                    <div className="flex space-x-2">
+                      {showNewDirInput ? (
+                        <div className="flex space-x-1">
+                          <input type="text" value={newDirName}
+                            onChange={e => setNewDirName(e.target.value)}
+                            className="input text-xs py-1 w-28" placeholder="目录名"
+                            onKeyDown={e => { if (e.key === 'Enter') handleCreateDir(); if (e.key === 'Escape') { setShowNewDirInput(false); setNewDirName(''); } }} />
+                          <button type="button" onClick={handleCreateDir}
+                            className="btn btn-primary text-xs py-1">创建</button>
+                          <button type="button" onClick={() => { setShowNewDirInput(false); setNewDirName(''); }}
+                            className="btn btn-secondary text-xs py-1">取消</button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => setShowNewDirInput(true)}
+                          className="text-xs text-primary hover:underline flex items-center space-x-1">
+                          <Plus className="w-3 h-3" />
+                          <span>新建目录</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
+                {sourceTree.length > 0 && (
+                  <div className="p-3 bg-dark-600 rounded-lg">
+                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center space-x-1">
+                      <GitBranch className="w-4 h-4 text-primary" />
+                      <span>目录结构预览</span>
+                    </h4>
+                    <div className="max-h-48 overflow-y-auto space-y-0.5">
+                      <div className="text-xs flex items-center space-x-1 font-mono">
+                        <FolderOpen className="w-3 h-3 text-warning shrink-0" />
+                        <span className="text-gray-400 truncate">{directory}</span>
+                        <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />
+                        <span className="text-primary truncate">{outputDirectory}</span>
+                      </div>
+                      {renderTree(treeData, '', 1)}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="label mb-2">选择预设</label>
@@ -137,6 +301,19 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   ) : (
                     <p className="text-gray-400">暂无预设可用</p>
                   )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="copyNonVideoFiles"
+                    checked={copyNonVideoFiles}
+                    onChange={e => setCopyNonVideoFiles(e.target.checked)}
+                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="copyNonVideoFiles" className="text-sm text-gray-300">
+                    把源目录不能转码的文件复制到目标目录
+                  </label>
                 </div>
 
                 <div className="flex items-center space-x-2">

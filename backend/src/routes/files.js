@@ -308,4 +308,44 @@ router.get('/download', authenticateToken, query('path').notEmpty(), validate, (
   }
 });
 
+router.get('/tree', authenticateToken, query('path').notEmpty(), validate, (req, res, next) => {
+  try {
+    const dir = req.query.path;
+    if (!fs.existsSync(dir)) {
+      return res.json({ success: true, data: { directories: [] } });
+    }
+
+    const scanTree = (base, relative = '') => {
+      const results = [];
+      const items = fs.readdirSync(base, { withFileTypes: true });
+      for (const item of items) {
+        if (item.isDirectory()) {
+          const relPath = relative ? `${relative}/${item.name}` : item.name;
+          results.push(relPath);
+          results.push(...scanTree(path.join(base, item.name), relPath));
+        }
+      }
+      return results;
+    };
+
+    const directories = scanTree(dir);
+    res.json({ success: true, data: { directories } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/mkdir', authenticateToken, body('path').notEmpty(), validate, (req, res, next) => {
+  try {
+    const dir = req.body.path;
+    if (fs.existsSync(dir)) {
+      return res.status(400).json({ success: false, error: '目录已存在' });
+    }
+    fs.mkdirSync(dir, { recursive: true });
+    res.json({ success: true, data: { path: dir } });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
