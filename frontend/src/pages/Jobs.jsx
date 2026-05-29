@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 
 function Jobs() {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ function Jobs() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const fetchJobs = async () => {
     try {
@@ -70,14 +72,23 @@ function Jobs() {
   };
 
   const handleClearHistory = async () => {
-    if (!confirm(t('jobs.confirmClearHistory'))) return;
-
     try {
       await api.delete('/jobs/all');
       fetchJobs();
     } catch (error) {
       console.error('Failed to clear history:', error);
     }
+    setConfirmAction(null);
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await api.delete('/jobs/all-force');
+      fetchJobs();
+    } catch (error) {
+      console.error('Failed to clear all jobs:', error);
+    }
+    setConfirmAction(null);
   };
 
   const getStatusLabel = status => {
@@ -108,15 +119,20 @@ function Jobs() {
         </div>
 
         <div className='flex items-center space-x-2'>
-          {jobs.some(j => ['completed', 'failed', 'cancelled'].includes(j.status)) && (
-            <button
-              onClick={handleClearHistory}
-              className='btn btn-danger inline-flex items-center space-x-2'
-            >
-              <Trash2 className='w-4 h-4' />
-              <span>{t('jobs.clearHistory')}</span>
-            </button>
-          )}
+          <button
+            onClick={() => setConfirmAction('clearAll')}
+            className='btn btn-danger inline-flex items-center space-x-2'
+          >
+            <AlertTriangle className='w-4 h-4' />
+            <span>{t('jobs.clearAll') || '清理所有任务'}</span>
+          </button>
+          <button
+            onClick={() => setConfirmAction('clearHistory')}
+            className='btn btn-danger inline-flex items-center space-x-2'
+          >
+            <Trash2 className='w-4 h-4' />
+            <span>{t('jobs.clearHistory')}</span>
+          </button>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
@@ -245,6 +261,33 @@ function Jobs() {
           </Link>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmAction === 'clearAll'}
+        title={t('jobs.confirmClearAllTitle') || '清理所有任务'}
+        message={
+          t('jobs.confirmClearAll') ||
+          '确定要清理所有任务吗？包括正在处理中的任务将被取消。此操作不可撤销。'
+        }
+        confirmText={t('common.confirm') || '确认清理'}
+        cancelText={t('common.cancel') || '取消'}
+        onConfirm={handleClearAll}
+        onCancel={() => setConfirmAction(null)}
+        danger
+      />
+      <ConfirmDialog
+        open={confirmAction === 'clearHistory'}
+        title={t('jobs.confirmClearHistoryTitle') || '清理任务历史'}
+        message={
+          t('jobs.confirmClearHistory') ||
+          '确定要清理所有已完成、失败和已取消的任务吗？此操作不可撤销。'
+        }
+        confirmText={t('common.confirm') || '确认清理'}
+        cancelText={t('common.cancel') || '取消'}
+        onConfirm={handleClearHistory}
+        onCancel={() => setConfirmAction(null)}
+        danger
+      />
     </div>
   );
 }

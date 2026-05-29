@@ -183,6 +183,30 @@ router.delete('/all', authenticateToken, async (req, res, next) => {
   }
 });
 
+router.delete('/all-force', authenticateToken, async (req, res, next) => {
+  try {
+    const db = getDatabase();
+
+    const processingJobs = db
+      .prepare("SELECT id FROM jobs WHERE status = 'processing'")
+      .all();
+
+    for (const job of processingJobs) {
+      await cancelTranscode(job.id);
+    }
+
+    const result = db.prepare('DELETE FROM jobs').run();
+
+    res.json({
+      success: true,
+      message: 'All jobs cleared successfully',
+      deleted: result.changes
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete('/:id', authenticateToken, async (req, res, next) => {
   try {
     const db = getDatabase();
