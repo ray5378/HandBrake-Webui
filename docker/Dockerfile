@@ -39,7 +39,7 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# 安装 HandBrake 和运行时依赖 (含硬件加速支持)
+# 安装 HandBrake 和运行时依赖
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
     echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
@@ -57,10 +57,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositor
     libx265 \
     libvpx \
     libdav1d \
-    aom-libs && \
-    if [ "$(uname -m)" = "x86_64" ]; then \
-      apk add --no-cache intel-media-driver onevpl-intel-gpu; \
-    fi
+    aom-libs
 
 # 设置时区
 ENV TZ=Asia/Shanghai
