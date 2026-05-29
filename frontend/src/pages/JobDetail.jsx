@@ -87,18 +87,18 @@ function JobDetail() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-400">加载中...</div>
+      <div className='flex items-center justify-center py-12'>
+        <div className='text-gray-400'>加载中...</div>
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-        <p className="text-gray-400">任务不存在</p>
-        <Link to="/jobs" className="btn btn-primary mt-4">
+      <div className='text-center py-12'>
+        <AlertCircle className='w-16 h-16 text-error mx-auto mb-4' />
+        <p className='text-gray-400'>任务不存在</p>
+        <Link to='/jobs' className='btn btn-primary mt-4'>
           返回任务列表
         </Link>
       </div>
@@ -106,29 +106,29 @@ function JobDetail() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link to="/jobs" className="btn btn-secondary">
-          <ArrowLeft className="w-4 h-4" />
+    <div className='max-w-4xl mx-auto space-y-6'>
+      <div className='flex items-center space-x-4'>
+        <Link to='/jobs' className='btn btn-secondary'>
+          <ArrowLeft className='w-4 h-4' />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">任务详情</h1>
-          <p className="text-gray-400 text-sm mt-1">ID: {job.id}</p>
+          <h1 className='text-2xl font-bold text-white'>任务详情</h1>
+          <p className='text-gray-400 text-sm mt-1'>ID: {job.id}</p>
         </div>
       </div>
 
-      <div className="card">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            {job.status === 'queued' && <Clock className="w-8 h-8 text-warning" />}
+      <div className='card'>
+        <div className='flex items-center justify-between mb-6'>
+          <div className='flex items-center space-x-3'>
+            {job.status === 'queued' && <Clock className='w-8 h-8 text-warning' />}
             {job.status === 'processing' && (
-              <Play className="w-8 h-8 text-secondary animate-pulse" />
+              <Play className='w-8 h-8 text-secondary animate-pulse' />
             )}
-            {job.status === 'completed' && <CheckCircle className="w-8 h-8 text-success" />}
-            {job.status === 'failed' && <XCircle className="w-8 h-8 text-error" />}
-            {job.status === 'cancelled' && <XCircle className="w-8 h-8 text-gray-500" />}
+            {job.status === 'completed' && <CheckCircle className='w-8 h-8 text-success' />}
+            {job.status === 'failed' && <XCircle className='w-8 h-8 text-error' />}
+            {job.status === 'cancelled' && <XCircle className='w-8 h-8 text-gray-500' />}
             <div>
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className='text-xl font-semibold text-white'>
                 {job.source_file.split('/').pop()}
               </h2>
               <span className={clsx('badge', `badge-${job.status}`)}>
@@ -141,89 +141,89 @@ function JobDetail() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             {job.status === 'processing' && (
-              <button onClick={handleCancel} className="btn btn-danger">
-                <XCircle className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">取消</span>
+              <button onClick={handleCancel} className='btn btn-danger'>
+                <XCircle className='w-4 h-4' />
+                <span className='hidden sm:inline ml-2'>取消</span>
               </button>
             )}
 
             {job.status === 'completed' && (
-              <button onClick={handleDownload} className="btn btn-primary">
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">下载</span>
+              <button onClick={handleDownload} className='btn btn-primary'>
+                <Download className='w-4 h-4' />
+                <span className='hidden sm:inline ml-2'>下载</span>
               </button>
             )}
 
             {(job.status === 'completed' ||
               job.status === 'failed' ||
               job.status === 'cancelled') && (
-              <button onClick={handleDelete} className="btn btn-secondary">
-                <Trash2 className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">删除</span>
+              <button onClick={handleDelete} className='btn btn-secondary'>
+                <Trash2 className='w-4 h-4' />
+                <span className='hidden sm:inline ml-2'>删除</span>
               </button>
             )}
           </div>
         </div>
 
         {job.status === 'processing' && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-secondary">转码进度</span>
-              <span className="text-white font-mono text-lg">{job.progress.toFixed(1)}%</span>
+          <div className='mb-6'>
+            <div className='flex items-center justify-between text-sm mb-2'>
+              <span className='text-secondary'>转码进度</span>
+              <span className='text-white font-mono text-lg'>{job.progress.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-dark-700 rounded-full h-3 overflow-hidden">
+            <div className='w-full bg-dark-700 rounded-full h-3 overflow-hidden'>
               <div
-                className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000"
+                className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
                 style={{ width: `${job.progress}%` }}
               />
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           <div>
-            <p className="text-sm text-gray-400 mb-1">源文件</p>
-            <p className="text-white font-mono text-sm break-all">{job.source_file}</p>
+            <p className='text-sm text-gray-400 mb-1'>源文件</p>
+            <p className='text-white font-mono text-sm break-all'>{job.source_file}</p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-400 mb-1">输出文件</p>
-            <p className="text-white font-mono text-sm break-all">{job.output_file}</p>
+            <p className='text-sm text-gray-400 mb-1'>输出文件</p>
+            <p className='text-white font-mono text-sm break-all'>{job.output_file}</p>
           </div>
 
           {job.preset_name && (
             <div>
-              <p className="text-sm text-gray-400 mb-1">预设</p>
-              <p className="text-white">{job.preset_name}</p>
+              <p className='text-sm text-gray-400 mb-1'>预设</p>
+              <p className='text-white'>{job.preset_name}</p>
             </div>
           )}
 
           <div>
-            <p className="text-sm text-gray-400 mb-1">创建时间</p>
-            <p className="text-white">{new Date(job.created_at).toLocaleString('zh-CN')}</p>
+            <p className='text-sm text-gray-400 mb-1'>创建时间</p>
+            <p className='text-white'>{new Date(job.created_at).toLocaleString('zh-CN')}</p>
           </div>
 
           {job.started_at && (
             <div>
-              <p className="text-sm text-gray-400 mb-1">开始时间</p>
-              <p className="text-white">{new Date(job.started_at).toLocaleString('zh-CN')}</p>
+              <p className='text-sm text-gray-400 mb-1'>开始时间</p>
+              <p className='text-white'>{new Date(job.started_at).toLocaleString('zh-CN')}</p>
             </div>
           )}
 
           {job.completed_at && (
             <div>
-              <p className="text-sm text-gray-400 mb-1">完成时间</p>
-              <p className="text-white">{new Date(job.completed_at).toLocaleString('zh-CN')}</p>
+              <p className='text-sm text-gray-400 mb-1'>完成时间</p>
+              <p className='text-white'>{new Date(job.completed_at).toLocaleString('zh-CN')}</p>
             </div>
           )}
         </div>
 
         {job.error_log && (
-          <div className="mt-6">
-            <p className="text-sm text-error mb-2">错误日志:</p>
-            <pre className="bg-dark-700 p-4 rounded-lg text-xs text-gray-300 font-mono overflow-x-auto max-h-64">
+          <div className='mt-6'>
+            <p className='text-sm text-error mb-2'>错误日志:</p>
+            <pre className='bg-dark-700 p-4 rounded-lg text-xs text-gray-300 font-mono overflow-x-auto max-h-64'>
               {job.error_log}
             </pre>
           </div>

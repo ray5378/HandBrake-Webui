@@ -20,7 +20,7 @@ function ProtectedRoute({ children }) {
   }, [checkAuth]);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to='/login' replace />;
   }
 
   return children;
@@ -31,9 +31,9 @@ function App() {
     <BrowserRouter>
       <Suspense fallback={<Loading />}>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path='/login' element={<Login />} />
           <Route
-            path="/"
+            path='/'
             element={
               <ProtectedRoute>
                 <Layout />
@@ -41,13 +41,13 @@ function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="files" element={<Files />} />
-            <Route path="jobs" element={<Jobs />} />
-            <Route path="jobs/:id" element={<JobDetail />} />
-            <Route path="presets" element={<Presets />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path='files' element={<Files />} />
+            <Route path='jobs' element={<Jobs />} />
+            <Route path='jobs/:id' element={<JobDetail />} />
+            <Route path='presets' element={<Presets />} />
+            <Route path='settings' element={<Settings />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

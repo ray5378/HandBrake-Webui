@@ -131,17 +131,17 @@ function Files() {
   const pathParts = currentPath.split('/').filter(Boolean);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h1 className="text-3xl font-bold text-white">{t('files.title')}</h1>
-          <div className="flex items-center space-x-2 mt-2 text-sm text-gray-400">
+          <h1 className='text-3xl font-bold text-white'>{t('files.title')}</h1>
+          <div className='flex items-center space-x-2 mt-2 text-sm text-gray-400'>
             {pathParts.map((part, index) => (
               <React.Fragment key={index}>
-                {index > 0 && <ChevronRight className="w-4 h-4" />}
+                {index > 0 && <ChevronRight className='w-4 h-4' />}
                 <button
                   onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
-                  className="hover:text-white transition-colors"
+                  className='hover:text-white transition-colors'
                 >
                   {part}
                 </button>
@@ -150,19 +150,19 @@ function Files() {
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className='flex items-center space-x-3'>
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400' />
             <input
-              type="text"
+              type='text'
               placeholder={t('common.search') + '...'}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="input pl-10 w-48"
+              className='input pl-10 w-48'
             />
           </div>
 
-          <div className="flex items-center space-x-1 bg-dark-700 rounded-lg p-1">
+          <div className='flex items-center space-x-1 bg-dark-700 rounded-lg p-1'>
             <button
               onClick={() => setViewMode('grid')}
               className={clsx(
@@ -170,7 +170,7 @@ function Files() {
                 viewMode === 'grid' ? 'bg-primary text-white' : 'text-gray-400'
               )}
             >
-              <Grid className="w-4 h-4" />
+              <Grid className='w-4 h-4' />
             </button>
             <button
               onClick={() => setViewMode('list')}
@@ -179,19 +179,19 @@ function Files() {
                 viewMode === 'list' ? 'bg-primary text-white' : 'text-gray-400'
               )}
             >
-              <List className="w-4 h-4" />
+              <List className='w-4 h-4' />
             </button>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">{t('common.loading')}</div>
+        <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
         <>
           {directories.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-sm font-medium text-gray-400 mb-3">
+            <div className='mb-6'>
+              <h2 className='text-sm font-medium text-gray-400 mb-3'>
                 {t('common.directories') || 'Directories'}
               </h2>
               <div
@@ -210,8 +210,8 @@ function Files() {
                       viewMode === 'grid' && 'flex-col text-center justify-center'
                     )}
                   >
-                    <FolderOpen className="w-8 h-8 text-warning flex-shrink-0" />
-                    <span className="text-white break-all whitespace-normal text-center">
+                    <FolderOpen className='w-8 h-8 text-warning flex-shrink-0' />
+                    <span className='text-white break-all whitespace-normal text-center'>
                       {dir.name}
                     </span>
                   </button>
@@ -232,57 +232,57 @@ function Files() {
               {filteredFiles.map(file => (
                 <div
                   key={file.path}
-                  className="card hover:border-primary/50 transition-colors group"
+                  className='card hover:border-primary/50 transition-colors group'
                 >
                   {viewMode === 'grid' ? (
                     <>
-                      <div className="aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                        <Video className="w-12 h-12 text-gray-600" />
+                      <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
+                        <Video className='w-12 h-12 text-gray-600' />
                       </div>
-                      <h3 className="font-medium text-white break-all whitespace-normal mb-2">
+                      <h3 className='font-medium text-white break-all whitespace-normal mb-2'>
                         {file.name}
                       </h3>
-                      <p className="text-xs text-gray-400 mb-3">{formatSize(file.size)}</p>
-                      <div className="flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
+                      <div className='flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity'>
                         <button
                           onClick={() => handleDownload(file.path, file.name)}
-                          className="btn btn-secondary text-xs py-1 px-3"
+                          className='btn btn-secondary text-xs py-1 px-3'
                         >
-                          <Download className="w-3 h-3" />
+                          <Download className='w-3 h-3' />
                         </button>
                         <button
                           onClick={() => handleDelete(file.path)}
-                          className="btn btn-danger text-xs py-1 px-3"
+                          className='btn btn-danger text-xs py-1 px-3'
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className='w-3 h-3' />
                         </button>
                       </div>
                     </>
                   ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <Video className="w-8 h-8 text-gray-600 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium break-all whitespace-normal">
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center space-x-3 flex-1 min-w-0'>
+                        <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-white font-medium break-all whitespace-normal'>
                             {file.name}
                           </p>
-                          <p className="text-sm text-gray-400">
+                          <p className='text-sm text-gray-400'>
                             {formatSize(file.size)} · {file.extension}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className='flex items-center space-x-2'>
                         <button
                           onClick={() => handleDownload(file.path, file.name)}
-                          className="btn btn-secondary text-xs"
+                          className='btn btn-secondary text-xs'
                         >
-                          <Download className="w-4 h-4" />
+                          <Download className='w-4 h-4' />
                         </button>
                         <button
                           onClick={() => handleDelete(file.path)}
-                          className="btn btn-danger text-xs"
+                          className='btn btn-danger text-xs'
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className='w-4 h-4' />
                         </button>
                       </div>
                     </div>
@@ -291,10 +291,10 @@ function Files() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Video className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400">{t('files.noFiles')}</p>
-              <p className="text-sm text-gray-500 mt-1">{t('files.dragDropHint')}</p>
+            <div className='text-center py-12'>
+              <Video className='w-16 h-16 text-gray-600 mx-auto mb-4' />
+              <p className='text-gray-400'>{t('files.noFiles')}</p>
+              <p className='text-sm text-gray-500 mt-1'>{t('files.dragDropHint')}</p>
             </div>
           )}
         </>
@@ -303,7 +303,7 @@ function Files() {
       {contextMenu && (
         <div
           ref={contextMenuRef}
-          className="fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 py-1 min-w-[200px]"
+          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 py-1 min-w-[200px]'
           style={{
             left: Math.min(contextMenu.x, window.innerWidth - 220),
             top: Math.min(contextMenu.y, window.innerHeight - 200)
@@ -311,9 +311,9 @@ function Files() {
         >
           <button
             onClick={handleBatchTranscode}
-            className="w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3"
+            className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
           >
-            <PlayCircle className="w-4 h-4 text-primary" />
+            <PlayCircle className='w-4 h-4 text-primary' />
             <span>{t('common.batchTranscode') || 'Batch Transcode'}</span>
           </button>
         </div>

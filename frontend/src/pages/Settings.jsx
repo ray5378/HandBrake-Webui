@@ -169,15 +169,15 @@ function Settings() {
   const pathParts = (browsePath || '/drive').split('/').filter(Boolean);
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <div>
-        <h1 className="text-3xl font-bold text-white">{t('settings.title')}</h1>
-        <p className="text-gray-400 mt-1">{t('settings.subtitle')}</p>
+        <h1 className='text-3xl font-bold text-white'>{t('settings.title')}</h1>
+        <p className='text-gray-400 mt-1'>{t('settings.subtitle')}</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="lg:w-64 flex-shrink-0">
-          <nav className="space-y-1">
+      <div className='flex flex-col lg:flex-row gap-6'>
+        <div className='lg:w-64 flex-shrink-0'>
+          <nav className='space-y-1'>
             {tabs.map(tab => (
               <button
                 key={tab.id}
@@ -186,40 +186,40 @@ function Settings() {
                   activeTab === tab.id ? 'bg-primary text-white' : 'text-gray-300 hover:bg-dark-700'
                 }`}
               >
-                <tab.icon className="w-5 h-5" />
+                <tab.icon className='w-5 h-5' />
                 <span>{tab.label}</span>
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="flex-1">
+        <div className='flex-1'>
           {activeTab === 'general' && (
-            <div className="card">
-              <h2 className="text-xl font-semibold text-white mb-4">{t('settings.about')}</h2>
+            <div className='card'>
+              <h2 className='text-xl font-semibold text-white mb-4'>{t('settings.about')}</h2>
 
               {systemInfo ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className='space-y-4'>
+                  <div className='grid grid-cols-2 gap-4'>
                     <div>
-                      <p className="text-sm text-gray-400">HandBrake {t('settings.version')}</p>
-                      <p className="text-white font-mono">{systemInfo.handbrakeVersion}</p>
+                      <p className='text-sm text-gray-400'>HandBrake {t('settings.version')}</p>
+                      <p className='text-white font-mono'>{systemInfo.handbrakeVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">Node.js {t('settings.version')}</p>
-                      <p className="text-white font-mono">{systemInfo.nodeVersion}</p>
+                      <p className='text-sm text-gray-400'>Node.js {t('settings.version')}</p>
+                      <p className='text-white font-mono'>{systemInfo.nodeVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">
+                      <p className='text-sm text-gray-400'>
                         {t('settings.platform') || 'Platform'}
                       </p>
-                      <p className="text-white">
+                      <p className='text-white'>
                         {systemInfo.platform} ({systemInfo.arch})
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">{t('common.uptime') || 'Uptime'}</p>
-                      <p className="text-white font-mono">
+                      <p className='text-sm text-gray-400'>{t('common.uptime') || 'Uptime'}</p>
+                      <p className='text-white font-mono'>
                         {Math.floor(systemInfo.uptime / 3600)} h{' '}
                         {Math.floor((systemInfo.uptime % 3600) / 60)} m
                       </p>
@@ -227,29 +227,29 @@ function Settings() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-400 mb-2">
+                    <p className='text-sm text-gray-400 mb-2'>
                       {t('settings.memoryUsage') || 'Memory Usage'}
                     </p>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className='grid grid-cols-3 gap-4'>
                       <div>
-                        <p className="text-xs text-gray-500">RSS</p>
-                        <p className="text-white font-mono">
+                        <p className='text-xs text-gray-500'>RSS</p>
+                        <p className='text-white font-mono'>
                           {formatBytes(systemInfo.memoryUsage?.rss)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">
+                        <p className='text-xs text-gray-500'>
                           {t('common.heapTotal') || 'Heap Total'}
                         </p>
-                        <p className="text-white font-mono">
+                        <p className='text-white font-mono'>
                           {formatBytes(systemInfo.memoryUsage?.heapTotal)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">
+                        <p className='text-xs text-gray-500'>
                           {t('common.heapUsed') || 'Heap Used'}
                         </p>
-                        <p className="text-white font-mono">
+                        <p className='text-white font-mono'>
                           {formatBytes(systemInfo.memoryUsage?.heapUsed)}
                         </p>
                       </div>
@@ -257,65 +257,65 @@ function Settings() {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-400">{t('common.loading')}</p>
+                <p className='text-gray-400'>{t('common.loading')}</p>
               )}
             </div>
           )}
 
           {activeTab === 'account' && (
-            <div className="space-y-6">
-              <div className="card">
-                <h2 className="text-xl font-semibold text-white mb-4">
+            <div className='space-y-6'>
+              <div className='card'>
+                <h2 className='text-xl font-semibold text-white mb-4'>
                   {t('settings.accountInfo') || 'Account Information'}
                 </h2>
 
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   <div>
-                    <p className="text-sm text-gray-400">{t('auth.username')}</p>
-                    <p className="text-white text-lg">{user?.username}</p>
+                    <p className='text-sm text-gray-400'>{t('auth.username')}</p>
+                    <p className='text-white text-lg'>{user?.username}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">{t('settings.role') || 'Role'}</p>
-                    <p className="text-white capitalize">{user?.role}</p>
+                    <p className='text-sm text-gray-400'>{t('settings.role') || 'Role'}</p>
+                    <p className='text-white capitalize'>{user?.role}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className='grid grid-cols-2 gap-4 mt-4'>
                   <div>
-                    <p className="text-sm text-gray-400">{t('settings.commit')}</p>
-                    <p className="text-white font-mono text-xs">
+                    <p className='text-sm text-gray-400'>{t('settings.commit')}</p>
+                    <p className='text-white font-mono text-xs'>
                       {import.meta.env.VITE_GIT_COMMIT || 'unknown'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="card">
-                <h2 className="text-xl font-semibold text-white mb-4">
+              <div className='card'>
+                <h2 className='text-xl font-semibold text-white mb-4'>
                   {t('settings.changePassword') || 'Change Password'}
                 </h2>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
-                    <AlertCircle className="w-4 h-4" />
+                  <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
+                    <AlertCircle className='w-4 h-4' />
                     <span>{error}</span>
                   </div>
                 )}
 
                 {success && (
-                  <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm">
-                    <CheckCircle className="w-4 h-4" />
+                  <div className='mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm'>
+                    <CheckCircle className='w-4 h-4' />
                     <span>{success}</span>
                   </div>
                 )}
 
-                <form onSubmit={handlePasswordChange} className="space-y-4">
+                <form onSubmit={handlePasswordChange} className='space-y-4'>
                   <div>
-                    <label className="label">
+                    <label className='label'>
                       {t('settings.currentPassword') || 'Current Password'}
                     </label>
                     <input
-                      type="password"
+                      type='password'
                       value={passwordForm.currentPassword}
                       onChange={e =>
                         setPasswordForm({
@@ -323,15 +323,15 @@ function Settings() {
                           currentPassword: e.target.value
                         })
                       }
-                      className="input"
+                      className='input'
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="label">{t('settings.newPassword') || 'New Password'}</label>
+                    <label className='label'>{t('settings.newPassword') || 'New Password'}</label>
                     <input
-                      type="password"
+                      type='password'
                       value={passwordForm.newPassword}
                       onChange={e =>
                         setPasswordForm({
@@ -339,17 +339,17 @@ function Settings() {
                           newPassword: e.target.value
                         })
                       }
-                      className="input"
+                      className='input'
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="label">
+                    <label className='label'>
                       {t('settings.confirmPassword') || 'Confirm Password'}
                     </label>
                     <input
-                      type="password"
+                      type='password'
                       value={passwordForm.confirmPassword}
                       onChange={e =>
                         setPasswordForm({
@@ -357,24 +357,24 @@ function Settings() {
                           confirmPassword: e.target.value
                         })
                       }
-                      className="input"
+                      className='input'
                       required
                     />
                   </div>
 
                   <button
-                    type="submit"
+                    type='submit'
                     disabled={loading}
-                    className="btn btn-primary inline-flex items-center space-x-2"
+                    className='btn btn-primary inline-flex items-center space-x-2'
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className='w-4 h-4 animate-spin' />
                         <span>{t('common.saving') || 'Saving...'}</span>
                       </>
                     ) : (
                       <>
-                        <Save className="w-4 h-4" />
+                        <Save className='w-4 h-4' />
                         <span>{t('common.save')}</span>
                       </>
                     )}
@@ -385,42 +385,42 @@ function Settings() {
           )}
 
           {activeTab === 'storage' && (
-            <div className="card">
-              <h2 className="text-xl font-semibold text-white mb-4">{t('settings.storage')}</h2>
+            <div className='card'>
+              <h2 className='text-xl font-semibold text-white mb-4'>{t('settings.storage')}</h2>
 
               {directories && systemInfo ? (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">
+                    <h3 className='text-sm font-medium text-gray-400 mb-3'>
                       {t('settings.directoryMapping') || 'Directory Mapping'}
                     </h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <FolderOpen className="w-5 h-5 text-primary" />
+                    <div className='space-y-2'>
+                      <div className='flex items-center justify-between p-3 bg-dark-700 rounded-lg'>
+                        <div className='flex items-center space-x-3'>
+                          <FolderOpen className='w-5 h-5 text-primary' />
                           <div>
-                            <p className="text-white">{t('files.sourceFiles')}</p>
-                            <p className="text-xs text-gray-400 font-mono">{directories.source}</p>
+                            <p className='text-white'>{t('files.sourceFiles')}</p>
+                            <p className='text-xs text-gray-400 font-mono'>{directories.source}</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <FolderOpen className="w-5 h-5 text-success" />
+                      <div className='flex items-center justify-between p-3 bg-dark-700 rounded-lg'>
+                        <div className='flex items-center space-x-3'>
+                          <FolderOpen className='w-5 h-5 text-success' />
                           <div>
-                            <p className="text-white">{t('files.outputFiles')}</p>
-                            <p className="text-xs text-gray-400 font-mono">{directories.output}</p>
+                            <p className='text-white'>{t('files.outputFiles')}</p>
+                            <p className='text-xs text-gray-400 font-mono'>{directories.output}</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <FolderOpen className="w-5 h-5 text-warning" />
+                      <div className='flex items-center justify-between p-3 bg-dark-700 rounded-lg'>
+                        <div className='flex items-center space-x-3'>
+                          <FolderOpen className='w-5 h-5 text-warning' />
                           <div>
-                            <p className="text-white">{t('settings.configDir')}</p>
-                            <p className="text-xs text-gray-400 font-mono">{directories.config}</p>
+                            <p className='text-white'>{t('settings.configDir')}</p>
+                            <p className='text-xs text-gray-400 font-mono'>{directories.config}</p>
                           </div>
                         </div>
                       </div>
@@ -428,19 +428,19 @@ function Settings() {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">
+                    <h3 className='text-sm font-medium text-gray-400 mb-3'>
                       {t('dashboard.diskUsage')}
                     </h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">{t('common.used') || 'Used'}</span>
-                        <span className="text-white font-mono">
+                    <div className='space-y-2'>
+                      <div className='flex justify-between text-sm'>
+                        <span className='text-gray-300'>{t('common.used') || 'Used'}</span>
+                        <span className='text-white font-mono'>
                           {formatBytes(systemInfo.diskUsage?.used || 0)}
                         </span>
                       </div>
-                      <div className="w-full bg-dark-700 rounded-full h-3 overflow-hidden">
+                      <div className='w-full bg-dark-700 rounded-full h-3 overflow-hidden'>
                         <div
-                          className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
+                          className='h-full bg-gradient-to-r from-primary to-secondary rounded-full'
                           style={{
                             width: `${
                               systemInfo.diskUsage?.total > 0
@@ -453,15 +453,15 @@ function Settings() {
                           }}
                         />
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">{t('common.total') || 'Total'}</span>
-                        <span className="text-gray-300 font-mono">
+                      <div className='flex justify-between text-sm'>
+                        <span className='text-gray-400'>{t('common.total') || 'Total'}</span>
+                        <span className='text-gray-300 font-mono'>
                           {formatBytes(systemInfo.diskUsage?.total || 0)}
                         </span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">{t('common.free') || 'Free'}</span>
-                        <span className="text-gray-300 font-mono">
+                      <div className='flex justify-between text-sm'>
+                        <span className='text-gray-400'>{t('common.free') || 'Free'}</span>
+                        <span className='text-gray-300 font-mono'>
                           {formatBytes(systemInfo.diskUsage?.free || 0)}
                         </span>
                       </div>
@@ -469,52 +469,52 @@ function Settings() {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-400">{t('common.loading')}</p>
+                <p className='text-gray-400'>{t('common.loading')}</p>
               )}
             </div>
           )}
 
           {activeTab === 'cache' && (
-            <div className="card">
-              <h2 className="text-xl font-semibold text-white mb-4">缓存目录设置</h2>
-              <p className="text-gray-400 text-sm mb-4">
+            <div className='card'>
+              <h2 className='text-xl font-semibold text-white mb-4'>缓存目录设置</h2>
+              <p className='text-gray-400 text-sm mb-4'>
                 选择一个目录作为转码临时缓存目录。转码时中间文件会先写入此目录，完成后移动到输出目录。
               </p>
 
               {error && (
-                <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
-                  <AlertCircle className="w-4 h-4" />
+                <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
+                  <AlertCircle className='w-4 h-4' />
                   <span>{error}</span>
                 </div>
               )}
 
               {success && (
-                <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm">
-                  <CheckCircle className="w-4 h-4" />
+                <div className='mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm'>
+                  <CheckCircle className='w-4 h-4' />
                   <span>{success}</span>
                 </div>
               )}
 
-              <div className="mb-4">
-                <label className="label">当前缓存目录</label>
-                <p className="text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1">
+              <div className='mb-4'>
+                <label className='label'>当前缓存目录</label>
+                <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1'>
                   {cacheDir || '（未设置）'}
                 </p>
               </div>
 
-              <div className="mb-4">
-                <label className="label">浏览目录</label>
+              <div className='mb-4'>
+                <label className='label'>浏览目录</label>
 
                 {browseLoading ? (
-                  <div className="flex items-center space-x-2 text-gray-400 py-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm">加载中...</span>
+                  <div className='flex items-center space-x-2 text-gray-400 py-2'>
+                    <Loader2 className='w-4 h-4 animate-spin' />
+                    <span className='text-sm'>加载中...</span>
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center space-x-1 text-sm mb-3 flex-wrap">
+                    <div className='flex items-center space-x-1 text-sm mb-3 flex-wrap'>
                       <button
-                        type="button"
+                        type='button'
                         onClick={() => handleBrowse('/drive')}
                         className={`hover:underline ${
                           browsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
@@ -526,9 +526,9 @@ function Settings() {
                         const fullPath = '/drive/' + pathParts.slice(1, i + 2).join('/');
                         return (
                           <React.Fragment key={i}>
-                            <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />
+                            <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />
                             <button
-                              type="button"
+                              type='button'
                               onClick={() => handleBrowse(fullPath)}
                               className={`hover:underline ${
                                 browsePath === fullPath ? 'text-white font-medium' : 'text-primary'
@@ -541,10 +541,10 @@ function Settings() {
                       })}
                     </div>
 
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto">
+                    <div className='grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto'>
                       {browseDirs.map(dir => (
                         <button
-                          type="button"
+                          type='button'
                           key={dir.path}
                           onClick={() => handleBrowse(dir.path)}
                           className={`flex items-center space-x-2 p-2 rounded-lg transition-colors text-left ${
@@ -553,36 +553,36 @@ function Settings() {
                               : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
                           }`}
                         >
-                          <FolderOpen className="w-4 h-4 text-warning shrink-0" />
-                          <span className="text-white text-xs truncate">{dir.name}</span>
+                          <FolderOpen className='w-4 h-4 text-warning shrink-0' />
+                          <span className='text-white text-xs truncate'>{dir.name}</span>
                         </button>
                       ))}
                       {browseDirs.length === 0 && (
-                        <p className="col-span-full text-gray-500 text-xs py-2">空目录</p>
+                        <p className='col-span-full text-gray-500 text-xs py-2'>空目录</p>
                       )}
                     </div>
                   </>
                 )}
 
-                <p className="text-xs text-gray-400">
-                  已选: <span className="text-primary">{cacheDir || '（未选择）'}</span>
+                <p className='text-xs text-gray-400'>
+                  已选: <span className='text-primary'>{cacheDir || '（未选择）'}</span>
                 </p>
               </div>
 
               <button
-                type="button"
+                type='button'
                 onClick={handleSaveCacheDir}
                 disabled={savingCacheDir || !cacheDir}
-                className="btn btn-primary inline-flex items-center space-x-2"
+                className='btn btn-primary inline-flex items-center space-x-2'
               >
                 {savingCacheDir ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className='w-4 h-4 animate-spin' />
                     <span>保存中...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
+                    <Save className='w-4 h-4' />
                     <span>保存</span>
                   </>
                 )}

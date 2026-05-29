@@ -61,11 +61,8 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setPresets(presetsRes.data.data.presets);
       setSourceTree(treeRes.data.data.directories || []);
 
-      const lastDir = directory.split('/').filter(Boolean).pop();
-      if (lastDir) {
-        setOutputDirectory(`/drive/转码/转码后/${lastDir}`);
-      }
-      await fetchBrowseDirs('/drive/转码/转码后');
+      setOutputDirectory(ROOT_OUTPUT_PATH);
+      await fetchBrowseDirs(ROOT_OUTPUT_PATH);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -136,8 +133,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   const ROOT_OUTPUT_PATH = '/drive/转码/转码后';
   const pathParts = (browsePath || ROOT_OUTPUT_PATH).split('/').filter(Boolean);
-  const rootDepth = ROOT_OUTPUT_PATH.split('/').filter(Boolean).length;
-  const relativeParts = pathParts.slice(rootDepth);
 
   const buildTree = paths => {
     const tree = {};
@@ -163,14 +158,14 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       return (
         <React.Fragment key={name}>
           <div
-            className="text-xs text-gray-400 flex items-center space-x-1 font-mono"
+            className='text-xs text-gray-400 flex items-center space-x-1 font-mono'
             style={{ paddingLeft: depth * 20 }}
           >
-            <span className="text-gray-600 shrink-0">{connector}</span>
-            <FolderOpen className="w-3 h-3 text-warning shrink-0" />
-            <span className="truncate">{name}</span>
-            <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />
-            <span className="text-primary truncate">
+            <span className='text-gray-600 shrink-0'>{connector}</span>
+            <FolderOpen className='w-3 h-3 text-warning shrink-0' />
+            <span className='truncate'>{name}</span>
+            <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
+            <span className='text-primary truncate'>
               {outputDirectory}/{prefix}
               {name}
             </span>
@@ -184,74 +179,61 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const treeData = buildTree(sourceTree);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-dark-700">
+    <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4'>
+      <div className='bg-dark-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
+        <div className='flex items-center justify-between p-6 border-b border-dark-700'>
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
-              <Video className="w-6 h-6" />
+            <h2 className='text-2xl font-bold text-white flex items-center space-x-3'>
+              <Video className='w-6 h-6' />
               <span>批量转码</span>
             </h2>
-            <p className="text-gray-400 mt-1">源目录: {directory}</p>
+            <p className='text-gray-400 mt-1'>源目录: {directory}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-gray-400" />
+          <button onClick={onClose} className='p-2 hover:bg-dark-700 rounded-lg transition-colors'>
+            <X className='w-5 h-5 text-gray-400' />
           </button>
         </div>
 
         {success ? (
-          <div className="p-8 text-center">
-            <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">任务已提交!</h3>
-            <p className="text-gray-400">正在跳转到任务列表...</p>
+          <div className='p-8 text-center'>
+            <CheckCircle className='w-16 h-16 text-success mx-auto mb-4' />
+            <h3 className='text-xl font-bold text-white mb-2'>任务已提交!</h3>
+            <p className='text-gray-400'>正在跳转到任务列表...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className='p-6 space-y-6'>
             {error && (
-              <div className="p-4 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error">
-                <X className="w-5 h-5" />
+              <div className='p-4 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error'>
+                <X className='w-5 h-5' />
                 <span>{error}</span>
               </div>
             )}
 
-            <div className="bg-dark-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-                <FolderOpen className="w-5 h-5" />
+            <div className='bg-dark-700 rounded-lg p-4'>
+              <h3 className='text-lg font-semibold text-white mb-3 flex items-center space-x-2'>
+                <FolderOpen className='w-5 h-5' />
                 <span>输出设置</span>
               </h3>
 
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <div>
-                  <label className="label">输出目录</label>
+                  <label className='label'>输出目录</label>
 
                   {browseLoading ? (
-                    <div className="flex items-center space-x-2 text-gray-400 py-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">加载中...</span>
+                    <div className='flex items-center space-x-2 text-gray-400 py-2'>
+                      <Loader2 className='w-4 h-4 animate-spin' />
+                      <span className='text-sm'>加载中...</span>
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center space-x-1 text-sm mb-3 flex-wrap">
-                        <button
-                          type="button"
-                          onClick={() => handleBrowse(ROOT_OUTPUT_PATH)}
-                          className={clsx(
-                            'hover:underline',
-                            browsePath === ROOT_OUTPUT_PATH
-                              ? 'text-white font-medium'
-                              : 'text-primary'
-                          )}
-                        >
-                          转码后
-                        </button>
-                        {relativeParts.map((part, i) => {
-                          const fullPath =
-                            ROOT_OUTPUT_PATH + '/' + relativeParts.slice(0, i + 1).join('/');
+                      <div className='flex items-center space-x-1 text-sm mb-3 flex-wrap'>
+                        {pathParts.map((part, i) => {
+                          const fullPath = '/' + pathParts.slice(0, i + 1).join('/');
                           return (
                             <React.Fragment key={i}>
-                              <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />
+                              {i > 0 && <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />}
                               <button
-                                type="button"
+                                type='button'
                                 onClick={() => handleBrowse(fullPath)}
                                 className={clsx(
                                   'hover:underline',
@@ -267,10 +249,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                         })}
                       </div>
 
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto">
+                      <div className='grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto'>
                         {browseDirs.map(dir => (
                           <button
-                            type="button"
+                            type='button'
                             key={dir.path}
                             onClick={() => handleBrowse(dir.path)}
                             onDoubleClick={e => {
@@ -284,30 +266,30 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                                 : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
                             )}
                           >
-                            <FolderOpen className="w-4 h-4 text-warning shrink-0" />
-                            <span className="text-white text-xs truncate">{dir.name}</span>
+                            <FolderOpen className='w-4 h-4 text-warning shrink-0' />
+                            <span className='text-white text-xs truncate'>{dir.name}</span>
                           </button>
                         ))}
                         {browseDirs.length === 0 && (
-                          <p className="col-span-full text-gray-500 text-xs py-2">空目录</p>
+                          <p className='col-span-full text-gray-500 text-xs py-2'>空目录</p>
                         )}
                       </div>
                     </>
                   )}
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-400">
-                      已选: <span className="text-primary">{outputDirectory}</span>
+                  <div className='flex items-center justify-between'>
+                    <p className='text-xs text-gray-400'>
+                      已选: <span className='text-primary'>{outputDirectory}</span>
                     </p>
-                    <div className="flex space-x-2">
+                    <div className='flex space-x-2'>
                       {showNewDirInput ? (
-                        <div className="flex space-x-1">
+                        <div className='flex space-x-1'>
                           <input
-                            type="text"
+                            type='text'
                             value={newDirName}
                             onChange={e => setNewDirName(e.target.value)}
-                            className="input text-xs py-1 w-28"
-                            placeholder="目录名"
+                            className='input text-xs py-1 w-28'
+                            placeholder='目录名'
                             onKeyDown={e => {
                               if (e.key === 'Enter') handleCreateDir();
                               if (e.key === 'Escape') {
@@ -317,30 +299,30 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             }}
                           />
                           <button
-                            type="button"
+                            type='button'
                             onClick={handleCreateDir}
-                            className="btn btn-primary text-xs py-1"
+                            className='btn btn-primary text-xs py-1'
                           >
                             创建
                           </button>
                           <button
-                            type="button"
+                            type='button'
                             onClick={() => {
                               setShowNewDirInput(false);
                               setNewDirName('');
                             }}
-                            className="btn btn-secondary text-xs py-1"
+                            className='btn btn-secondary text-xs py-1'
                           >
                             取消
                           </button>
                         </div>
                       ) : (
                         <button
-                          type="button"
+                          type='button'
                           onClick={() => setShowNewDirInput(true)}
-                          className="text-xs text-primary hover:underline flex items-center space-x-1"
+                          className='text-xs text-primary hover:underline flex items-center space-x-1'
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className='w-3 h-3' />
                           <span>新建目录</span>
                         </button>
                       )}
@@ -349,17 +331,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                 </div>
 
                 {sourceTree.length > 0 && (
-                  <div className="p-3 bg-dark-600 rounded-lg">
-                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center space-x-1">
-                      <GitBranch className="w-4 h-4 text-primary" />
+                  <div className='p-3 bg-dark-600 rounded-lg'>
+                    <h4 className='text-sm font-semibold text-white mb-2 flex items-center space-x-1'>
+                      <GitBranch className='w-4 h-4 text-primary' />
                       <span>目录结构预览</span>
                     </h4>
-                    <div className="max-h-48 overflow-y-auto space-y-0.5">
-                      <div className="text-xs flex items-center space-x-1 font-mono">
-                        <FolderOpen className="w-3 h-3 text-warning shrink-0" />
-                        <span className="text-gray-400 truncate">{directory}</span>
-                        <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />
-                        <span className="text-primary truncate">{outputDirectory}</span>
+                    <div className='max-h-48 overflow-y-auto space-y-0.5'>
+                      <div className='text-xs flex items-center space-x-1 font-mono'>
+                        <FolderOpen className='w-3 h-3 text-warning shrink-0' />
+                        <span className='text-gray-400 truncate'>{directory}</span>
+                        <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
+                        <span className='text-primary truncate'>{outputDirectory}</span>
                       </div>
                       {renderTree(treeData, '', 1)}
                     </div>
@@ -367,14 +349,14 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                 )}
 
                 <div>
-                  <label className="label mb-2">选择预设</label>
+                  <label className='label mb-2'>选择预设</label>
                   {presets.length > 0 ? (
                     <select
                       value={selectedPreset}
                       onChange={e => setSelectedPreset(e.target.value)}
-                      className="input"
+                      className='input'
                     >
-                      <option value="">不使用预设</option>
+                      <option value=''>不使用预设</option>
                       {presets.map(preset => (
                         <option key={preset.id} value={preset.id}>
                           {preset.name} - {preset.description}
@@ -382,57 +364,57 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       ))}
                     </select>
                   ) : (
-                    <p className="text-gray-400">暂无预设可用</p>
+                    <p className='text-gray-400'>暂无预设可用</p>
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className='flex items-center space-x-2'>
                   <input
-                    type="checkbox"
-                    id="copyNonVideoFiles"
+                    type='checkbox'
+                    id='copyNonVideoFiles'
                     checked={copyNonVideoFiles}
                     onChange={e => setCopyNonVideoFiles(e.target.checked)}
-                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                   />
-                  <label htmlFor="copyNonVideoFiles" className="text-sm text-gray-300">
+                  <label htmlFor='copyNonVideoFiles' className='text-sm text-gray-300'>
                     把源目录不能转码的文件复制到目标目录
                   </label>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className='flex items-center space-x-2'>
                   <input
-                    type="checkbox"
-                    id="moveNonVideoFiles"
+                    type='checkbox'
+                    id='moveNonVideoFiles'
                     checked={moveNonVideoFiles}
                     onChange={e => setMoveNonVideoFiles(e.target.checked)}
-                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                   />
-                  <label htmlFor="moveNonVideoFiles" className="text-sm text-gray-300">
+                  <label htmlFor='moveNonVideoFiles' className='text-sm text-gray-300'>
                     把源目录不能转码的文件移动到目标目录
                   </label>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className='flex items-center space-x-2'>
                   <input
-                    type="checkbox"
-                    id="customSettings"
+                    type='checkbox'
+                    id='customSettings'
                     checked={customSettings}
                     onChange={e => setCustomSettings(e.target.checked)}
-                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                   />
-                  <label htmlFor="customSettings" className="text-sm text-gray-300">
+                  <label htmlFor='customSettings' className='text-sm text-gray-300'>
                     使用自定义设置
                   </label>
                 </div>
 
                 {customSettings && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-dark-600 rounded-lg">
+                  <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-dark-600 rounded-lg'>
                     <div>
-                      <label className="label">CRF (质量)</label>
+                      <label className='label'>CRF (质量)</label>
                       <input
-                        type="number"
-                        min="0"
-                        max="51"
+                        type='number'
+                        min='0'
+                        max='51'
                         value={settings.crf}
                         onChange={e =>
                           setSettings({
@@ -440,15 +422,15 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             crf: parseInt(e.target.value)
                           })
                         }
-                        className="input"
+                        className='input'
                       />
-                      <p className="text-xs text-gray-400 mt-1">0=最佳质量, 51=最小体积</p>
+                      <p className='text-xs text-gray-400 mt-1'>0=最佳质量, 51=最小体积</p>
                     </div>
 
                     <div>
-                      <label className="label">音频码率 (kbps)</label>
+                      <label className='label'>音频码率 (kbps)</label>
                       <input
-                        type="number"
+                        type='number'
                         value={settings.audioBitrate}
                         onChange={e =>
                           setSettings({
@@ -456,12 +438,12 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             audioBitrate: parseInt(e.target.value)
                           })
                         }
-                        className="input"
+                        className='input'
                       />
                     </div>
 
                     <div>
-                      <label className="label">音频声道</label>
+                      <label className='label'>音频声道</label>
                       <select
                         value={settings.audioChannels}
                         onChange={e =>
@@ -470,10 +452,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             audioChannels: parseInt(e.target.value)
                           })
                         }
-                        className="input"
+                        className='input'
                       >
-                        <option value="2">立体声</option>
-                        <option value="6">5.1 环绕</option>
+                        <option value='2'>立体声</option>
+                        <option value='6'>5.1 环绕</option>
                       </select>
                     </div>
                   </div>
@@ -481,9 +463,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
               </div>
             </div>
 
-            <div className="bg-dark-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-3">说明</h3>
-              <ul className="text-gray-400 text-sm space-y-2">
+            <div className='bg-dark-700 rounded-lg p-4'>
+              <h3 className='text-lg font-semibold text-white mb-3'>说明</h3>
+              <ul className='text-gray-400 text-sm space-y-2'>
                 <li>• 递归扫描源目录中的所有视频文件</li>
                 <li>• 保持原始目录结构</li>
                 <li>• 转码后的文件保持原文件名，仅扩展名改为容器格式</li>
@@ -491,23 +473,23 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
               </ul>
             </div>
 
-            <div className="flex space-x-3 pt-4">
-              <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
+            <div className='flex space-x-3 pt-4'>
+              <button type='button' onClick={onClose} className='btn btn-secondary flex-1'>
                 取消
               </button>
               <button
-                type="submit"
+                type='submit'
                 disabled={submitting}
-                className="btn btn-primary flex-1 flex items-center justify-center space-x-2"
+                className='btn btn-primary flex-1 flex items-center justify-center space-x-2'
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className='w-4 h-4 animate-spin' />
                     <span>提交中...</span>
                   </>
                 ) : (
                   <>
-                    <Settings className="w-4 h-4" />
+                    <Settings className='w-4 h-4' />
                     <span>开始批量转码</span>
                   </>
                 )}

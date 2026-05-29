@@ -78,74 +78,74 @@ function Login() {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className='min-h-screen bg-dark-900 flex items-center justify-center'>
+        <Loader2 className='w-8 h-8 text-primary animate-spin' />
       </div>
     );
   }
 
   if (isSetupMode) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Video className="w-10 h-10 text-white" />
+      <div className='min-h-screen bg-dark-900 flex items-center justify-center px-4'>
+        <div className='max-w-md w-full'>
+          <div className='text-center mb-8'>
+            <div className='w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4'>
+              <Video className='w-10 h-10 text-white' />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">HandBrake Web UI</h1>
-            <p className="text-gray-400">{t('auth.setupTitle')}</p>
+            <h1 className='text-3xl font-bold text-white mb-2'>HandBrake Web UI</h1>
+            <p className='text-gray-400'>{t('auth.setupTitle')}</p>
           </div>
 
-          <div className="bg-dark-800 rounded-xl p-8 shadow-xl">
+          <div className='bg-dark-800 rounded-xl p-8 shadow-xl'>
             {error && (
-              <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
-                <AlertCircle className="w-4 h-4" />
+              <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
+                <AlertCircle className='w-4 h-4' />
                 <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSetupSubmit} className="space-y-4">
+            <form onSubmit={handleSetupSubmit} className='space-y-4'>
               <div>
-                <label className="label">{t('auth.username')}</label>
+                <label className='label'>{t('auth.username')}</label>
                 <input
-                  type="text"
+                  type='text'
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  className="input"
+                  className='input'
                   placeholder={t('auth.placeholderSetupUsername')}
                 />
               </div>
 
               <div>
-                <label className="label">{t('auth.password')}</label>
+                <label className='label'>{t('auth.password')}</label>
                 <input
-                  type="password"
+                  type='password'
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="input"
+                  className='input'
                   placeholder={t('auth.placeholderSetupPassword')}
                 />
               </div>
 
               <div>
-                <label className="label">{t('auth.confirmPassword')}</label>
+                <label className='label'>{t('auth.confirmPassword')}</label>
                 <input
-                  type="password"
+                  type='password'
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="input"
+                  className='input'
                   placeholder={t('auth.placeholderConfirmPassword')}
                 />
               </div>
 
               <button
-                type="submit"
+                type='submit'
                 disabled={isLoading}
-                className="btn btn-primary w-full flex items-center justify-center space-x-2"
+                className='btn btn-primary w-full flex items-center justify-center space-x-2'
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className='w-4 h-4 animate-spin' />
                     <span>{t('common.saving')}</span>
                   </>
                 ) : (
@@ -160,55 +160,55 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Video className="w-10 h-10 text-white" />
+    <div className='min-h-screen bg-dark-900 flex items-center justify-center px-4'>
+      <div className='max-w-md w-full'>
+        <div className='text-center mb-8'>
+          <div className='w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4'>
+            <Video className='w-10 h-10 text-white' />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">HandBrake Web UI</h1>
-          <p className="text-gray-400">{t('auth.subtitle')}</p>
+          <h1 className='text-3xl font-bold text-white mb-2'>HandBrake Web UI</h1>
+          <p className='text-gray-400'>{t('auth.subtitle')}</p>
         </div>
 
-        <div className="bg-dark-800 rounded-xl p-8 shadow-xl">
+        <div className='bg-dark-800 rounded-xl p-8 shadow-xl'>
           {error && (
-            <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
-              <AlertCircle className="w-4 h-4" />
+            <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
+              <AlertCircle className='w-4 h-4' />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <form onSubmit={handleLoginSubmit} className='space-y-4'>
             <div>
-              <label className="label">{t('auth.username')}</label>
+              <label className='label'>{t('auth.username')}</label>
               <input
-                type="text"
+                type='text'
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                className="input"
+                className='input'
                 placeholder={t('auth.placeholderUsername')}
               />
             </div>
 
             <div>
-              <label className="label">{t('auth.password')}</label>
+              <label className='label'>{t('auth.password')}</label>
               <input
-                type="password"
+                type='password'
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="input"
+                className='input'
                 placeholder={t('auth.placeholderPassword')}
               />
             </div>
 
             <button
-              type="submit"
+              type='submit'
               disabled={isLoading}
-              className="btn btn-primary w-full flex items-center justify-center space-x-2"
+              className='btn btn-primary w-full flex items-center justify-center space-x-2'
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className='w-4 h-4 animate-spin' />
                   <span>{t('common.loading')}</span>
                 </>
               ) : (

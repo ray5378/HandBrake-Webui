@@ -14,8 +14,8 @@ function MobileNav() {
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-800 border-t border-dark-700 z-30 pb-[env(safe-area-inset-bottom,0px)]">
-      <div className="flex justify-around items-center py-2">
+    <nav className='lg:hidden fixed bottom-0 left-0 right-0 bg-dark-800 border-t border-dark-700 z-30 pb-[env(safe-area-inset-bottom,0px)]'>
+      <div className='flex justify-around items-center py-2'>
         {navItems.map(item => (
           <NavLink
             key={item.path}
@@ -27,8 +27,8 @@ function MobileNav() {
               )
             }
           >
-            <item.icon className="w-5 h-5" />
-            <span className="text-xs mt-1">{item.label}</span>
+            <item.icon className='w-5 h-5' />
+            <span className='text-xs mt-1'>{item.label}</span>
           </NavLink>
         ))}
       </div>

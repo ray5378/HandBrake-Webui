@@ -100,27 +100,27 @@ function Jobs() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h1 className="text-3xl font-bold text-white">{t('jobs.title')}</h1>
-          <p className="text-gray-400 mt-1">{t('jobs.subtitle')}</p>
+          <h1 className='text-3xl font-bold text-white'>{t('jobs.title')}</h1>
+          <p className='text-gray-400 mt-1'>{t('jobs.subtitle')}</p>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className='flex items-center space-x-2'>
           {jobs.some(j => ['completed', 'failed', 'cancelled'].includes(j.status)) && (
             <button
               onClick={handleClearHistory}
-              className="btn btn-danger inline-flex items-center space-x-2"
+              className='btn btn-danger inline-flex items-center space-x-2'
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className='w-4 h-4' />
               <span>{t('jobs.clearHistory')}</span>
             </button>
           )}
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="btn btn-secondary inline-flex items-center space-x-2"
+            className='btn btn-secondary inline-flex items-center space-x-2'
           >
             <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
             <span>{t('common.refresh')}</span>
@@ -128,7 +128,7 @@ function Jobs() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className='flex flex-wrap gap-2'>
         {filters.map(f => (
           <button
             key={f.value}
@@ -140,22 +140,22 @@ function Jobs() {
                 : 'bg-dark-700 text-gray-300 hover:bg-dark-600'
             )}
           >
-            <f.icon className="w-4 h-4" />
+            <f.icon className='w-4 h-4' />
             <span>{f.label}</span>
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">{t('common.loading')}</div>
+        <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : jobs.length > 0 ? (
-        <div className="space-y-3">
+        <div className='space-y-3'>
           {jobs.map(job => (
-            <div key={job.id} className="card hover:border-primary/50 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-white font-medium truncate">
+            <div key={job.id} className='card hover:border-primary/50 transition-colors'>
+              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+                <div className='flex-1 min-w-0'>
+                  <div className='flex items-center space-x-3 mb-2'>
+                    <h3 className='text-white font-medium truncate'>
                       {job.source_file.split('/').pop()}
                     </h3>
                     <span className={clsx('badge', `badge-${job.status}`)}>
@@ -163,7 +163,7 @@ function Jobs() {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                  <div className='flex flex-wrap gap-4 text-sm text-gray-400'>
                     <span>
                       {t('jobs.outputFile')}: {job.output_file.split('/').pop()}
                     </span>
@@ -178,14 +178,14 @@ function Jobs() {
                   </div>
 
                   {job.status === 'processing' && (
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-secondary">{t('jobs.progress')}</span>
-                        <span className="text-white font-mono">{job.progress.toFixed(1)}%</span>
+                    <div className='mt-3'>
+                      <div className='flex items-center justify-between text-sm mb-1'>
+                        <span className='text-secondary'>{t('jobs.progress')}</span>
+                        <span className='text-white font-mono'>{job.progress.toFixed(1)}%</span>
                       </div>
-                      <div className="w-full bg-dark-700 rounded-full h-2 overflow-hidden">
+                      <div className='w-full bg-dark-700 rounded-full h-2 overflow-hidden'>
                         <div
-                          className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all"
+                          className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all'
                           style={{ width: `${job.progress}%` }}
                         />
                       </div>
@@ -193,10 +193,10 @@ function Jobs() {
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className='flex items-center space-x-2'>
                   {job.status === 'processing' && (
-                    <button onClick={() => handleCancel(job.id)} className="btn btn-danger text-sm">
-                      <XCircle className="w-4 h-4" />
+                    <button onClick={() => handleCancel(job.id)} className='btn btn-danger text-sm'>
+                      <XCircle className='w-4 h-4' />
                     </button>
                   )}
 
@@ -204,30 +204,30 @@ function Jobs() {
                     job.status === 'failed' ||
                     job.status === 'cancelled') && (
                     <>
-                      <Link to={`/jobs/${job.id}`} className="btn btn-secondary text-sm">
-                        <Eye className="w-4 h-4" />
+                      <Link to={`/jobs/${job.id}`} className='btn btn-secondary text-sm'>
+                        <Eye className='w-4 h-4' />
                       </Link>
                       <button
                         onClick={() => handleDelete(job.id)}
-                        className="btn btn-danger text-sm"
+                        className='btn btn-danger text-sm'
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className='w-4 h-4' />
                       </button>
                     </>
                   )}
 
                   {job.status === 'queued' && (
-                    <button onClick={() => handleDelete(job.id)} className="btn btn-danger text-sm">
-                      <Trash2 className="w-4 h-4" />
+                    <button onClick={() => handleDelete(job.id)} className='btn btn-danger text-sm'>
+                      <Trash2 className='w-4 h-4' />
                     </button>
                   )}
                 </div>
               </div>
 
               {job.error_log && job.status === 'failed' && (
-                <div className="mt-4 p-3 bg-error/10 border border-error/20 rounded-lg">
-                  <p className="text-sm text-error font-medium mb-1">{t('jobs.error')}:</p>
-                  <pre className="text-xs text-gray-300 font-mono overflow-x-auto">
+                <div className='mt-4 p-3 bg-error/10 border border-error/20 rounded-lg'>
+                  <p className='text-sm text-error font-medium mb-1'>{t('jobs.error')}:</p>
+                  <pre className='text-xs text-gray-300 font-mono overflow-x-auto'>
                     {job.error_log}
                   </pre>
                 </div>
@@ -236,11 +236,11 @@ function Jobs() {
           ))}
         </div>
       ) : (
-        <div className="card text-center py-12">
-          <ListTodo className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 mb-4">{t('jobs.noJobs')}</p>
-          <Link to="/files" className="btn btn-primary inline-flex items-center space-x-2">
-            <Play className="w-4 h-4" />
+        <div className='card text-center py-12'>
+          <ListTodo className='w-16 h-16 text-gray-600 mx-auto mb-4' />
+          <p className='text-gray-400 mb-4'>{t('jobs.noJobs')}</p>
+          <Link to='/files' className='btn btn-primary inline-flex items-center space-x-2'>
+            <Play className='w-4 h-4' />
             <span>{t('files.title')}</span>
           </Link>
         </div>

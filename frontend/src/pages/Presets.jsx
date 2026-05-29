@@ -166,13 +166,13 @@ function Presets() {
     switch (tab) {
       case 'summary':
         return (
-          <div className="space-y-6">
+          <div className='space-y-6'>
             <div>
-              <label className="label">{t('container.format')}</label>
+              <label className='label'>{t('container.format')}</label>
               <select
                 value={formData.settings.format}
                 onChange={e => updateSettings('format', e.target.value)}
-                className="input"
+                className='input'
               >
                 {FORMATS.map(fmt => (
                   <option key={fmt.value} value={fmt.value}>
@@ -182,11 +182,11 @@ function Presets() {
               </select>
             </div>
             <div>
-              <label className="label">{t('container.optimization')}</label>
+              <label className='label'>{t('container.optimization')}</label>
               <select
                 value={formData.settings.optimize}
                 onChange={e => updateSettings('optimize', e.target.value)}
-                className="input"
+                className='input'
               >
                 {OPTIMIZE_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>
@@ -200,14 +200,14 @@ function Presets() {
 
       case 'video':
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='space-y-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('video.codec')}</label>
+                <label className='label'>{t('video.codec')}</label>
                 <select
                   value={formData.settings.video?.codec || 'x264'}
                   onChange={e => updateSettings('video.codec', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   <optgroup label={t('codecs.software')}>
                     {VIDEO_CODECS.filter(c => c.group === 'software').map(codec => (
@@ -241,11 +241,11 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">{t('video.rateControl')}</label>
+                <label className='label'>{t('video.rateControl')}</label>
                 <select
                   value={formData.settings.video?.rateControl || 'crf'}
                   onChange={e => updateSettings('video.rateControl', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {getAllowedRateControls(formData.settings.video?.codec).map(rc => (
                     <option key={rc.value} value={rc.value}>
@@ -272,10 +272,10 @@ function Presets() {
 
                 return (
                   <div>
-                    <label className="label">{rcInfo.label}</label>
-                    <div className="flex items-center space-x-3">
+                    <label className='label'>{rcInfo.label}</label>
+                    <div className='flex items-center space-x-3'>
                       <input
-                        type="number"
+                        type='number'
                         min={rcInfo.min}
                         max={rcInfo.max}
                         step={rcInfo.type === 'crf' || rcInfo.type === 'icq' ? '0.5' : '1'}
@@ -289,10 +289,10 @@ function Presets() {
                             updateSettings(`video.${fieldName}`, val);
                           }
                         }}
-                        className="input w-24"
+                        className='input w-24'
                       />
                       <input
-                        type="range"
+                        type='range'
                         min={rcInfo.min}
                         max={rcInfo.max}
                         step={rcInfo.type === 'crf' || rcInfo.type === 'icq' ? '0.5' : '1'}
@@ -304,10 +304,10 @@ function Presets() {
                               : parseInt(e.target.value);
                           updateSettings(`video.${fieldName}`, val);
                         }}
-                        className="flex-1"
+                        className='flex-1'
                       />
                     </div>
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <div className='flex justify-between text-xs text-gray-500 mt-1'>
                       <span>{t('video.smaller')}</span>
                       <span>{t('video.higher')}</span>
                     </div>
@@ -320,15 +320,15 @@ function Presets() {
             {(formData.settings.video?.rateControl === 'cbr' ||
               formData.settings.video?.rateControl === 'vbr') && (
               <div>
-                <label className="label">{t('video.bitrate')} (kbps)</label>
+                <label className='label'>{t('video.bitrate')} (kbps)</label>
                 <input
-                  type="number"
-                  min="8"
-                  max="80000"
-                  step="50"
+                  type='number'
+                  min='8'
+                  max='80000'
+                  step='50'
                   value={formData.settings.video?.bitrate || ''}
                   onChange={e => updateSettings('video.bitrate', parseInt(e.target.value) || 0)}
-                  className="input"
+                  className='input'
                   placeholder={t('common.placeholder.bitrateRange')}
                 />
               </div>
@@ -336,12 +336,12 @@ function Presets() {
 
             {formData.settings.video?.rateControl === 'cqp' && (
               <div>
-                <label className="label">{t('video.qp')}</label>
-                <div className="flex items-center space-x-3">
+                <label className='label'>{t('video.qp')}</label>
+                <div className='flex items-center space-x-3'>
                   <input
-                    type="number"
-                    min="0"
-                    max="51"
+                    type='number'
+                    min='0'
+                    max='51'
                     value={formData.settings.video?.qp ?? 22}
                     onChange={e => {
                       const val = parseInt(e.target.value);
@@ -349,27 +349,27 @@ function Presets() {
                         updateSettings('video.qp', val);
                       }
                     }}
-                    className="input w-24"
+                    className='input w-24'
                   />
                   <input
-                    type="range"
-                    min="0"
-                    max="51"
+                    type='range'
+                    min='0'
+                    max='51'
                     value={formData.settings.video?.qp ?? 22}
                     onChange={e => updateSettings('video.qp', parseInt(e.target.value))}
-                    className="flex-1"
+                    className='flex-1'
                   />
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('video.preset')}</label>
+                <label className='label'>{t('video.preset')}</label>
                 <select
                   value={formData.settings.video?.preset || 'medium'}
                   onChange={e => updateSettings('video.preset', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {(() => {
                     const codec = formData.settings.video?.codec || 'x264';
@@ -395,13 +395,13 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">{t('video.tune')}</label>
+                <label className='label'>{t('video.tune')}</label>
                 <select
                   value={formData.settings.video?.tune || ''}
                   onChange={e => updateSettings('video.tune', e.target.value || null)}
-                  className="input"
+                  className='input'
                 >
-                  <option value="">{t('common.none')}</option>
+                  <option value=''>{t('common.none')}</option>
                   {(() => {
                     const codec = formData.settings.video?.codec || 'x264';
                     if (
@@ -421,68 +421,68 @@ function Presets() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('video.profile')}</label>
+                <label className='label'>{t('video.profile')}</label>
                 <select
                   value={formData.settings.video?.profile || ''}
                   onChange={e => updateSettings('video.profile', e.target.value || null)}
-                  className="input"
+                  className='input'
                 >
-                  <option value="">{t('common.auto')}</option>
+                  <option value=''>{t('common.auto')}</option>
                   {formData.settings.video?.codec === 'x264' ? (
                     <>
-                      <option value="baseline">{t('video.baseline')}</option>
-                      <option value="main">{t('video.main')}</option>
-                      <option value="high">{t('video.high')}</option>
-                      <option value="high10">{t('profiles.high10')}</option>
-                      <option value="high422">{t('profiles.high422')}</option>
-                      <option value="high444">{t('profiles.high444')}</option>
+                      <option value='baseline'>{t('video.baseline')}</option>
+                      <option value='main'>{t('video.main')}</option>
+                      <option value='high'>{t('video.high')}</option>
+                      <option value='high10'>{t('profiles.high10')}</option>
+                      <option value='high422'>{t('profiles.high422')}</option>
+                      <option value='high444'>{t('profiles.high444')}</option>
                     </>
                   ) : formData.settings.video?.codec === 'x265' ? (
                     <>
-                      <option value="main">{t('video.main')}</option>
-                      <option value="main10">{t('profiles.main10')}</option>
-                      <option value="mainstillpicture">{t('profiles.mainstillpicture')}</option>
+                      <option value='main'>{t('video.main')}</option>
+                      <option value='main10'>{t('profiles.main10')}</option>
+                      <option value='mainstillpicture'>{t('profiles.mainstillpicture')}</option>
                     </>
                   ) : null}
                 </select>
               </div>
 
               <div>
-                <label className="label">{t('video.level')}</label>
+                <label className='label'>{t('video.level')}</label>
                 <select
                   value={formData.settings.video?.level || ''}
                   onChange={e => updateSettings('video.level', e.target.value || null)}
-                  className="input"
+                  className='input'
                 >
-                  <option value="">{t('common.auto')}</option>
-                  <option value="1.0">1.0</option>
-                  <option value="1.1">1.1</option>
-                  <option value="1.2">1.2</option>
-                  <option value="1.3">1.3</option>
-                  <option value="2.0">2.0</option>
-                  <option value="2.1">2.1</option>
-                  <option value="2.2">2.2</option>
-                  <option value="3.0">3.0</option>
-                  <option value="3.1">3.1</option>
-                  <option value="3.2">3.2</option>
-                  <option value="4.0">4.0</option>
-                  <option value="4.1">4.1</option>
-                  <option value="4.2">4.2</option>
-                  <option value="5.0">5.0</option>
-                  <option value="5.1">5.1</option>
-                  <option value="5.2">5.2</option>
-                  <option value="6.0">6.0</option>
-                  <option value="6.1">6.1</option>
-                  <option value="6.2">6.2</option>
+                  <option value=''>{t('common.auto')}</option>
+                  <option value='1.0'>1.0</option>
+                  <option value='1.1'>1.1</option>
+                  <option value='1.2'>1.2</option>
+                  <option value='1.3'>1.3</option>
+                  <option value='2.0'>2.0</option>
+                  <option value='2.1'>2.1</option>
+                  <option value='2.2'>2.2</option>
+                  <option value='3.0'>3.0</option>
+                  <option value='3.1'>3.1</option>
+                  <option value='3.2'>3.2</option>
+                  <option value='4.0'>4.0</option>
+                  <option value='4.1'>4.1</option>
+                  <option value='4.2'>4.2</option>
+                  <option value='5.0'>5.0</option>
+                  <option value='5.1'>5.1</option>
+                  <option value='5.2'>5.2</option>
+                  <option value='6.0'>6.0</option>
+                  <option value='6.1'>6.1</option>
+                  <option value='6.2'>6.2</option>
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('video.framerate')}</label>
+                <label className='label'>{t('video.framerate')}</label>
                 <select
                   value={
                     formData.settings.video?.framerate === null ||
@@ -497,7 +497,7 @@ function Presets() {
                       updateSettings('video.framerate', parseFloat(e.target.value));
                     }
                   }}
-                  className="input"
+                  className='input'
                 >
                   {FRAMERATES.map(fr => (
                     <option
@@ -510,17 +510,17 @@ function Presets() {
                 </select>
                 {formData.settings.video?.framerate !== null &&
                   formData.settings.video?.framerate !== undefined && (
-                    <div className="mt-2">
+                    <div className='mt-2'>
                       <input
-                        type="number"
-                        step="0.001"
-                        min="1"
-                        max="240"
+                        type='number'
+                        step='0.001'
+                        min='1'
+                        max='240'
                         value={formData.settings.video?.framerate || 30}
                         onChange={e =>
                           updateSettings('video.framerate', parseFloat(e.target.value) || null)
                         }
-                        className="input"
+                        className='input'
                         placeholder={t('common.placeholder.enterFramerate')}
                       />
                     </div>
@@ -528,26 +528,26 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">{t('video.framerateMode')}</label>
+                <label className='label'>{t('video.framerateMode')}</label>
                 <select
                   value={formData.settings.video?.framerateMode || 'cfr'}
                   onChange={e => updateSettings('video.framerateMode', e.target.value)}
-                  className="input"
+                  className='input'
                 >
-                  <option value="cfr">{t('video.fixedFramerate')}</option>
-                  <option value="vfr">{t('video.variableFramerate')}</option>
-                  <option value="pfr">{t('video.peakFramerate')}</option>
+                  <option value='cfr'>{t('video.fixedFramerate')}</option>
+                  <option value='vfr'>{t('video.variableFramerate')}</option>
+                  <option value='pfr'>{t('video.peakFramerate')}</option>
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('video.colorRange')}</label>
+                <label className='label'>{t('video.colorRange')}</label>
                 <select
                   value={formData.settings.video?.colorRange || 'auto'}
                   onChange={e => updateSettings('video.colorRange', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {COLOR_RANGES.map(range => (
                     <option key={range.value} value={range.value}>
@@ -557,15 +557,15 @@ function Presets() {
                 </select>
               </div>
 
-              <div className="flex items-center space-x-2 pt-6">
+              <div className='flex items-center space-x-2 pt-6'>
                 <input
-                  type="checkbox"
-                  id="multiPass"
+                  type='checkbox'
+                  id='multiPass'
                   checked={formData.settings.video?.multiPass || false}
                   onChange={e => updateSettings('video.multiPass', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="multiPass" className="text-gray-200">
+                <label htmlFor='multiPass' className='text-gray-200'>
                   {t('video.multiPass')}
                 </label>
               </div>
@@ -575,12 +575,12 @@ function Presets() {
 
       case 'dimensions':
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='space-y-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('dimensions.width')} (px)</label>
+                <label className='label'>{t('dimensions.width')} (px)</label>
                 <input
-                  type="number"
+                  type='number'
                   value={formData.settings.dimensions?.width || ''}
                   onChange={e =>
                     updateSettings(
@@ -588,14 +588,14 @@ function Presets() {
                       e.target.value ? parseInt(e.target.value) : null
                     )
                   }
-                  className="input"
+                  className='input'
                   placeholder={t('common.auto')}
                 />
               </div>
               <div>
-                <label className="label">{t('dimensions.height')} (px)</label>
+                <label className='label'>{t('dimensions.height')} (px)</label>
                 <input
-                  type="number"
+                  type='number'
                   value={formData.settings.dimensions?.height || ''}
                   onChange={e =>
                     updateSettings(
@@ -603,85 +603,85 @@ function Presets() {
                       e.target.value ? parseInt(e.target.value) : null
                     )
                   }
-                  className="input"
+                  className='input'
                   placeholder={t('common.auto')}
                 />
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="cropEnable"
+                  type='checkbox'
+                  id='cropEnable'
                   checked={formData.settings.dimensions?.cropping?.enabled}
                   onChange={e => updateSettings('dimensions.cropping.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="cropEnable" className="text-gray-200">
+                <label htmlFor='cropEnable' className='text-gray-200'>
                   {t('dimensions.enableCropping')}
                 </label>
               </div>
               {formData.settings.dimensions?.cropping?.enabled && (
-                <div className="pl-6 space-y-4">
-                  <div className="flex items-center space-x-2">
+                <div className='pl-6 space-y-4'>
+                  <div className='flex items-center space-x-2'>
                     <input
-                      type="checkbox"
-                      id="autocrop"
+                      type='checkbox'
+                      id='autocrop'
                       checked={formData.settings.dimensions?.cropping?.autocrop}
                       onChange={e =>
                         updateSettings('dimensions.cropping.autocrop', e.target.checked)
                       }
-                      className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                      className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                     />
-                    <label htmlFor="autocrop" className="text-gray-200">
+                    <label htmlFor='autocrop' className='text-gray-200'>
                       {t('dimensions.autoCrop')}
                     </label>
                   </div>
                   {!formData.settings.dimensions?.cropping?.autocrop && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-2'>
                       <div>
-                        <label className="label">{t('dimensions.top')}</label>
+                        <label className='label'>{t('dimensions.top')}</label>
                         <input
-                          type="number"
+                          type='number'
                           value={formData.settings.dimensions?.cropping?.top || 0}
                           onChange={e =>
                             updateSettings('dimensions.cropping.top', parseInt(e.target.value))
                           }
-                          className="input"
+                          className='input'
                         />
                       </div>
                       <div>
-                        <label className="label">{t('dimensions.bottom')}</label>
+                        <label className='label'>{t('dimensions.bottom')}</label>
                         <input
-                          type="number"
+                          type='number'
                           value={formData.settings.dimensions?.cropping?.bottom || 0}
                           onChange={e =>
                             updateSettings('dimensions.cropping.bottom', parseInt(e.target.value))
                           }
-                          className="input"
+                          className='input'
                         />
                       </div>
                       <div>
-                        <label className="label">{t('dimensions.left')}</label>
+                        <label className='label'>{t('dimensions.left')}</label>
                         <input
-                          type="number"
+                          type='number'
                           value={formData.settings.dimensions?.cropping?.left || 0}
                           onChange={e =>
                             updateSettings('dimensions.cropping.left', parseInt(e.target.value))
                           }
-                          className="input"
+                          className='input'
                         />
                       </div>
                       <div>
-                        <label className="label">{t('dimensions.right')}</label>
+                        <label className='label'>{t('dimensions.right')}</label>
                         <input
-                          type="number"
+                          type='number'
                           value={formData.settings.dimensions?.cropping?.right || 0}
                           onChange={e =>
                             updateSettings('dimensions.cropping.right', parseInt(e.target.value))
                           }
-                          className="input"
+                          className='input'
                         />
                       </div>
                     </div>
@@ -690,29 +690,29 @@ function Presets() {
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="keepAspect"
+                  type='checkbox'
+                  id='keepAspect'
                   checked={formData.settings.dimensions?.scaling?.keepDisplayAspect !== false}
                   onChange={e =>
                     updateSettings('dimensions.scaling.keepDisplayAspect', e.target.checked)
                   }
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="keepAspect" className="text-gray-200">
+                <label htmlFor='keepAspect' className='text-gray-200'>
                   {t('dimensions.keepAspectRatio')}
                 </label>
               </div>
               <div>
-                <label className="label">{t('dimensions.modulus')}</label>
+                <label className='label'>{t('dimensions.modulus')}</label>
                 <select
                   value={formData.settings.dimensions?.scaling?.modulus || 16}
                   onChange={e =>
                     updateSettings('dimensions.scaling.modulus', parseInt(e.target.value))
                   }
-                  className="input"
+                  className='input'
                 >
                   <option value={2}>2</option>
                   <option value={4}>4</option>
@@ -723,13 +723,13 @@ function Presets() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className='space-y-4'>
               <div>
-                <label className="label">{t('dimensions.resolutionLimit')}</label>
+                <label className='label'>{t('dimensions.resolutionLimit')}</label>
                 <select
                   value={formData.settings.dimensions?.resolutionLimit || ''}
                   onChange={e => updateSettings('dimensions.resolutionLimit', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {RESOLUTION_LIMITS.map(limit => (
                     <option key={limit.value} value={limit.value}>
@@ -740,11 +740,11 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">{t('dimensions.anamorphic')}</label>
+                <label className='label'>{t('dimensions.anamorphic')}</label>
                 <select
                   value={formData.settings.dimensions?.scaling?.anamorphic || 'auto'}
                   onChange={e => updateSettings('dimensions.scaling.anamorphic', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {ANAMORPHIC_MODES.map(mode => (
                     <option key={mode.value} value={mode.value}>
@@ -756,57 +756,57 @@ function Presets() {
 
               {formData.settings.dimensions?.scaling?.anamorphic === 'custom' && (
                 <div>
-                  <label className="label">{t('dimensions.pixelAspectRatio')}</label>
-                  <div className="flex items-center space-x-2">
+                  <label className='label'>{t('dimensions.pixelAspectRatio')}</label>
+                  <div className='flex items-center space-x-2'>
                     <input
-                      type="number"
-                      min="1"
-                      max="100"
+                      type='number'
+                      min='1'
+                      max='100'
                       value={formData.settings.dimensions?.scaling?.pixelAspectX || 1}
                       onChange={e =>
                         updateSettings('dimensions.scaling.pixelAspectX', parseInt(e.target.value))
                       }
-                      className="input w-16"
+                      className='input w-16'
                     />
-                    <span className="text-gray-400">:</span>
+                    <span className='text-gray-400'>:</span>
                     <input
-                      type="number"
-                      min="1"
-                      max="100"
+                      type='number'
+                      min='1'
+                      max='100'
                       value={formData.settings.dimensions?.scaling?.pixelAspectY || 1}
                       onChange={e =>
                         updateSettings('dimensions.scaling.pixelAspectY', parseInt(e.target.value))
                       }
-                      className="input w-16"
+                      className='input w-16'
                     />
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-4'>
+                <div className='flex items-center space-x-2'>
                   <input
-                    type="checkbox"
-                    id="bestSize"
+                    type='checkbox'
+                    id='bestSize'
                     checked={formData.settings.dimensions?.scaling?.bestSize || false}
                     onChange={e => updateSettings('dimensions.scaling.bestSize', e.target.checked)}
-                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                   />
-                  <label htmlFor="bestSize" className="text-gray-200">
+                  <label htmlFor='bestSize' className='text-gray-200'>
                     {t('dimensions.bestSize')}
                   </label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className='flex items-center space-x-2'>
                   <input
-                    type="checkbox"
-                    id="allowUpscaling"
+                    type='checkbox'
+                    id='allowUpscaling'
                     checked={formData.settings.dimensions?.scaling?.allowUpscaling || false}
                     onChange={e =>
                       updateSettings('dimensions.scaling.allowUpscaling', e.target.checked)
                     }
-                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                   />
-                  <label htmlFor="allowUpscaling" className="text-gray-200">
+                  <label htmlFor='allowUpscaling' className='text-gray-200'>
                     {t('dimensions.allowUpscaling')}
                   </label>
                 </div>
@@ -817,14 +817,14 @@ function Presets() {
 
       case 'audio':
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='space-y-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('audio.codec')}</label>
+                <label className='label'>{t('audio.codec')}</label>
                 <select
                   value={formData.settings.audio?.default?.codec || 'av_aac'}
                   onChange={e => updateSettings('audio.default.codec', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {AUDIO_CODECS.map(codec => (
                     <option key={codec.value} value={codec.value}>
@@ -835,23 +835,23 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">{t('audio.bitrate')}</label>
+                <label className='label'>{t('audio.bitrate')}</label>
                 <input
-                  type="number"
+                  type='number'
                   value={formData.settings.audio?.default?.bitrate || 160}
                   onChange={e => updateSettings('audio.default.bitrate', parseInt(e.target.value))}
-                  className="input"
+                  className='input'
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="label">{t('audio.mixdown')}</label>
+                <label className='label'>{t('audio.mixdown')}</label>
                 <select
                   value={formData.settings.audio?.default?.mixdown || 'stereo'}
                   onChange={e => updateSettings('audio.default.mixdown', e.target.value)}
-                  className="input"
+                  className='input'
                 >
                   {MIXDOWN_MODES.map(mode => (
                     <option key={mode.value} value={mode.value}>
@@ -862,7 +862,7 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">{t('audio.samplerate')}</label>
+                <label className='label'>{t('audio.samplerate')}</label>
                 <select
                   value={formData.settings.audio?.default?.samplerate || ''}
                   onChange={e =>
@@ -871,9 +871,9 @@ function Presets() {
                       e.target.value ? parseInt(e.target.value) : null
                     )
                   }
-                  className="input"
+                  className='input'
                 >
-                  <option value="">{t('common.auto')}</option>
+                  <option value=''>{t('common.auto')}</option>
                   {AUDIO_SAMPLERATES.map(sr => (
                     <option key={sr.value} value={sr.value}>
                       {sr.label}
@@ -884,11 +884,11 @@ function Presets() {
             </div>
 
             <div>
-              <label className="label">{t('audio.drc')}</label>
+              <label className='label'>{t('audio.drc')}</label>
               <select
                 value={formData.settings.audio?.default?.drc || 'none'}
                 onChange={e => updateSettings('audio.default.drc', e.target.value)}
-                className="input"
+                className='input'
               >
                 {DRC_MODES.map(mode => (
                   <option key={mode.value} value={mode.value}>
@@ -899,15 +899,15 @@ function Presets() {
             </div>
 
             <div>
-              <label className="label">{t('audio.gain')}</label>
+              <label className='label'>{t('audio.gain')}</label>
               <input
-                type="number"
-                step="0.5"
-                min="-20"
-                max="20"
+                type='number'
+                step='0.5'
+                min='-20'
+                max='20'
                 value={formData.settings.audio?.default?.gain || 0}
                 onChange={e => updateSettings('audio.default.gain', parseFloat(e.target.value))}
-                className="input"
+                className='input'
               />
             </div>
           </div>
@@ -915,102 +915,102 @@ function Presets() {
 
       case 'filters':
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+          <div className='space-y-6'>
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="deinterlace"
+                  type='checkbox'
+                  id='deinterlace'
                   checked={formData.settings.filters?.deinterlace?.enabled}
                   onChange={e => updateSettings('filters.deinterlace.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="deinterlace" className="text-gray-200">
+                <label htmlFor='deinterlace' className='text-gray-200'>
                   {t('filters.deinterlace')}
                 </label>
               </div>
               {formData.settings.filters?.deinterlace?.enabled && (
-                <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <select
                     value={formData.settings.filters?.deinterlace?.mode || 'slower'}
                     onChange={e => updateSettings('filters.deinterlace.mode', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="fast">{t('filters.fast')}</option>
-                    <option value="slow">{t('filters.slow')}</option>
-                    <option value="slower">{t('filters.slower')}</option>
-                    <option value="bob">{t('filters.bob')}</option>
+                    <option value='fast'>{t('filters.fast')}</option>
+                    <option value='slow'>{t('filters.slow')}</option>
+                    <option value='slower'>{t('filters.slower')}</option>
+                    <option value='bob'>{t('filters.bob')}</option>
                   </select>
                   <select
                     value={formData.settings.filters?.deinterlace?.parity || 'auto'}
                     onChange={e => updateSettings('filters.deinterlace.parity', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="auto">{t('deinterlaceParity.auto')}</option>
-                    <option value="tff">{t('deinterlaceParity.tff')}</option>
-                    <option value="bff">{t('deinterlaceParity.bff')}</option>
+                    <option value='auto'>{t('deinterlaceParity.auto')}</option>
+                    <option value='tff'>{t('deinterlaceParity.tff')}</option>
+                    <option value='bff'>{t('deinterlaceParity.bff')}</option>
                   </select>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="decomb"
+                  type='checkbox'
+                  id='decomb'
                   checked={formData.settings.filters?.decomb?.enabled}
                   onChange={e => updateSettings('filters.decomb.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="decomb" className="text-gray-200">
+                <label htmlFor='decomb' className='text-gray-200'>
                   {t('filters.decomb')}
                 </label>
               </div>
               {formData.settings.filters?.decomb?.enabled && (
-                <div className="pl-6">
+                <div className='pl-6'>
                   <select
                     value={formData.settings.filters?.decomb?.mode || 'default'}
                     onChange={e => updateSettings('filters.decomb.mode', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="default">{t('decombModes.default')}</option>
-                    <option value="bob">{t('decombModes.bob')}</option>
-                    <option value="custom">{t('decombModes.custom')}</option>
+                    <option value='default'>{t('decombModes.default')}</option>
+                    <option value='bob'>{t('decombModes.bob')}</option>
+                    <option value='custom'>{t('decombModes.custom')}</option>
                   </select>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="detelecine"
+                  type='checkbox'
+                  id='detelecine'
                   checked={formData.settings.filters?.detelecine?.enabled}
                   onChange={e => updateSettings('filters.detelecine.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="detelecine" className="text-gray-200">
+                <label htmlFor='detelecine' className='text-gray-200'>
                   {t('filters.detelecine')}
                 </label>
               </div>
               {formData.settings.filters?.detelecine?.enabled && (
-                <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <select
                     value={formData.settings.filters?.detelecine?.pattern || '23.976'}
                     onChange={e => updateSettings('filters.detelecine.pattern', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="23.976">23.976</option>
-                    <option value="24">24</option>
-                    <option value="25">25</option>
-                    <option value="29.97">29.97</option>
-                    <option value="30">30</option>
-                    <option value="custom">{t('detelecinePatterns.custom')}</option>
+                    <option value='23.976'>23.976</option>
+                    <option value='24'>24</option>
+                    <option value='25'>25</option>
+                    <option value='29.97'>29.97</option>
+                    <option value='30'>30</option>
+                    <option value='custom'>{t('detelecinePatterns.custom')}</option>
                   </select>
                   <input
-                    type="number"
+                    type='number'
                     value={formData.settings.filters?.detelecine?.startFrame || ''}
                     onChange={e =>
                       updateSettings(
@@ -1018,266 +1018,266 @@ function Presets() {
                         e.target.value ? parseInt(e.target.value) : null
                       )
                     }
-                    className="input"
+                    className='input'
                     placeholder={t('common.placeholder.startFrame')}
                   />
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="denoise"
+                  type='checkbox'
+                  id='denoise'
                   checked={formData.settings.filters?.denoise?.enabled}
                   onChange={e => updateSettings('filters.denoise.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="denoise" className="text-gray-200">
+                <label htmlFor='denoise' className='text-gray-200'>
                   {t('filters.denoise')}
                 </label>
               </div>
               {formData.settings.filters?.denoise?.enabled && (
-                <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <select
                     value={formData.settings.filters?.denoise?.method || 'nlmeans'}
                     onChange={e => updateSettings('filters.denoise.method', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="hqdn3d">{t('filters.hqdn3d')}</option>
-                    <option value="nlmeans">{t('filters.nlmeans')}</option>
+                    <option value='hqdn3d'>{t('filters.hqdn3d')}</option>
+                    <option value='nlmeans'>{t('filters.nlmeans')}</option>
                   </select>
                   <select
                     value={formData.settings.filters?.denoise?.preset || 'medium'}
                     onChange={e => updateSettings('filters.denoise.preset', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="ultralight">{t('filters.ultralight')}</option>
-                    <option value="light">{t('filters.light')}</option>
-                    <option value="medium">{t('filters.medium')}</option>
-                    <option value="strong">{t('filters.strong')}</option>
+                    <option value='ultralight'>{t('filters.ultralight')}</option>
+                    <option value='light'>{t('filters.light')}</option>
+                    <option value='medium'>{t('filters.medium')}</option>
+                    <option value='strong'>{t('filters.strong')}</option>
                   </select>
                   <select
                     value={formData.settings.filters?.denoise?.tune || 'none'}
                     onChange={e => updateSettings('filters.denoise.tune', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="none">{t('common.none')}</option>
-                    <option value="film">{t('filters.film')}</option>
-                    <option value="grain">{t('filters.grain')}</option>
-                    <option value="psnr">PSNR</option>
-                    <option value="ssim">SSIM</option>
+                    <option value='none'>{t('common.none')}</option>
+                    <option value='film'>{t('filters.film')}</option>
+                    <option value='grain'>{t('filters.grain')}</option>
+                    <option value='psnr'>PSNR</option>
+                    <option value='ssim'>SSIM</option>
                   </select>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="deblock"
+                  type='checkbox'
+                  id='deblock'
                   checked={formData.settings.filters?.deblock?.enabled}
                   onChange={e => updateSettings('filters.deblock.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="deblock" className="text-gray-200">
+                <label htmlFor='deblock' className='text-gray-200'>
                   {t('filters.deblock')}
                 </label>
               </div>
               {formData.settings.filters?.deblock?.enabled && (
-                <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div>
-                    <label className="label">{t('filters.strength')}</label>
+                    <label className='label'>{t('filters.strength')}</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="10"
+                      type='number'
+                      min='0'
+                      max='10'
                       value={formData.settings.filters?.deblock?.strength || 4}
                       onChange={e =>
                         updateSettings('filters.deblock.strength', parseInt(e.target.value))
                       }
-                      className="input"
+                      className='input'
                     />
                   </div>
                   <div>
-                    <label className="label">{t('filters.threshold')}</label>
+                    <label className='label'>{t('filters.threshold')}</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="10"
+                      type='number'
+                      min='0'
+                      max='10'
                       value={formData.settings.filters?.deblock?.threshold || 4}
                       onChange={e =>
                         updateSettings('filters.deblock.threshold', parseInt(e.target.value))
                       }
-                      className="input"
+                      className='input'
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="sharpen"
+                  type='checkbox'
+                  id='sharpen'
                   checked={formData.settings.filters?.sharpen?.enabled}
                   onChange={e => updateSettings('filters.sharpen.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="sharpen" className="text-gray-200">
+                <label htmlFor='sharpen' className='text-gray-200'>
                   {t('filters.sharpen')}
                 </label>
               </div>
               {formData.settings.filters?.sharpen?.enabled && (
-                <div className="pl-6">
+                <div className='pl-6'>
                   <select
                     value={formData.settings.filters?.sharpen?.method || 'unsharp'}
                     onChange={e => updateSettings('filters.sharpen.method', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="unsharp">{t('filters.unsharp')}</option>
-                    <option value="lapsharp">{t('filters.lapsharp')}</option>
+                    <option value='unsharp'>{t('filters.unsharp')}</option>
+                    <option value='lapsharp'>{t('filters.lapsharp')}</option>
                   </select>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="chromaSmooth"
+                  type='checkbox'
+                  id='chromaSmooth'
                   checked={formData.settings.filters?.chromaSmooth?.enabled}
                   onChange={e => updateSettings('filters.chromaSmooth.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="chromaSmooth" className="text-gray-200">
+                <label htmlFor='chromaSmooth' className='text-gray-200'>
                   {t('filters.chromaSmooth')}
                 </label>
               </div>
               {formData.settings.filters?.chromaSmooth?.enabled && (
-                <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div>
-                    <label className="label">{t('filters.tuSize')}</label>
+                    <label className='label'>{t('filters.tuSize')}</label>
                     <input
-                      type="number"
-                      min="2"
-                      max="6"
+                      type='number'
+                      min='2'
+                      max='6'
                       value={formData.settings.filters?.chromaSmooth?.tuSize || 2}
                       onChange={e =>
                         updateSettings('filters.chromaSmooth.tuSize', parseInt(e.target.value))
                       }
-                      className="input"
+                      className='input'
                     />
                   </div>
                   <div>
-                    <label className="label">{t('filters.strength')}</label>
+                    <label className='label'>{t('filters.strength')}</label>
                     <input
-                      type="number"
-                      min="1"
-                      max="10"
+                      type='number'
+                      min='1'
+                      max='10'
                       value={formData.settings.filters?.chromaSmooth?.strength || 2}
                       onChange={e =>
                         updateSettings('filters.chromaSmooth.strength', parseInt(e.target.value))
                       }
-                      className="input"
+                      className='input'
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="colorspace"
+                  type='checkbox'
+                  id='colorspace'
                   checked={formData.settings.filters?.colorspace?.enabled}
                   onChange={e => updateSettings('filters.colorspace.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="colorspace" className="text-gray-200">
+                <label htmlFor='colorspace' className='text-gray-200'>
                   {t('filters.colorspace')}
                 </label>
               </div>
               {formData.settings.filters?.colorspace?.enabled && (
-                <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <select
                     value={formData.settings.filters?.colorspace?.matrix || ''}
                     onChange={e =>
                       updateSettings('filters.colorspace.matrix', e.target.value || null)
                     }
-                    className="input"
+                    className='input'
                   >
-                    <option value="">{t('common.auto')}</option>
-                    <option value="bt709">{t('colorspaceMatrices.bt709')}</option>
-                    <option value="bt470bg">{t('colorspaceMatrices.bt470bg')}</option>
-                    <option value="smpte170m">{t('colorspaceMatrices.smpte170m')}</option>
-                    <option value="bt2020nc">{t('colorspaceMatrices.bt2020nc')}</option>
+                    <option value=''>{t('common.auto')}</option>
+                    <option value='bt709'>{t('colorspaceMatrices.bt709')}</option>
+                    <option value='bt470bg'>{t('colorspaceMatrices.bt470bg')}</option>
+                    <option value='smpte170m'>{t('colorspaceMatrices.smpte170m')}</option>
+                    <option value='bt2020nc'>{t('colorspaceMatrices.bt2020nc')}</option>
                   </select>
                   <select
                     value={formData.settings.filters?.colorspace?.range || 'auto'}
                     onChange={e => updateSettings('filters.colorspace.range', e.target.value)}
-                    className="input"
+                    className='input'
                   >
-                    <option value="auto">{t('colorspaceRanges.auto')}</option>
-                    <option value="limited">{t('colorspaceRanges.limited')}</option>
-                    <option value="full">{t('colorspaceRanges.full')}</option>
+                    <option value='auto'>{t('colorspaceRanges.auto')}</option>
+                    <option value='limited'>{t('colorspaceRanges.limited')}</option>
+                    <option value='full'>{t('colorspaceRanges.full')}</option>
                   </select>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="rotate"
+                  type='checkbox'
+                  id='rotate'
                   checked={formData.settings.filters?.rotate?.enabled}
                   onChange={e => updateSettings('filters.rotate.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="rotate" className="text-gray-200">
+                <label htmlFor='rotate' className='text-gray-200'>
                   {t('filters.rotate')}
                 </label>
               </div>
               {formData.settings.filters?.rotate?.enabled && (
-                <div className="pl-6 space-y-4">
+                <div className='pl-6 space-y-4'>
                   <select
                     value={formData.settings.filters?.rotate?.angle || 0}
                     onChange={e => updateSettings('filters.rotate.angle', parseInt(e.target.value))}
-                    className="input"
+                    className='input'
                   >
                     <option value={0}>0°</option>
                     <option value={90}>90°</option>
                     <option value={180}>180°</option>
                     <option value={270}>270°</option>
                   </select>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
+                  <div className='flex items-center space-x-4'>
+                    <div className='flex items-center space-x-2'>
                       <input
-                        type="checkbox"
-                        id="hflip"
+                        type='checkbox'
+                        id='hflip'
                         checked={formData.settings.filters?.rotate?.hFlip}
                         onChange={e => updateSettings('filters.rotate.hFlip', e.target.checked)}
-                        className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                        className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                       />
-                      <label htmlFor="hflip" className="text-gray-200">
+                      <label htmlFor='hflip' className='text-gray-200'>
                         {t('filters.hFlip')}
                       </label>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className='flex items-center space-x-2'>
                       <input
-                        type="checkbox"
-                        id="vflip"
+                        type='checkbox'
+                        id='vflip'
                         checked={formData.settings.filters?.rotate?.vFlip}
                         onChange={e => updateSettings('filters.rotate.vFlip', e.target.checked)}
-                        className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                        className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                       />
-                      <label htmlFor="vflip" className="text-gray-200">
+                      <label htmlFor='vflip' className='text-gray-200'>
                         {t('filters.vFlip')}
                       </label>
                     </div>
@@ -1290,38 +1290,38 @@ function Presets() {
 
       case 'subtitles':
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+          <div className='space-y-6'>
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="scanForced"
+                  type='checkbox'
+                  id='scanForced'
                   checked={formData.settings.subtitles?.scanForced}
                   onChange={e => updateSettings('subtitles.scanForced', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="scanForced" className="text-gray-200">
+                <label htmlFor='scanForced' className='text-gray-200'>
                   {t('subtitles.scanForced')}
                 </label>
               </div>
             </div>
-            <p className="text-gray-500 text-sm">{t('subtitles.comingSoon')}</p>
+            <p className='text-gray-500 text-sm'>{t('subtitles.comingSoon')}</p>
           </div>
         );
 
       case 'chapters':
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+          <div className='space-y-6'>
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="chapters"
+                  type='checkbox'
+                  id='chapters'
                   checked={formData.settings.chapters?.enabled !== false}
                   onChange={e => updateSettings('chapters.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="chapters" className="text-gray-200">
+                <label htmlFor='chapters' className='text-gray-200'>
                   {t('chapters.includeChapters')}
                 </label>
               </div>
@@ -1331,89 +1331,89 @@ function Presets() {
 
       case 'tags':
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+          <div className='space-y-6'>
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="tags"
+                  type='checkbox'
+                  id='tags'
                   checked={formData.settings.tags?.enabled}
                   onChange={e => updateSettings('tags.enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                 />
-                <label htmlFor="tags" className="text-gray-200">
+                <label htmlFor='tags' className='text-gray-200'>
                   {t('tags.includeTags')}
                 </label>
               </div>
             </div>
 
             {formData.settings.tags?.enabled && (
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <div>
-                  <label className="label">{t('tags.title')}</label>
+                  <label className='label'>{t('tags.title')}</label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.settings.tags?.values?.title || ''}
                     onChange={e => updateSettings('tags.values.title', e.target.value)}
-                    className="input"
+                    className='input'
                     placeholder={t('common.placeholder.enterTitle')}
                   />
                 </div>
                 <div>
-                  <label className="label">{t('tags.actor')}</label>
+                  <label className='label'>{t('tags.actor')}</label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.settings.tags?.values?.actor || ''}
                     onChange={e => updateSettings('tags.values.actor', e.target.value)}
-                    className="input"
+                    className='input'
                     placeholder={t('common.placeholder.enterActor')}
                   />
                 </div>
                 <div>
-                  <label className="label">{t('tags.director')}</label>
+                  <label className='label'>{t('tags.director')}</label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.settings.tags?.values?.director || ''}
                     onChange={e => updateSettings('tags.values.director', e.target.value)}
-                    className="input"
+                    className='input'
                     placeholder={t('common.placeholder.enterDirector')}
                   />
                 </div>
                 <div>
-                  <label className="label">{t('tags.releaseDate')}</label>
+                  <label className='label'>{t('tags.releaseDate')}</label>
                   <input
-                    type="date"
+                    type='date'
                     value={formData.settings.tags?.values?.date || ''}
                     onChange={e => updateSettings('tags.values.date', e.target.value)}
-                    className="input"
+                    className='input'
                   />
                 </div>
                 <div>
-                  <label className="label">{t('tags.genre')}</label>
+                  <label className='label'>{t('tags.genre')}</label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.settings.tags?.values?.genre || ''}
                     onChange={e => updateSettings('tags.values.genre', e.target.value)}
-                    className="input"
+                    className='input'
                     placeholder={t('common.placeholder.enterGenre')}
                   />
                 </div>
                 <div>
-                  <label className="label">{t('tags.description')}</label>
+                  <label className='label'>{t('tags.description')}</label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.settings.tags?.values?.description || ''}
                     onChange={e => updateSettings('tags.values.description', e.target.value)}
-                    className="input"
+                    className='input'
                     placeholder={t('common.placeholder.enterDescription')}
                   />
                 </div>
                 <div>
-                  <label className="label">{t('tags.plot')}</label>
+                  <label className='label'>{t('tags.plot')}</label>
                   <textarea
                     value={formData.settings.tags?.values?.plot || ''}
                     onChange={e => updateSettings('tags.values.plot', e.target.value)}
-                    className="input h-32"
+                    className='input h-32'
                     placeholder={t('common.placeholder.enterPlot')}
                   />
                 </div>
@@ -1428,11 +1428,11 @@ function Presets() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h1 className="text-3xl font-bold text-white">{t('presets.title')}</h1>
-          <p className="text-gray-400 mt-1">{t('presets.subtitle')}</p>
+          <h1 className='text-3xl font-bold text-white'>{t('presets.title')}</h1>
+          <p className='text-gray-400 mt-1'>{t('presets.subtitle')}</p>
         </div>
 
         <button
@@ -1440,70 +1440,70 @@ function Presets() {
             resetForm();
             setShowModal(true);
           }}
-          className="btn btn-primary inline-flex items-center space-x-2"
+          className='btn btn-primary inline-flex items-center space-x-2'
         >
-          <Plus className="w-4 h-4" />
+          <Plus className='w-4 h-4' />
           <span>{t('presets.createPreset')}</span>
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">{t('common.loading')}</div>
+        <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {presets.map(preset => (
-            <div key={preset.id} className="card hover:border-primary/50 transition-colors">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  {preset.isBuiltIn && <Star className="w-5 h-5 text-warning" />}
-                  <h3 className="text-lg font-semibold text-white">{preset.name}</h3>
+            <div key={preset.id} className='card hover:border-primary/50 transition-colors'>
+              <div className='flex items-start justify-between mb-3'>
+                <div className='flex items-center space-x-2'>
+                  {preset.isBuiltIn && <Star className='w-5 h-5 text-warning' />}
+                  <h3 className='text-lg font-semibold text-white'>{preset.name}</h3>
                 </div>
-                <span className="text-xs text-gray-400 uppercase">{preset.settings.format}</span>
+                <span className='text-xs text-gray-400 uppercase'>{preset.settings.format}</span>
               </div>
 
-              <p className="text-sm text-gray-400 mb-4">{preset.description}</p>
+              <p className='text-sm text-gray-400 mb-4'>{preset.description}</p>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">{t('common.video')}</span>
-                  <span className="text-white">{getCodecLabel(preset.settings.video?.codec)}</span>
+              <div className='space-y-2 text-sm'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-gray-400'>{t('common.video')}</span>
+                  <span className='text-white'>{getCodecLabel(preset.settings.video?.codec)}</span>
                 </div>
                 {preset.settings.video?.crf !== undefined && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">
+                  <div className='flex items-center justify-between'>
+                    <span className='text-gray-400'>
                       {t('video.crf')} ({t('video.quality')})
                     </span>
-                    <span className="text-white">{preset.settings.video.crf}</span>
+                    <span className='text-white'>{preset.settings.video.crf}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">{t('common.audio')}</span>
-                  <span className="text-white">
+                <div className='flex items-center justify-between'>
+                  <span className='text-gray-400'>{t('common.audio')}</span>
+                  <span className='text-white'>
                     {getCodecLabel(preset.settings.audio?.default?.codec)}
                   </span>
                 </div>
                 {preset.settings.audio?.default?.bitrate && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">{t('common.audioBitrate')}</span>
-                    <span className="text-white">{preset.settings.audio.default.bitrate} kbps</span>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-gray-400'>{t('common.audioBitrate')}</span>
+                    <span className='text-white'>{preset.settings.audio.default.bitrate} kbps</span>
                   </div>
                 )}
               </div>
 
               {!preset.isBuiltIn && (
-                <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-dark-700">
+                <div className='flex items-center space-x-2 mt-4 pt-4 border-t border-dark-700'>
                   <button
                     onClick={() => handleEdit(preset)}
-                    className="btn btn-secondary flex-1 text-sm flex items-center justify-center"
+                    className='btn btn-secondary flex-1 text-sm flex items-center justify-center'
                   >
-                    <Edit className="w-4 h-4" />
-                    <span className="ml-2">{t('common.edit')}</span>
+                    <Edit className='w-4 h-4' />
+                    <span className='ml-2'>{t('common.edit')}</span>
                   </button>
                   <button
                     onClick={() => handleDelete(preset.id)}
-                    className="btn btn-danger text-sm"
+                    className='btn btn-danger text-sm'
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className='w-4 h-4' />
                   </button>
                 </div>
               )}
@@ -1513,19 +1513,19 @@ function Presets() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-800 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-dark-700">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">
+        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4'>
+          <div className='bg-dark-800 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col'>
+            <div className='p-6 border-b border-dark-700'>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-2xl font-bold text-white'>
                   {editingPreset ? t('presets.editPreset') : t('presets.createPreset')}
                 </h2>
               </div>
             </div>
 
-            <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-              <div className="bg-dark-900 border-b md:border-b-0 md:border-r border-dark-700 p-4 md:w-48 shrink-0">
-                <nav className="space-y-1">
+            <div className='flex-1 overflow-hidden flex flex-col md:flex-row'>
+              <div className='bg-dark-900 border-b md:border-b-0 md:border-r border-dark-700 p-4 md:w-48 shrink-0'>
+                <nav className='space-y-1'>
                   {tabs.map(tab => {
                     const Icon = tab.icon;
                     return (
@@ -1539,58 +1539,58 @@ function Presets() {
                             : 'text-gray-400 hover:text-white hover:bg-dark-800'
                         )}
                       >
-                        <Icon className="w-4 h-4" />
-                        <span className="text-sm">{tab.label}</span>
+                        <Icon className='w-4 h-4' />
+                        <span className='text-sm'>{tab.label}</span>
                       </button>
                     );
                   })}
                 </nav>
               </div>
 
-              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-                <div className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className='flex-1 overflow-y-auto'>
+                <div className='p-6 space-y-6'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <label className="label">{t('presets.presetName')}</label>
+                      <label className='label'>{t('presets.presetName')}</label>
                       <input
-                        type="text"
+                        type='text'
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="input"
+                        className='input'
                         placeholder={t('common.placeholder.enterPresetName')}
                         required
                       />
                     </div>
                     <div>
-                      <label className="label">{t('presets.presetDescription')}</label>
+                      <label className='label'>{t('presets.presetDescription')}</label>
                       <input
-                        type="text"
+                        type='text'
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        className="input"
+                        className='input'
                         placeholder={t('common.placeholder.enterPresetDescription')}
                       />
                     </div>
                   </div>
 
-                  <div className="border-t border-dark-700 pt-6">
+                  <div className='border-t border-dark-700 pt-6'>
                     <TabContent tab={activeTab} />
                   </div>
                 </div>
 
-                <div className="p-6 border-t border-dark-700 flex items-center justify-end space-x-3">
+                <div className='p-6 border-t border-dark-700 flex items-center justify-end space-x-3'>
                   <button
-                    type="button"
+                    type='button'
                     onClick={() => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="btn btn-secondary"
+                    className='btn btn-secondary'
                   >
                     {t('common.cancel')}
                   </button>
                   <button
-                    type="button"
+                    type='button'
                     onClick={() => {
                       setFormData({
                         name: editingPreset?.name || '',
@@ -1598,11 +1598,11 @@ function Presets() {
                         settings: getDefaultPresetSettings()
                       });
                     }}
-                    className="btn btn-warning"
+                    className='btn btn-warning'
                   >
                     {t('common.reset')}
                   </button>
-                  <button type="submit" className="btn btn-primary">
+                  <button type='submit' className='btn btn-primary'>
                     {editingPreset ? t('common.save') : t('common.create')}
                   </button>
                 </div>
