@@ -110,7 +110,9 @@ export const RATE_CONTROLS = [
   { value: 'crf', label: '恒定质量 (CRF)' },
   { value: 'cbr', label: '恒定码率 (CBR)' },
   { value: 'vbr', label: '可变码率 (VBR)' },
-  { value: 'cqp', label: '恒定量化参数 (CQP)' }
+  { value: 'cqp', label: '恒定量化参数 (CQP)' },
+  { value: 'icq', label: 'Intel QSV ICQ' },
+  { value: 'cq', label: 'SVT-AV1 CQ' }
 ];
 
 // 音频编码器
@@ -269,6 +271,9 @@ export function getDefaultPresetSettings() {
       peakFrameRate: null,
       rateControl: 'crf',
       crf: 22,
+      icq: 22,
+      cqp: 22,
+      cq: 30,
       qp: null,
       bitrate: null,
       quality: null,
@@ -276,6 +281,8 @@ export function getDefaultPresetSettings() {
       tune: null,
       profile: null,
       level: null,
+      colorRange: 'auto',
+      multiPass: false,
       useAdvancedOptions: false,
       advancedOptions: null
     },
@@ -284,6 +291,7 @@ export function getDefaultPresetSettings() {
       height: null,
       displayWidth: null,
       displayHeight: null,
+      resolutionLimit: '',
       cropping: {
         enabled: false,
         top: 0,
@@ -296,9 +304,13 @@ export function getDefaultPresetSettings() {
         mode: 'auto',
         algorithm: 'lanczos',
         anamorphic: 'auto',
+        pixelAspectX: 1,
+        pixelAspectY: 1,
         keepDisplayAspect: true,
         modulus: 16,
-        pixelAspect: null
+        pixelAspect: null,
+        bestSize: false,
+        allowUpscaling: false
       },
       interlaceDetect: false,
       combDetect: 'default',
@@ -420,7 +432,15 @@ export function getDefaultPresetSettings() {
     },
     tags: {
       enabled: false,
-      values: {}
+      values: {
+        title: '',
+        actor: '',
+        director: '',
+        date: '',
+        genre: '',
+        description: '',
+        plot: ''
+      }
     }
   };
 }
