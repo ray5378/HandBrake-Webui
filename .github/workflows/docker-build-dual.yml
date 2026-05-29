@@ -73,13 +73,13 @@ jobs:
             ${{ matrix.registry == 'dockerhub' && format('{0}/{1}', secrets.DOCKERHUB_USERNAME, 'handbrake-webui') || '' }}
             ${{ matrix.registry == 'ghcr' && format('ghcr.io/{0}/{1}', github.repository_owner, 'handbrake-webui') || '' }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha,format=long
-            type=raw,value=latest,enable={{is_default_branch}}
+            type:ref,event=branch
+            type:ref,event=pr
+            type:semver,pattern={{version}}
+            type:semver,pattern={{major}}.{{minor}}
+            type:semver,pattern={{major}}
+            type:sha,format=long
+            type:raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -89,7 +89,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,disabled=true
+          cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
@@ -123,7 +123,7 @@ jobs:
           file: docker/Dockerfile
           tags: handbrake-webui:test
           load: true
-          cache-from: type=gha,disabled=true
+          cache-from: type=gha
 
       - name: Test container can start
         run: |

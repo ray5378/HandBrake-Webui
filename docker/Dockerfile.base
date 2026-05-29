@@ -1,6 +1,28 @@
 # HandBrake Base Image
-# 基于 jlesage/baseimage-gui
+# 基于 debian:bookworm-slim，包含完整的 HandBrake CLI 和硬件加速支持
 
-FROM jlesage/baseimage-gui:alpine-3.20-v4.11.3
+FROM debian:bookworm-slim
 
-# jlesage/baseimage-gui 已包含完整的手Brake 和硬件加速支持
+# 设置非交互式环境变量
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 添加 Debian non-free 仓库以获取 Intel 非免费驱动
+RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+
+# 安装基础依赖和硬件驱动
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Intel QSV 驱动链
+    libva2 libva-drm2 libva-x11-2 \
+    intel-media-va-driver-non-free \
+    # AMD VCN 驱动
+    mesa-va-drivers \
+    # HandBrake CLI
+    handbrake-cli \
+    # 常用工具
+    ffmpeg pciutils curl ca-certificates dumb-init \
+    && rm -rf /var/lib/apt/lists/*
