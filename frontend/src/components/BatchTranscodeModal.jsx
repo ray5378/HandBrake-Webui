@@ -61,6 +61,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setPresets(presetsRes.data.data.presets);
       setSourceTree(treeRes.data.data.directories || []);
 
+      const lastDir = directory.split('/').filter(Boolean).pop();
+      if (lastDir) {
+        setOutputDirectory(`/output/${lastDir}`);
+      }
       await fetchBrowseDirs('/output');
     } catch (error) {
       console.error('Failed to fetch data:', error);
