@@ -162,18 +162,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       const hasChildren = Object.keys(children).length > 0;
       return (
         <React.Fragment key={name}>
-          <div
-            className='text-xs text-gray-400 flex items-center space-x-1 font-mono'
-            style={{ paddingLeft: depth * 20 }}
-          >
-            <span className='text-gray-600 shrink-0'>{connector}</span>
-            <FolderOpen className='w-3 h-3 text-warning shrink-0' />
-            <span className='truncate'>{name}</span>
-            <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
-            <span className='text-primary truncate'>
-              {outputDirectory}/{prefix}
-              {name}
-            </span>
+          <div className='text-xs text-gray-400 font-mono mb-1' style={{ paddingLeft: depth * 16 }}>
+            <div className='flex items-baseline space-x-1'>
+              <span className='text-gray-600 shrink-0'>{connector}</span>
+              <FolderOpen className='w-3 h-3 text-warning shrink-0 relative top-0.5' />
+              <span className='text-gray-400'>{name}</span>
+              <ChevronRight className='w-3 h-3 text-gray-600 shrink-0 relative top-0.5' />
+              <span className='text-primary break-all'>
+                {outputDirectory}/{prefix}
+                {name}
+              </span>
+            </div>
           </div>
           {hasChildren && renderTree(children, prefix + name + '/', depth + 1)}
         </React.Fragment>
@@ -342,11 +341,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       <span>目录结构预览</span>
                     </h4>
                     <div className='max-h-48 overflow-y-auto space-y-0.5'>
-                      <div className='text-xs flex items-center space-x-1 font-mono'>
-                        <FolderOpen className='w-3 h-3 text-warning shrink-0' />
-                        <span className='text-gray-400 truncate'>{directory}</span>
-                        <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
-                        <span className='text-primary truncate'>{outputDirectory}</span>
+                      <div className='text-xs font-mono space-y-1'>
+                        <div className='flex items-center space-x-1'>
+                          <FolderOpen className='w-3 h-3 text-warning shrink-0' />
+                          <span className='text-gray-400'>源:</span>
+                          <span className='text-gray-400 break-all'>{directory}</span>
+                        </div>
+                        <div className='flex items-center space-x-1'>
+                          <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
+                          <span className='text-primary'>输出:</span>
+                          <span className='text-primary break-all'>{outputDirectory}</span>
+                        </div>
                       </div>
                       {renderTree(treeData, '', 1)}
                     </div>
