@@ -145,14 +145,14 @@ function Presets() {
   };
 
   const tabs = [
-    { id: 'summary', label: 'Summary', icon: Layers },
-    { id: 'dimensions', label: 'Dimensions', icon: Settings },
-    { id: 'filters', label: 'Filters', icon: Settings },
-    { id: 'video', label: 'Video', icon: Video },
-    { id: 'audio', label: 'Audio', icon: Headphones },
-    { id: 'subtitles', label: 'Subtitles', icon: Subtitles },
-    { id: 'chapters', label: 'Chapters', icon: BookOpen },
-    { id: 'tags', label: 'Tags', icon: Tag }
+    { id: 'summary', label: '基本信息', icon: Layers },
+    { id: 'dimensions', label: '尺寸', icon: Settings },
+    { id: 'filters', label: '滤镜', icon: Settings },
+    { id: 'video', label: '视频', icon: Video },
+    { id: 'audio', label: '音频', icon: Headphones },
+    { id: 'subtitles', label: '字幕', icon: Subtitles },
+    { id: 'chapters', label: '章节', icon: BookOpen },
+    { id: 'tags', label: '标签', icon: Tag }
   ];
 
   const TabContent = ({ tab }) => {
@@ -161,7 +161,7 @@ function Presets() {
         return (
           <div className="space-y-6">
             <div>
-              <label className="label">Container</label>
+              <label className="label">容器格式</label>
               <select
                 value={formData.settings.format}
                 onChange={e => updateSettings('format', e.target.value)}
@@ -175,7 +175,7 @@ function Presets() {
               </select>
             </div>
             <div>
-              <label className="label">Optimization</label>
+              <label className="label">容器优化</label>
               <select
                 value={formData.settings.optimize}
                 onChange={e => updateSettings('optimize', e.target.value)}
@@ -196,7 +196,7 @@ function Presets() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Video Codec</label>
+                <label className="label">视频编码器</label>
                 <select
                   value={formData.settings.video?.codec || 'x264'}
                   onChange={e => updateSettings('video.codec', e.target.value)}
@@ -211,7 +211,7 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">Rate Control</label>
+                <label className="label">码率控制</label>
                 <select
                   value={formData.settings.video?.rateControl || 'crf'}
                   onChange={e => updateSettings('video.rateControl', e.target.value)}
@@ -229,7 +229,7 @@ function Presets() {
             {formData.settings.video?.rateControl === 'crf' && (
               <div>
                 <label className="label">
-                  Constant Quality (RF): {formData.settings.video?.crf || 22}
+                  恒定质量 (RF): {formData.settings.video?.crf || 22}
                 </label>
                 <input
                   type="range"
@@ -241,8 +241,8 @@ function Presets() {
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>Smaller size</span>
-                  <span>Higher quality</span>
+                  <span>体积更小</span>
+                  <span>画质更高</span>
                 </div>
               </div>
             )}
@@ -250,7 +250,7 @@ function Presets() {
             {(formData.settings.video?.rateControl === 'cbr' ||
               formData.settings.video?.rateControl === 'vbr') && (
               <div>
-                <label className="label">Target Bitrate (kbps)</label>
+                <label className="label">目标码率 (kbps)</label>
                 <input
                   type="number"
                   value={formData.settings.video?.bitrate || 1500}
@@ -262,7 +262,7 @@ function Presets() {
 
             {formData.settings.video?.rateControl === 'cqp' && (
               <div>
-                <label className="label">Constant QP: {formData.settings.video?.qp || 22}</label>
+                <label className="label">恒定量化参数: {formData.settings.video?.qp || 22}</label>
                 <input
                   type="range"
                   min="0"
@@ -276,7 +276,7 @@ function Presets() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Encoder Preset</label>
+                <label className="label">编码预设</label>
                 <select
                   value={formData.settings.video?.preset || 'medium'}
                   onChange={e => updateSettings('video.preset', e.target.value)}
@@ -293,13 +293,13 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">Tune</label>
+                <label className="label">调优</label>
                 <select
                   value={formData.settings.video?.tune || ''}
                   onChange={e => updateSettings('video.tune', e.target.value || null)}
                   className="input"
                 >
-                  <option value="">None</option>
+                  <option value="">无</option>
                   {(formData.settings.video?.codec === 'x265' ? X265_TUNES : X264_TUNES).map(
                     tune => (
                       <option key={tune.value} value={tune.value}>
@@ -313,40 +313,40 @@ function Presets() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Profile</label>
+                <label className="label">编码档次</label>
                 <select
                   value={formData.settings.video?.profile || ''}
                   onChange={e => updateSettings('video.profile', e.target.value || null)}
                   className="input"
                 >
-                  <option value="">Auto</option>
+                  <option value="">自动</option>
                   {formData.settings.video?.codec === 'x264' ? (
                     <>
-                      <option value="baseline">Baseline</option>
-                      <option value="main">Main</option>
-                      <option value="high">High</option>
+                      <option value="baseline">Baseline（基线）</option>
+                      <option value="main">Main（主流）</option>
+                      <option value="high">High（高）</option>
                       <option value="high10">High 10</option>
                       <option value="high422">High 4:2:2</option>
                       <option value="high444">High 4:4:4</option>
                     </>
                   ) : formData.settings.video?.codec === 'x265' ? (
                     <>
-                      <option value="main">Main</option>
+                      <option value="main">Main（主流）</option>
                       <option value="main10">Main 10</option>
-                      <option value="mainstillpicture">Main Still Picture</option>
+                      <option value="mainstillpicture">Main Still Picture（静态图像）</option>
                     </>
                   ) : null}
                 </select>
               </div>
 
               <div>
-                <label className="label">Level</label>
+                <label className="label">编码等级</label>
                 <select
                   value={formData.settings.video?.level || ''}
                   onChange={e => updateSettings('video.level', e.target.value || null)}
                   className="input"
                 >
-                  <option value="">Auto</option>
+                  <option value="">自动</option>
                   <option value="1.0">1.0</option>
                   <option value="1.1">1.1</option>
                   <option value="1.2">1.2</option>
@@ -372,13 +372,13 @@ function Presets() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Framerate (FPS)</label>
+                <label className="label">帧率 (FPS)</label>
                 <select
                   value={formData.settings.video?.framerate || ''}
                   onChange={e => updateSettings('video.framerate', e.target.value || null)}
                   className="input"
                 >
-                  <option value="">Same as source</option>
+                  <option value="">与源文件相同</option>
                   <option value="23.976">23.976</option>
                   <option value="24">24</option>
                   <option value="25">25</option>
@@ -391,15 +391,15 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">Framerate Mode</label>
+                <label className="label">帧率模式</label>
                 <select
                   value={formData.settings.video?.framerateMode || 'cfr'}
                   onChange={e => updateSettings('video.framerateMode', e.target.value)}
                   className="input"
                 >
-                  <option value="cfr">Constant Framerate</option>
-                  <option value="vfr">Variable Framerate</option>
-                  <option value="pfr">Peak Framerate</option>
+                  <option value="cfr">恒定帧率 (CFR)</option>
+                  <option value="vfr">可变帧率 (VFR)</option>
+                  <option value="pfr">峰值帧率 (PFR)</option>
                 </select>
               </div>
             </div>
@@ -411,7 +411,7 @@ function Presets() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Width (px)</label>
+                <label className="label">宽度 (px)</label>
                 <input
                   type="number"
                   value={formData.settings.dimensions?.width || ''}
@@ -422,11 +422,11 @@ function Presets() {
                     )
                   }
                   className="input"
-                  placeholder="Auto"
+                  placeholder="自动"
                 />
               </div>
               <div>
-                <label className="label">Height (px)</label>
+                <label className="label">高度 (px)</label>
                 <input
                   type="number"
                   value={formData.settings.dimensions?.height || ''}
@@ -437,7 +437,7 @@ function Presets() {
                     )
                   }
                   className="input"
-                  placeholder="Auto"
+                  placeholder="自动"
                 />
               </div>
             </div>
@@ -452,7 +452,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="cropEnable" className="text-gray-200">
-                  Enable Cropping
+                  启用裁剪
                 </label>
               </div>
               {formData.settings.dimensions?.cropping?.enabled && (
@@ -468,13 +468,13 @@ function Presets() {
                       className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                     />
                     <label htmlFor="autocrop" className="text-gray-200">
-                      Auto Crop
+                      自动裁剪
                     </label>
                   </div>
                   {!formData.settings.dimensions?.cropping?.autocrop && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       <div>
-                        <label className="label">Top</label>
+                        <label className="label">上</label>
                         <input
                           type="number"
                           value={formData.settings.dimensions?.cropping?.top || 0}
@@ -485,7 +485,7 @@ function Presets() {
                         />
                       </div>
                       <div>
-                        <label className="label">Bottom</label>
+                        <label className="label">下</label>
                         <input
                           type="number"
                           value={formData.settings.dimensions?.cropping?.bottom || 0}
@@ -496,7 +496,7 @@ function Presets() {
                         />
                       </div>
                       <div>
-                        <label className="label">Left</label>
+                        <label className="label">左</label>
                         <input
                           type="number"
                           value={formData.settings.dimensions?.cropping?.left || 0}
@@ -507,7 +507,7 @@ function Presets() {
                         />
                       </div>
                       <div>
-                        <label className="label">Right</label>
+                        <label className="label">右</label>
                         <input
                           type="number"
                           value={formData.settings.dimensions?.cropping?.right || 0}
@@ -535,11 +535,11 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="keepAspect" className="text-gray-200">
-                  Keep Aspect Ratio
+                  保持宽高比
                 </label>
               </div>
               <div>
-                <label className="label">Modulus</label>
+                <label className="label">对齐模数</label>
                 <select
                   value={formData.settings.dimensions?.scaling?.modulus || 16}
                   onChange={e =>
@@ -563,7 +563,7 @@ function Presets() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Audio Codec</label>
+                <label className="label">音频编码器</label>
                 <select
                   value={formData.settings.audio?.default?.codec || 'av_aac'}
                   onChange={e => updateSettings('audio.default.codec', e.target.value)}
@@ -578,7 +578,7 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">Bitrate (kbps)</label>
+                <label className="label">码率 (kbps)</label>
                 <input
                   type="number"
                   value={formData.settings.audio?.default?.bitrate || 160}
@@ -590,7 +590,7 @@ function Presets() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">Mixdown</label>
+                <label className="label">声道混合</label>
                 <select
                   value={formData.settings.audio?.default?.mixdown || 'stereo'}
                   onChange={e => updateSettings('audio.default.mixdown', e.target.value)}
@@ -605,7 +605,7 @@ function Presets() {
               </div>
 
               <div>
-                <label className="label">Sample Rate</label>
+                <label className="label">采样率</label>
                 <select
                   value={formData.settings.audio?.default?.samplerate || ''}
                   onChange={e =>
@@ -616,7 +616,7 @@ function Presets() {
                   }
                   className="input"
                 >
-                  <option value="">Auto</option>
+                  <option value="">自动</option>
                   {AUDIO_SAMPLERATES.map(sr => (
                     <option key={sr.value} value={sr.value}>
                       {sr.label}
@@ -627,7 +627,7 @@ function Presets() {
             </div>
 
             <div>
-              <label className="label">Dynamic Range Compression</label>
+              <label className="label">动态范围压缩 (DRC)</label>
               <select
                 value={formData.settings.audio?.default?.drc || 'none'}
                 onChange={e => updateSettings('audio.default.drc', e.target.value)}
@@ -642,7 +642,7 @@ function Presets() {
             </div>
 
             <div>
-              <label className="label">Gain (dB)</label>
+              <label className="label">增益 (dB)</label>
               <input
                 type="number"
                 step="0.5"
@@ -669,7 +669,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="deinterlace" className="text-gray-200">
-                  Deinterlace
+                  去隔行 (Deinterlace)
                 </label>
               </div>
               {formData.settings.filters?.deinterlace?.enabled && (
@@ -679,9 +679,9 @@ function Presets() {
                     onChange={e => updateSettings('filters.deinterlace.mode', e.target.value)}
                     className="input"
                   >
-                    <option value="fast">Fast</option>
-                    <option value="slow">Slow</option>
-                    <option value="slower">Slower</option>
+                    <option value="fast">快速 (Fast)</option>
+                    <option value="slow">慢速 (Slow)</option>
+                    <option value="slower">更慢 (Slower)</option>
                     <option value="bob">Bob</option>
                   </select>
                   <select
@@ -689,9 +689,9 @@ function Presets() {
                     onChange={e => updateSettings('filters.deinterlace.parity', e.target.value)}
                     className="input"
                   >
-                    <option value="auto">Auto</option>
-                    <option value="tff">Top Field First</option>
-                    <option value="bff">Bottom Field First</option>
+                    <option value="auto">自动</option>
+                    <option value="tff">顶场优先</option>
+                    <option value="bff">底场优先</option>
                   </select>
                 </div>
               )}
@@ -707,7 +707,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="decomb" className="text-gray-200">
-                  Decomb
+                  反锯齿 (Decomb)
                 </label>
               </div>
               {formData.settings.filters?.decomb?.enabled && (
@@ -717,9 +717,9 @@ function Presets() {
                     onChange={e => updateSettings('filters.decomb.mode', e.target.value)}
                     className="input"
                   >
-                    <option value="default">Default</option>
+                    <option value="default">默认</option>
                     <option value="bob">Bob</option>
-                    <option value="custom">Custom</option>
+                    <option value="custom">自定义</option>
                   </select>
                 </div>
               )}
@@ -735,7 +735,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="detelecine" className="text-gray-200">
-                  Detelecine
+                  去胶卷 (Detelecine)
                 </label>
               </div>
               {formData.settings.filters?.detelecine?.enabled && (
@@ -750,7 +750,7 @@ function Presets() {
                     <option value="25">25</option>
                     <option value="29.97">29.97</option>
                     <option value="30">30</option>
-                    <option value="custom">Custom</option>
+                    <option value="custom">自定义</option>
                   </select>
                   <input
                     type="number"
@@ -762,7 +762,7 @@ function Presets() {
                       )
                     }
                     className="input"
-                    placeholder="Start Frame"
+                    placeholder="起始帧"
                   />
                 </div>
               )}
@@ -778,7 +778,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="denoise" className="text-gray-200">
-                  Denoise
+                  降噪 (Denoise)
                 </label>
               </div>
               {formData.settings.filters?.denoise?.enabled && (
@@ -796,19 +796,19 @@ function Presets() {
                     onChange={e => updateSettings('filters.denoise.preset', e.target.value)}
                     className="input"
                   >
-                    <option value="ultralight">Ultralight</option>
-                    <option value="light">Light</option>
-                    <option value="medium">Medium</option>
-                    <option value="strong">Strong</option>
+                    <option value="ultralight">极轻</option>
+                    <option value="light">轻度</option>
+                    <option value="medium">中等</option>
+                    <option value="strong">强力</option>
                   </select>
                   <select
                     value={formData.settings.filters?.denoise?.tune || 'none'}
                     onChange={e => updateSettings('filters.denoise.tune', e.target.value)}
                     className="input"
                   >
-                    <option value="none">None</option>
-                    <option value="film">Film</option>
-                    <option value="grain">Grain</option>
+                    <option value="none">无</option>
+                    <option value="film">电影</option>
+                    <option value="grain">颗粒</option>
                     <option value="psnr">PSNR</option>
                     <option value="ssim">SSIM</option>
                   </select>
@@ -826,13 +826,13 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="deblock" className="text-gray-200">
-                  Deblock
+                  去块效应 (Deblock)
                 </label>
               </div>
               {formData.settings.filters?.deblock?.enabled && (
                 <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="label">Strength</label>
+                    <label className="label">强度</label>
                     <input
                       type="number"
                       min="0"
@@ -845,7 +845,7 @@ function Presets() {
                     />
                   </div>
                   <div>
-                    <label className="label">Threshold</label>
+                    <label className="label">阈值</label>
                     <input
                       type="number"
                       min="0"
@@ -871,7 +871,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="sharpen" className="text-gray-200">
-                  Sharpen
+                  锐化 (Sharpen)
                 </label>
               </div>
               {formData.settings.filters?.sharpen?.enabled && (
@@ -881,8 +881,8 @@ function Presets() {
                     onChange={e => updateSettings('filters.sharpen.method', e.target.value)}
                     className="input"
                   >
-                    <option value="unsharp">Unsharp Mask</option>
-                    <option value="lapsharp">Laplace</option>
+                    <option value="unsharp">反锐化掩模 (Unsharp)</option>
+                    <option value="lapsharp">拉普拉斯 (Laplace)</option>
                   </select>
                 </div>
               )}
@@ -898,13 +898,13 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="chromaSmooth" className="text-gray-200">
-                  Chroma Smooth
+                  色度平滑 (Chroma Smooth)
                 </label>
               </div>
               {formData.settings.filters?.chromaSmooth?.enabled && (
                 <div className="pl-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="label">TU Size</label>
+                    <label className="label">TU 尺寸</label>
                     <input
                       type="number"
                       min="2"
@@ -917,7 +917,7 @@ function Presets() {
                     />
                   </div>
                   <div>
-                    <label className="label">Strength</label>
+                    <label className="label">强度</label>
                     <input
                       type="number"
                       min="1"
@@ -943,7 +943,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="colorspace" className="text-gray-200">
-                  Color Space
+                  色彩空间
                 </label>
               </div>
               {formData.settings.filters?.colorspace?.enabled && (
@@ -955,7 +955,7 @@ function Presets() {
                     }
                     className="input"
                   >
-                    <option value="">Auto</option>
+                    <option value="">自动</option>
                     <option value="bt709">BT.709</option>
                     <option value="bt470bg">BT.470 BG</option>
                     <option value="smpte170m">SMPTE 170M</option>
@@ -966,9 +966,9 @@ function Presets() {
                     onChange={e => updateSettings('filters.colorspace.range', e.target.value)}
                     className="input"
                   >
-                    <option value="auto">Auto</option>
-                    <option value="limited">Limited</option>
-                    <option value="full">Full</option>
+                    <option value="auto">自动</option>
+                    <option value="limited">有限 (Limited)</option>
+                    <option value="full">完整 (Full)</option>
                   </select>
                 </div>
               )}
@@ -984,7 +984,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="rotate" className="text-gray-200">
-                  Rotate / Flip
+                  旋转 / 翻转
                 </label>
               </div>
               {formData.settings.filters?.rotate?.enabled && (
@@ -1009,7 +1009,7 @@ function Presets() {
                         className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                       />
                       <label htmlFor="hflip" className="text-gray-200">
-                        Horizontal Flip
+                        水平翻转
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -1021,7 +1021,7 @@ function Presets() {
                         className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                       />
                       <label htmlFor="vflip" className="text-gray-200">
-                        Vertical Flip
+                        垂直翻转
                       </label>
                     </div>
                   </div>
@@ -1044,11 +1044,11 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="scanForced" className="text-gray-200">
-                  Scan for forced subtitles
+                  扫描强制字幕
                 </label>
               </div>
             </div>
-            <p className="text-gray-500 text-sm">Subtitle track management coming soon.</p>
+            <p className="text-gray-500 text-sm">字幕轨道管理即将推出</p>
           </div>
         );
 
@@ -1065,7 +1065,7 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="chapters" className="text-gray-200">
-                  Include chapter markers
+                  包含章节标记
                 </label>
               </div>
             </div>
@@ -1085,11 +1085,11 @@ function Presets() {
                   className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
                 />
                 <label htmlFor="tags" className="text-gray-200">
-                  Include metadata tags
+                  包含元数据标签
                 </label>
               </div>
             </div>
-            <p className="text-gray-500 text-sm">Tag management coming soon.</p>
+            <p className="text-gray-500 text-sm">标签管理即将推出</p>
           </div>
         );
 
@@ -1136,24 +1136,24 @@ function Presets() {
 
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Video</span>
+                  <span className="text-gray-400">视频</span>
                   <span className="text-white">{getCodecLabel(preset.settings.video?.codec)}</span>
                 </div>
                 {preset.settings.video?.crf !== undefined && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Quality (CRF)</span>
+                    <span className="text-gray-400">画质 (CRF)</span>
                     <span className="text-white">{preset.settings.video.crf}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Audio</span>
+                  <span className="text-gray-400">音频</span>
                   <span className="text-white">
                     {getCodecLabel(preset.settings.audio?.default?.codec)}
                   </span>
                 </div>
                 {preset.settings.audio?.default?.bitrate && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Audio Bitrate</span>
+                    <span className="text-gray-400">音频码率</span>
                     <span className="text-white">{preset.settings.audio.default.bitrate} kbps</span>
                   </div>
                 )}

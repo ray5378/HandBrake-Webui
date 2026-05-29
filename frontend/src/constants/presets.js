@@ -19,65 +19,65 @@ export const VIDEO_CODECS = [
 
 // 视频编码器预设
 export const X264_PRESETS = [
-  { value: 'ultrafast', label: 'Ultrafast' },
-  { value: 'superfast', label: 'Superfast' },
-  { value: 'veryfast', label: 'Veryfast' },
-  { value: 'faster', label: 'Faster' },
-  { value: 'fast', label: 'Fast' },
-  { value: 'medium', label: 'Medium (Default)' },
-  { value: 'slow', label: 'Slow' },
-  { value: 'slower', label: 'Slower' },
-  { value: 'veryslow', label: 'Veryslow' },
-  { value: 'placebo', label: 'Placebo' }
+  { value: 'ultrafast', label: 'Ultrafast（极速）' },
+  { value: 'superfast', label: 'Superfast（超快）' },
+  { value: 'veryfast', label: 'Veryfast（非常快）' },
+  { value: 'faster', label: 'Faster（很快）' },
+  { value: 'fast', label: 'Fast（快）' },
+  { value: 'medium', label: 'Medium（中等）' },
+  { value: 'slow', label: 'Slow（慢）' },
+  { value: 'slower', label: 'Slower（更慢）' },
+  { value: 'veryslow', label: 'Veryslow（非常慢）' },
+  { value: 'placebo', label: 'Placebo（极致）' }
 ];
 
 export const X265_PRESETS = [
-  { value: 'ultrafast', label: 'Ultrafast' },
-  { value: 'superfast', label: 'Superfast' },
-  { value: 'veryfast', label: 'Veryfast' },
-  { value: 'faster', label: 'Faster' },
-  { value: 'fast', label: 'Fast' },
-  { value: 'medium', label: 'Medium (Default)' },
-  { value: 'slow', label: 'Slow' },
-  { value: 'slower', label: 'Slower' },
-  { value: 'veryslow', label: 'Veryslow' },
-  { value: 'placebo', label: 'Placebo' }
+  { value: 'ultrafast', label: 'Ultrafast（极速）' },
+  { value: 'superfast', label: 'Superfast（超快）' },
+  { value: 'veryfast', label: 'Veryfast（非常快）' },
+  { value: 'faster', label: 'Faster（很快）' },
+  { value: 'fast', label: 'Fast（快）' },
+  { value: 'medium', label: 'Medium（中等）' },
+  { value: 'slow', label: 'Slow（慢）' },
+  { value: 'slower', label: 'Slower（更慢）' },
+  { value: 'veryslow', label: 'Veryslow（非常慢）' },
+  { value: 'placebo', label: 'Placebo（极致）' }
 ];
 
 // 视频调优
 export const X264_TUNES = [
-  { value: 'film', label: 'Film' },
-  { value: 'animation', label: 'Animation' },
-  { value: 'grain', label: 'Grain' },
-  { value: 'stillimage', label: 'Still Image' },
-  { value: 'psnr', label: 'PSNR' },
-  { value: 'ssim', label: 'SSIM' },
-  { value: 'fastdecode', label: 'Fast Decode' },
-  { value: 'zerolatency', label: 'Zero Latency' }
+  { value: 'film', label: 'Film（电影）' },
+  { value: 'animation', label: 'Animation（动画）' },
+  { value: 'grain', label: 'Grain（颗粒）' },
+  { value: 'stillimage', label: 'Still Image（静态影像）' },
+  { value: 'psnr', label: 'PSNR（峰值信噪比）' },
+  { value: 'ssim', label: 'SSIM（结构相似性）' },
+  { value: 'fastdecode', label: 'Fast Decode（快速解码）' },
+  { value: 'zerolatency', label: 'Zero Latency（零延迟）' }
 ];
 
 export const X265_TUNES = [
-  { value: 'film', label: 'Film' },
-  { value: 'animation', label: 'Animation' },
-  { value: 'grain', label: 'Grain' },
-  { value: 'stillimage', label: 'Still Image' },
-  { value: 'psnr', label: 'PSNR' },
-  { value: 'ssim', label: 'SSIM' },
-  { value: 'fastdecode', label: 'Fast Decode' },
-  { value: 'zerolatency', label: 'Zero Latency' }
+  { value: 'film', label: 'Film（电影）' },
+  { value: 'animation', label: 'Animation（动画）' },
+  { value: 'grain', label: 'Grain（颗粒）' },
+  { value: 'stillimage', label: 'Still Image（静态影像）' },
+  { value: 'psnr', label: 'PSNR（峰值信噪比）' },
+  { value: 'ssim', label: 'SSIM（结构相似性）' },
+  { value: 'fastdecode', label: 'Fast Decode（快速解码）' },
+  { value: 'zerolatency', label: 'Zero Latency（零延迟）' }
 ];
 
 // 视频编码方式
 export const RATE_CONTROLS = [
-  { value: 'crf', label: 'Constant Quality (CRF)' },
-  { value: 'cbr', label: 'Constant Bitrate (CBR)' },
-  { value: 'vbr', label: 'Variable Bitrate (VBR)' },
-  { value: 'cqp', label: 'Constant QP (CQP)' }
+  { value: 'crf', label: '恒定质量 (CRF)' },
+  { value: 'cbr', label: '恒定码率 (CBR)' },
+  { value: 'vbr', label: '可变码率 (VBR)' },
+  { value: 'cqp', label: '恒定量化参数 (CQP)' }
 ];
 
 // 音频编码器
 export const AUDIO_CODECS = [
-  { value: 'copy', label: 'Passthrough' },
+  { value: 'copy', label: '直通 (Passthrough)' },
   { value: 'av_aac', label: 'AAC (avcodec)' },
   { value: 'ca_aac', label: 'AAC (CoreAudio)' },
   { value: 'mp3', label: 'MP3 (lame)' },
@@ -98,7 +98,7 @@ export const AUDIO_SAMPLERATES = [
   { value: 22050, label: '22.05 kHz' },
   { value: 24000, label: '24 kHz' },
   { value: 32000, label: '32 kHz' },
-  { value: 44100, label: '44.1 kHz (Default)' },
+  { value: 44100, label: '44.1 kHz（默认）' },
   { value: 48000, label: '48 kHz' },
   { value: 64000, label: '64 kHz' },
   { value: 88200, label: '88.2 kHz' },
@@ -107,27 +107,27 @@ export const AUDIO_SAMPLERATES = [
 
 // 混合声道
 export const MIXDOWN_MODES = [
-  { value: 'none', label: 'Auto' },
-  { value: 'mono', label: 'Mono' },
-  { value: 'stereo', label: 'Stereo' },
+  { value: 'none', label: '自动' },
+  { value: 'mono', label: '单声道' },
+  { value: 'stereo', label: '立体声' },
   { value: 'dpl2', label: 'Dolby Pro Logic II' },
-  { value: '5.1', label: '5.1 Channels' },
-  { value: '7.1', label: '7.1 Channels' }
+  { value: '5.1', label: '5.1 声道' },
+  { value: '7.1', label: '7.1 声道' }
 ];
 
 // DRC 模式
 export const DRC_MODES = [
-  { value: 'none', label: 'None (Default)' },
-  { value: 'light', label: 'Light' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'heavy', label: 'Heavy' }
+  { value: 'none', label: '无（默认）' },
+  { value: 'light', label: '轻度' },
+  { value: 'medium', label: '中等' },
+  { value: 'heavy', label: '重度' }
 ];
 
 // 容器优化
 export const OPTIMIZE_OPTIONS = [
-  { value: 'none', label: 'None' },
-  { value: 'fast-start', label: 'Fast Start (Web Optimized)' },
-  { value: 'fragmented', label: 'Fragmented' }
+  { value: 'none', label: '无' },
+  { value: 'fast-start', label: '快速启动（Web 优化）' },
+  { value: 'fragmented', label: '分段 (Fragmented)' }
 ];
 
 // 获取默认预设设置
