@@ -528,19 +528,58 @@ function parseProgress(jobId, data) {
 }
 
 function tryParseJsonProgress(data) {
-  const lines = data.split(/\r?\n|\r/).filter(Boolean);
+  // HandBrakeCLI --json outputs multi-line blocks with key prefixes:
+  // Progress: {
+  //     "State": "WORKING",
+  //     "Working": { "Progress": 0.5, ... }
+  // }
+  const lines = data.split(/\r?\n|\r/);
   let lastProgress = null;
-  for (const line of lines) {
-    try {
-      const json = JSON.parse(line);
-      if (typeof json.Progress === 'number') {
-        lastProgress = json.Progress;
-      }
-    } catch (e) {
-      // not JSON, skip
+  let i = 0;
+
+  while (i < lines.length) {
+    const match = lines[i].match(/^(\w+):\s*\{/);
+    if (!match) {
+      i++;
+      continue;
     }
+
+    const key = match[1];
+    let depth = 1;
+    let blockEnd = -1;
+
+    for (let j = i + 1; j < lines.length; j++) {
+      depth += (lines[j].match(/\{/g) || []).length;
+      depth -= (lines[j].match(/\}/g) || []).length;
+      if (depth === 0) {
+        blockEnd = j;
+        break;
+      }
+    }
+
+    if (blockEnd === -1) break;
+
+    if (key === 'Progress') {
+      const jsonLines = lines.slice(i, blockEnd + 1);
+      jsonLines[0] = jsonLines[0].substring(jsonLines[0].indexOf('{'));
+      const jsonStr = jsonLines.join('\n');
+
+      try {
+        const json = JSON.parse(jsonStr);
+        if (json.State === 'WORKING' && json.Working && typeof json.Working.Progress === 'number') {
+          lastProgress = json.Working.Progress * 100;
+        } else if (json.State === 'WORKDONE') {
+          lastProgress = 100;
+        }
+      } catch (e) {
+        // skip malformed blocks
+      }
+    }
+
+    i = blockEnd + 1;
   }
-  return lastProgress !== null ? lastProgress * 100 : null;
+
+  return lastProgress;
 }
 
 function tryParseTextProgress(data) {
