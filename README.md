@@ -30,6 +30,7 @@ services:
       - ./config:/config
       - ./source:/source
       - ./output:/output
+      - ./cache:/cache
     environment:
       - NODE_ENV=production
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production

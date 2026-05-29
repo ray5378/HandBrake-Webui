@@ -4,8 +4,8 @@
 
 ```bash
 # 1. 创建挂载目录
-mkdir -p config source output
-chmod 777 config source output
+mkdir -p config source output cache
+chmod 777 config source output cache
 
 # 2. 复制环境变量配置
 cp .env.example .env
@@ -36,6 +36,7 @@ docker run -d \
   -v $(pwd)/config:/config \
   -v $(pwd)/source:/source \
   -v $(pwd)/output:/output \
+  -v $(pwd)/cache:/cache \
   -e ADMIN_USERNAME=admin \
   -e ADMIN_PASSWORD=changeme123 \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
@@ -107,6 +108,7 @@ LOG_LEVEL=INFO
 | `./config` | `/config` | 数据库和配置 |
 | `./source` | `/source` | 源视频文件 |
 | `./output` | `/output` | 转码输出文件 |
+| `./cache` | `/cache` | 转码临时文件 |
 
 ---
 
@@ -216,7 +218,7 @@ netstat -tulpn | grep 3000
 
 ```bash
 # 修复权限
-chmod 777 -R config source output
+chmod 777 -R config source output cache
 ```
 
 ### 数据库问题

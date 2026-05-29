@@ -113,6 +113,7 @@ services:
       - ./config:/config
       - ./source:/source
       - ./output:/output
+      - ./cache:/cache
     environment:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme123
