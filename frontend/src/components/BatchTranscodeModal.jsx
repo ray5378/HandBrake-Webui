@@ -134,7 +134,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     }
   };
 
-  const pathParts = (browsePath || '/drive/转码/转码后').split('/').filter(Boolean);
+  const ROOT_OUTPUT_PATH = '/drive/转码/转码后';
+  const pathParts = (browsePath || ROOT_OUTPUT_PATH).split('/').filter(Boolean);
+  const rootDepth = ROOT_OUTPUT_PATH.split('/').filter(Boolean).length;
+  const relativeParts = pathParts.slice(rootDepth);
 
   const buildTree = paths => {
     const tree = {};
@@ -231,19 +234,19 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       <div className="flex items-center space-x-1 text-sm mb-3 flex-wrap">
                         <button
                           type="button"
-                          onClick={() => handleBrowse('/drive/转码/转码后')}
+                          onClick={() => handleBrowse(ROOT_OUTPUT_PATH)}
                           className={clsx(
                             'hover:underline',
-                            browsePath === '/drive/转码/转码后'
+                            browsePath === ROOT_OUTPUT_PATH
                               ? 'text-white font-medium'
                               : 'text-primary'
                           )}
                         >
                           转码后
                         </button>
-                        {pathParts.slice(1).map((part, i) => {
+                        {relativeParts.map((part, i) => {
                           const fullPath =
-                            '/drive/转码/转码后/' + pathParts.slice(1, i + 2).join('/');
+                            ROOT_OUTPUT_PATH + '/' + relativeParts.slice(0, i + 1).join('/');
                           return (
                             <React.Fragment key={i}>
                               <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />
