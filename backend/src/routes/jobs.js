@@ -162,7 +162,7 @@ router.delete('/all', authenticateToken, async (req, res, next) => {
     const db = getDatabase();
 
     const result = db
-      .prepare("DELETE FROM jobs WHERE status IN ('completed', 'failed', 'cancelled')")
+      .prepare('DELETE FROM jobs WHERE status IN (\'completed\', \'failed\', \'cancelled\')')
       .run();
 
     res.json({
