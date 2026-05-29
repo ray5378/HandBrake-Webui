@@ -595,9 +595,8 @@ async function cancelTranscode(jobId) {
   if (process) {
     process.kill('SIGTERM');
     activeJobs.delete(jobId);
+    processingCount = Math.max(0, processingCount - 1);
   }
-
-  processingCount = Math.max(0, processingCount - 1);
   processNextJob();
 }
 
