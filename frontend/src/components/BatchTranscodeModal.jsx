@@ -79,6 +79,11 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     fetchBrowseDirs(path);
   };
 
+  const handleBreadcrumbClick = path => {
+    setBrowsePath(path);
+    fetchBrowseDirs(path);
+  };
+
   const handleCreateDir = async () => {
     if (!newDirName.trim()) return;
     try {
@@ -238,7 +243,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                               {i > 0 && <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />}
                               <button
                                 type='button'
-                                onClick={() => handleBrowse(fullPath)}
+                                onClick={() => handleBreadcrumbClick(fullPath)}
                                 className={clsx(
                                   'hover:underline',
                                   browsePath === fullPath
