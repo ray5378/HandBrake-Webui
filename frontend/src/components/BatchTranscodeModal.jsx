@@ -168,7 +168,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
               <FolderOpen className='w-3 h-3 text-warning shrink-0 relative top-0.5' />
               <span className='text-gray-400'>{name}</span>
               <ChevronRight className='w-3 h-3 text-gray-600 shrink-0 relative top-0.5' />
-              <span className='text-primary break-all'>
+              <span className='text-primary whitespace-nowrap'>
                 {outputDirectory}/{prefix}
                 {name}
               </span>
@@ -184,7 +184,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   return (
     <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4'>
-      <div className='bg-dark-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
+      <div className='bg-dark-800 rounded-xl max-w-7xl w-full max-h-[90vh] overflow-y-auto'>
         <div className='flex items-center justify-between p-6 border-b border-dark-700'>
           <div>
             <h2 className='text-2xl font-bold text-white flex items-center space-x-3'>
@@ -253,7 +253,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                         })}
                       </div>
 
-                      <div className='grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto'>
+                      <div className='grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 mb-3 max-h-48 overflow-y-auto'>
                         {browseDirs.map(dir => (
                           <button
                             type='button'
