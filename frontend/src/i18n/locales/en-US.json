@@ -64,7 +64,8 @@
     "heapTotal": "Heap Total",
     "heapUsed": "Heap Used",
     "saving": "Saving...",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "quickActions": "Quick Actions"
   },
   "nav": {
     "dashboard": "Dashboard",
