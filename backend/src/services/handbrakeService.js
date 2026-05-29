@@ -448,23 +448,24 @@ function parseProgress(jobId, data) {
 
 function tryParseJsonProgress(data) {
   const lines = data.split('\n').filter(Boolean);
+  let lastProgress = null;
   for (const line of lines) {
     try {
       const json = JSON.parse(line);
       if (json.Event === 'Progress' && typeof json.Progress === 'number') {
-        return json.Progress;
+        lastProgress = json.Progress;
       }
     } catch (e) {
       // not JSON, skip
     }
   }
-  return null;
+  return lastProgress !== null ? lastProgress * 100 : null;
 }
 
 function tryParseTextProgress(data) {
-  const match = data.match(/Encoding:.*?(\d+\.?\d*)\s*%/);
-  if (match) {
-    return parseFloat(match[1]);
+  const matches = [...data.matchAll(/Encoding:.*?(\d+\.?\d*)\s*%/g)];
+  if (matches.length > 0) {
+    return parseFloat(matches[matches.length - 1][1]);
   }
   return null;
 }
