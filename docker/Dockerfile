@@ -48,25 +48,19 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositor
     ffmpeg \
     tzdata \
     dumb-init \
-    # Intel/AMD VA-API 硬件加速
     libva \
     libva-intel-driver \
     mesa-va-gallium \
-    # Intel QSV (Quick Sync Video)
-    intel-media-sdk \
-    libmfx \
-    # NVENC (NVIDIA) - 注意：还需 nvidia-docker2 运行时
-    libnvcuvid \
-    libnvidia-encode \
-    # 基础显卡工具
     mesa-dri-gallium \
     mesa-gl \
-    # 视频编解码库
     libx264 \
     libx265 \
     libvpx \
     libdav1d \
-    aom-libs
+    aom-libs && \
+    if [ "$(uname -m)" = "x86_64" ]; then \
+      apk add --no-cache intel-media-driver onevpl-intel-gpu; \
+    fi
 
 # 设置时区
 ENV TZ=Asia/Shanghai
