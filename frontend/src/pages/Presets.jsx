@@ -23,6 +23,9 @@ import {
   VIDEO_CODECS,
   X264_PRESETS,
   X265_PRESETS,
+  QSV_PRESETS,
+  NVENC_PRESETS,
+  VCE_PRESETS,
   X264_TUNES,
   X265_TUNES,
   RATE_CONTROLS,
@@ -202,11 +205,34 @@ function Presets() {
                   onChange={e => updateSettings('video.codec', e.target.value)}
                   className="input"
                 >
-                  {VIDEO_CODECS.map(codec => (
-                    <option key={codec.value} value={codec.value}>
-                      {codec.label}
-                    </option>
-                  ))}
+                  <optgroup label="软件编码">
+                    {VIDEO_CODECS.filter(c => c.group === 'software').map(codec => (
+                      <option key={codec.value} value={codec.value}>
+                        {codec.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Intel QSV（硬件加速）">
+                    {VIDEO_CODECS.filter(c => c.group === 'qsv').map(codec => (
+                      <option key={codec.value} value={codec.value}>
+                        {codec.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="NVIDIA NVENC（硬件加速）">
+                    {VIDEO_CODECS.filter(c => c.group === 'nvenc').map(codec => (
+                      <option key={codec.value} value={codec.value}>
+                        {codec.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="AMD VCE（硬件加速）">
+                    {VIDEO_CODECS.filter(c => c.group === 'vce').map(codec => (
+                      <option key={codec.value} value={codec.value}>
+                        {codec.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
@@ -282,13 +308,26 @@ function Presets() {
                   onChange={e => updateSettings('video.preset', e.target.value)}
                   className="input"
                 >
-                  {(formData.settings.video?.codec === 'x265' ? X265_PRESETS : X264_PRESETS).map(
-                    preset => (
+                  {(() => {
+                    const codec = formData.settings.video?.codec || 'x264';
+                    let presets;
+                    if (codec.startsWith('qsv_')) {
+                      presets = QSV_PRESETS;
+                    } else if (codec.startsWith('nvenc_')) {
+                      presets = NVENC_PRESETS;
+                    } else if (codec.startsWith('vce_')) {
+                      presets = VCE_PRESETS;
+                    } else if (codec === 'x265') {
+                      presets = X265_PRESETS;
+                    } else {
+                      presets = X264_PRESETS;
+                    }
+                    return presets.map(preset => (
                       <option key={preset.value} value={preset.value}>
                         {preset.label}
                       </option>
-                    )
-                  )}
+                    ));
+                  })()}
                 </select>
               </div>
 
@@ -300,13 +339,17 @@ function Presets() {
                   className="input"
                 >
                   <option value="">无</option>
-                  {(formData.settings.video?.codec === 'x265' ? X265_TUNES : X264_TUNES).map(
-                    tune => (
+                  {(() => {
+                    const codec = formData.settings.video?.codec || 'x264';
+                    if (codec.startsWith('qsv_') || codec.startsWith('nvenc_') || codec.startsWith('vce_')) {
+                      return null;
+                    }
+                    return (codec === 'x265' ? X265_TUNES : X264_TUNES).map(tune => (
                       <option key={tune.value} value={tune.value}>
                         {tune.label}
                       </option>
-                    )
-                  )}
+                    ));
+                  })()}
                 </select>
               </div>
             </div>

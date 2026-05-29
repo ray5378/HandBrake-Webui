@@ -11,10 +11,20 @@ export const FORMATS = [
 
 // 视频编码器
 export const VIDEO_CODECS = [
-  { value: 'x264', label: 'H.264 (x264)' },
-  { value: 'x265', label: 'H.265/HEVC (x265)' },
-  { value: 'svt-av1', label: 'AV1 (SVT-AV1)' },
-  { value: 'vp9', label: 'VP9' }
+  // 软件编码器
+  { value: 'x264', label: 'H.264 (x264)', group: 'software' },
+  { value: 'x265', label: 'H.265/HEVC (x265)', group: 'software' },
+  { value: 'svt-av1', label: 'AV1 (SVT-AV1)', group: 'software' },
+  { value: 'vp9', label: 'VP9', group: 'software' },
+  // Intel QSV 硬件编码
+  { value: 'qsv_h264', label: 'H.264 (QSV)', group: 'qsv' },
+  { value: 'qsv_h265', label: 'H.265/HEVC (QSV)', group: 'qsv' },
+  // NVIDIA NVENC 硬件编码
+  { value: 'nvenc_h264', label: 'H.264 (NVENC)', group: 'nvenc' },
+  { value: 'nvenc_h265', label: 'H.265/HEVC (NVENC)', group: 'nvenc' },
+  // AMD VCE 硬件编码
+  { value: 'vce_h264', label: 'H.264 (VCE)', group: 'vce' },
+  { value: 'vce_h265', label: 'H.265/HEVC (VCE)', group: 'vce' }
 ];
 
 // 视频编码器预设
@@ -42,6 +52,25 @@ export const X265_PRESETS = [
   { value: 'slower', label: 'Slower（更慢）' },
   { value: 'veryslow', label: 'Veryslow（非常慢）' },
   { value: 'placebo', label: 'Placebo（极致）' }
+];
+
+// 硬件编码器预设
+export const QSV_PRESETS = [
+  { value: 'speed', label: 'Speed（速度优先）' },
+  { value: 'balanced', label: 'Balanced（均衡）' },
+  { value: 'quality', label: 'Quality（画质优先）' }
+];
+
+export const NVENC_PRESETS = [
+  { value: 'fast', label: 'Fast（快速）' },
+  { value: 'medium', label: 'Medium（中等）' },
+  { value: 'slow', label: 'Slow（高质量）' }
+];
+
+export const VCE_PRESETS = [
+  { value: 'speed', label: 'Speed（速度优先）' },
+  { value: 'balanced', label: 'Balanced（均衡）' },
+  { value: 'quality', label: 'Quality（画质优先）' }
 ];
 
 // 视频调优
