@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useTranslation } from 'react-i18next';
-import { Video, Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 function Login() {
   const { t } = useTranslation();
@@ -92,8 +92,12 @@ function Login() {
       <div className='min-h-screen bg-dark-900 flex items-center justify-center px-4'>
         <div className='max-w-md w-full'>
           <div className='text-center mb-8'>
-            <div className='w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4'>
-              <Video className='w-10 h-10 text-white' />
+            <div className='w-20 h-20 mx-auto mb-4'>
+              <img
+                src='/logo.png'
+                alt='HandBrake Web UI'
+                className='w-full h-full object-contain'
+              />
             </div>
             <h1 className='text-3xl font-bold text-white mb-2'>HandBrake Web UI</h1>
             <p className='text-gray-400'>{t('auth.setupTitle')}</p>
@@ -166,8 +170,8 @@ function Login() {
     <div className='min-h-screen bg-dark-900 flex items-center justify-center px-4'>
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
-          <div className='w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4'>
-            <Video className='w-10 h-10 text-white' />
+          <div className='w-20 h-20 mx-auto mb-4'>
+            <img src='/logo.png' alt='HandBrake Web UI' className='w-full h-full object-contain' />
           </div>
           <h1 className='text-3xl font-bold text-white mb-2'>HandBrake Web UI</h1>
           <p className='text-gray-400'>{t('auth.subtitle')}</p>
