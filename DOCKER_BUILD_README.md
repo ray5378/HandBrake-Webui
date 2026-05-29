@@ -109,13 +109,9 @@ services:
       - 52389:52389
     volumes:
       - ./config:/config
-      - ./source:/source
-      - ./output:/output
-      - ./cache:/cache
+      - ./drive:/drive
     environment:
       - NODE_ENV=production
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=changeme123
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
@@ -132,12 +128,9 @@ docker pull your-username/handbrake-webui:latest
 # 运行容器
 docker run -d \
   --name handbrake-webui \
-  -p 3000:3000 \
+  -p 52389:52389 \
   -v $(pwd)/config:/config \
-  -v $(pwd)/source:/source \
-  -v $(pwd)/output:/output \
-  -e ADMIN_USERNAME=admin \
-  -e ADMIN_PASSWORD=changeme123 \
+  -v $(pwd)/drive:/drive \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
   --restart unless-stopped \
   your-username/handbrake-webui:latest
@@ -154,7 +147,7 @@ docker run -d \
 docker build -f docker/Dockerfile -t handbrake-webui:local .
 
 # 运行测试
-docker run -d -p 3000:3000 handbrake-webui:local
+docker run -d -p 52389:52389 handbrake-webui:local
 ```
 
 ### 使用自定义标签
@@ -214,4 +207,4 @@ docker buildx build \
 
 - [Docker 官方文档](https://docs.docker.com/)
 - [GitHub Actions 文档](https://docs.github.com/en/actions)
-- [Docker Buildx 文档](https://docs.docker.com/buildx/working-with-buildx/)
+- [Docker Buildx 文档](https://docs.buildx.working-with-buildx/)

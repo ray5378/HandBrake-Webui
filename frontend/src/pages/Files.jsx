@@ -22,7 +22,7 @@ function Files() {
   const [files, setFiles] = useState([]);
   const [directories, setDirectories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState('/source');
+  const [currentPath, setCurrentPath] = useState('/drive');
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState(null);

@@ -524,34 +524,7 @@ Encoding: task 1 of 1, 45.234567 %
 ## 6. Docker 配置
 
 ### 6.1 Dockerfile
-```dockerfile
-FROM alpine:3.19
-
-# 安装 Node.js 和 HandBrake
-RUN apk add --no-cache \
-    nodejs \
-    npm \
-    handbrake-cli \
-    ffmpeg \
-    && npm install -g npm
-
-# 复制应用代码
-COPY backend /app/backend
-COPY frontend /app/frontend
-
-# 安装依赖
-WORKDIR /app/backend
-RUN npm install --production
-
-WORKDIR /app/frontend
-RUN npm install && npm run build
-
-# 暴露端口
-EXPOSE 3000
-
-# 启动命令
-CMD ["node", "/app/backend/server.js"]
-```
+详见 [docker/Dockerfile](../docker/Dockerfile)，基于 Debian Bookworm 构建，包含 HandBrake CLI、Intel VA-API 驱动支持。
 
 ### 6.2 docker-compose.yml
 ```yaml
@@ -563,9 +536,7 @@ services:
       - 52389:52389
     volumes:
       - ./config:/config
-      - ./source:/source
-      - ./output:/output
-      - ./cache:/cache
+      - ./drive:/drive
     environment:
       - NODE_ENV=production
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production

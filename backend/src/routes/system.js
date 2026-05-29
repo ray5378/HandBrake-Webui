@@ -55,9 +55,68 @@ router.get('/directories', authenticateToken, (req, res) => {
     data: {
       source: config.uploadDir,
       output: config.outputDir,
-      config: config.configDir
+      config: config.configDir,
+      cache: config.cacheDir
     }
   });
+});
+
+router.get('/cache-dir', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      cacheDir: config.cacheDir
+    }
+  });
+});
+
+router.post('/cache-dir', authenticateToken, (req, res) => {
+  try {
+    const { path: cachePath } = req.body;
+
+    if (!cachePath || typeof cachePath !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: '请提供有效的目录路径'
+      });
+    }
+
+    if (!fs.existsSync(cachePath)) {
+      return res.status(400).json({
+        success: false,
+        error: '目录不存在'
+      });
+    }
+
+    const stats = fs.statSync(cachePath);
+    if (!stats.isDirectory()) {
+      return res.status(400).json({
+        success: false,
+        error: '路径不是一个目录'
+      });
+    }
+
+    try {
+      fs.accessSync(cachePath, fs.constants.W_OK);
+    } catch (e) {
+      return res.status(400).json({
+        success: false,
+        error: '目录不可写'
+      });
+    }
+
+    config.cacheDir = cachePath;
+    config.saveConfig();
+
+    res.json({
+      success: true,
+      data: {
+        cacheDir: config.cacheDir
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/handbrake/version', authenticateToken, (req, res) => {

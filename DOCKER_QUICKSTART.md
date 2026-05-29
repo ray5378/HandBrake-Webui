@@ -4,8 +4,8 @@
 
 ```bash
 # 1. 创建挂载目录
-mkdir -p config source output cache
-chmod 777 config source output cache
+mkdir -p config drive
+chmod 777 config drive
 
 # 2. 复制环境变量配置
 cp .env.example .env
@@ -15,7 +15,7 @@ cp .env.example .env
 docker-compose up -d
 
 # 4. 访问
-# http://localhost:3000
+# http://localhost:52389
 # 默认管理员: admin / changeme123
 ```
 
@@ -32,13 +32,9 @@ docker pull your-username/handbrake-webui:latest
 # 运行容器
 docker run -d \
   --name handbrake-webui \
-  -p 3000:3000 \
+  -p 52389:52389 \
   -v $(pwd)/config:/config \
-  -v $(pwd)/source:/source \
-  -v $(pwd)/output:/output \
-  -v $(pwd)/cache:/cache \
-  -e ADMIN_USERNAME=admin \
-  -e ADMIN_PASSWORD=changeme123 \
+  -v $(pwd)/drive:/drive \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
   --restart unless-stopped \
   your-username/handbrake-webui:latest
@@ -52,9 +48,6 @@ npm run docker:buildx
 
 # 方式二：使用 docker 命令
 docker build -f docker/Dockerfile -t handbrake-webui:local .
-
-# 方式三：多平台构建
-npm run docker:buildx-multi
 ```
 
 ### 测试本地镜像
@@ -64,10 +57,10 @@ npm run docker:buildx-multi
 npm run docker:test
 
 # 或手动运行
-docker run -d -p 3000:3000 --name handbrake-test handbrake-webui:local
+docker run -d -p 52389:52389 --name handbrake-test handbrake-webui:local
 
 # 访问测试
-# http://localhost:3000
+# http://localhost:52389
 
 # 停止并删除
 docker stop handbrake-test && docker rm handbrake-test
@@ -83,15 +76,10 @@ docker stop handbrake-test && docker rm handbrake-test
 
 ```bash
 # 服务配置
-PORT=3000
+PORT=52389
 NODE_ENV=production
 
-# 管理员账号
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=changeme123  # 请修改！
-
 # JWT 密钥（生产环境必须修改！）
-# 使用以下命令生成: openssl rand -base64 64
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
 # 转码配置
@@ -106,9 +94,15 @@ LOG_LEVEL=INFO
 | 宿主机 | 容器 | 说明 |
 |-------|------|------|
 | `./config` | `/config` | 数据库和配置 |
-| `./source` | `/source` | 源视频文件 |
-| `./output` | `/output` | 转码输出文件 |
-| `./cache` | `/cache` | 转码临时文件 |
+| `./drive` | `/drive` | 源视频、转码输出、缓存等所有文件 |
+
+所有文件操作都在 `/drive` 同一文件系统内，避免跨设备移动文件导致的错误。
+
+### 首次使用配置
+
+1. 访问 Web UI，设置管理员账号
+2. 进入 **设置 → 缓存目录**，通过文件浏览器选择一个临时缓存目录（如 `/drive/cache`）
+3. 返回文件管理页面，即可开始选择源文件进行转码
 
 ---
 
@@ -117,14 +111,15 @@ LOG_LEVEL=INFO
 ### 开发阶段
 
 ```bash
+# 创建必要目录
+mkdir -p config drive
+chmod 777 config drive
+
 # 代码检查
 npm run lint
 
 # 代码格式化
 npm run format
-
-# 构建本地镜像
-npm run docker:buildx
 
 # 启动服务
 docker-compose up -d
@@ -210,15 +205,15 @@ cp -r config config.backup.$(date +%Y%m%d)
 docker-compose logs -f
 
 # 检查端口占用
-lsof -i :3000
-netstat -tulpn | grep 3000
+lsof -i :52389
+netstat -tulpn | grep 52389
 ```
 
 ### 文件权限问题
 
 ```bash
 # 修复权限
-chmod 777 -R config source output cache
+chmod 777 -R config drive
 ```
 
 ### 数据库问题
@@ -228,6 +223,14 @@ chmod 777 -R config source output cache
 rm -f config/database.sqlite
 docker-compose restart
 ```
+
+### 转码任务提交失败
+
+如果提示"请先在设置中配置缓存目录"，请按以下步骤操作：
+1. 访问 Web UI
+2. 进入 **设置 → 缓存目录**
+3. 通过文件浏览器选择一个目录（例如 `/drive/cache`）
+4. 点击保存
 
 ### 性能优化
 
@@ -240,7 +243,7 @@ docker-compose restart
 #         cpus: '2.0'
 #         memory: 4G
 
-# 2. 使用 SSD 存储 source 和 output 目录
+# 2. 使用 SSD 存储 drive 目录
 ```
 
 ---
@@ -257,25 +260,26 @@ docker-compose restart
 - ✅ 响应式 UI（桌面端 + 移动端）
 - ✅ Docker 自动构建
 - ✅ 多平台支持 (AMD64/ARM64)
-
----
-
-## 🔗 更多资源
-
-- [项目文档](./PROJECT_SUMMARY.md)
-- [Docker 自动构建说明](./DOCKER_BUILD_README.md)
-- [技术架构文档](./.trae/documents/architecture-handbrake-webui.md)
-- [代码规范](./.github/CODE_STYLE_CHECKLIST.md)
+- ✅ 单挂载点设计，解决跨设备文件移动问题
 
 ---
 
 ## 💡 提示
 
-1. **建议使用 Docker Compose** - 更方便配置和管理
-2. **定期备份** - 重要配置和数据库
-3. **监控资源使用** - 转码会消耗大量 CPU/内存
-4. **使用 SSD** - 提升 IO 性能和转码速度
-5. **更新镜像** - 安全更新和新功能
+1. **使用单个挂载点** - 所有文件操作集中在 `/drive`，避免跨文件系统错误
+2. **首次先配缓存** - 使用前先在设置中配置缓存目录
+3. **定期备份** - 重要配置和数据库
+4. **监控资源使用** - 转码会消耗大量 CPU/内存
+5. **使用 SSD** - 提升 IO 性能和转码速度
+
+---
+
+## 📚 更多资源
+
+- [项目文档](./PROJECT_SUMMARY.md)
+- [Docker 自动构建说明](./DOCKER_BUILD_README.md)
+- [技术架构文档](./.trae/documents/architecture-handbrake-webui.md)
+- [代码规范](./.github/CODE_STYLE_CHECKLIST.md)
 
 ---
 

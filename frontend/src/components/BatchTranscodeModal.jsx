@@ -16,8 +16,8 @@ import clsx from 'clsx';
 function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState('');
-  const [outputDirectory, setOutputDirectory] = useState('/output');
-  const [browsePath, setBrowsePath] = useState('/output');
+  const [outputDirectory, setOutputDirectory] = useState('/drive/转码/转码后');
+  const [browsePath, setBrowsePath] = useState('/drive/转码/转码后');
   const [browseDirs, setBrowseDirs] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(false);
   const [sourceTree, setSourceTree] = useState([]);
@@ -63,9 +63,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
       const lastDir = directory.split('/').filter(Boolean).pop();
       if (lastDir) {
-        setOutputDirectory(`/output/${lastDir}`);
+        setOutputDirectory(`/drive/转码/转码后/${lastDir}`);
       }
-      await fetchBrowseDirs('/output');
+      await fetchBrowseDirs('/drive/转码/转码后');
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -98,6 +98,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       return;
     }
 
+    try {
+      const cacheRes = await api.get('/system/cache-dir');
+      if (!cacheRes.data.data.cacheDir) {
+        setError('请先在设置中配置缓存目录');
+        return;
+      }
+    } catch (err) {
+      setError('检查缓存目录失败，请先在设置中配置');
+      return;
+    }
+
     setSubmitting(true);
     setError('');
 
@@ -123,7 +134,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     }
   };
 
-  const pathParts = (browsePath || '/output').split('/').filter(Boolean);
+  const pathParts = (browsePath || '/drive/转码/转码后').split('/').filter(Boolean);
 
   const buildTree = paths => {
     const tree = {};
@@ -220,16 +231,16 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       <div className="flex items-center space-x-1 text-sm mb-3 flex-wrap">
                         <button
                           type="button"
-                          onClick={() => handleBrowse('/output')}
+                          onClick={() => handleBrowse('/drive/转码/转码后')}
                           className={clsx(
                             'hover:underline',
-                            browsePath === '/output' ? 'text-white font-medium' : 'text-primary'
+                            browsePath === '/drive/转码/转码后' ? 'text-white font-medium' : 'text-primary'
                           )}
                         >
-                          output
+                          转码后
                         </button>
                         {pathParts.slice(1).map((part, i) => {
-                          const fullPath = '/output/' + pathParts.slice(1, i + 2).join('/');
+                          const fullPath = '/drive/转码/转码后/' + pathParts.slice(1, i + 2).join('/');
                           return (
                             <React.Fragment key={i}>
                               <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />

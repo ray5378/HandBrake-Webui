@@ -45,11 +45,9 @@ COPY frontend/dist ./frontend/dist
 
 ENV NODE_ENV=production
 ENV PORT=52389
-ENV UPLOAD_DIR=/source
-ENV OUTPUT_DIR=/output
 ENV CONFIG_DIR=/config
 
-RUN mkdir -p /config /source /output
+RUN mkdir -p /config /drive /drive/转码/转码后
 
 EXPOSE 52389
 

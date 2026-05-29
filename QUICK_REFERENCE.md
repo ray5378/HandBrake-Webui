@@ -7,7 +7,7 @@
 docker-compose up -d
 
 # 访问
-http://localhost:3000
+http://localhost:52389
 
 # 管理员账号
 用户名: admin
@@ -47,19 +47,16 @@ npm run format              # 格式化代码
 
 | 容器内路径 | 宿主机路径 | 用途 |
 |-----------|-----------|------|
-| /source | ./source | 源视频文件 |
-| /output | ./output | 转码输出 |
 | /config | ./config | 数据库和配置 |
+| /drive | ./drive | 源视频、转码输出、缓存等所有文件 |
 
 ## ⚙️ 环境变量
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| ADMIN_USERNAME | admin | 管理员用户名 |
-| ADMIN_PASSWORD | changeme123 | 管理员密码 |
 | JWT_SECRET | (随机) | JWT 密钥 |
 | MAX_CONCURRENT_JOBS | 2 | 最大并发任务数 |
-| PORT | 3000 | 服务端口 |
+| PORT | 52389 | 服务端口 |
 
 ## 🎬 支持的编码格式
 
@@ -86,13 +83,13 @@ npm run format              # 格式化代码
 docker-compose logs -f
 
 # 检查端口占用
-lsof -i :3000
+lsof -i :52389
 ```
 
 ### 文件权限问题
 ```bash
 # 修复权限
-chmod 777 -R source output config
+chmod 777 -R config drive
 ```
 
 ### 数据库问题
@@ -102,11 +99,17 @@ rm -f config/database.sqlite
 docker-compose restart
 ```
 
+### 转码任务提交失败 - 缓存目录未配置
+```bash
+# 访问 Web UI → 设置 → 缓存目录
+# 通过文件浏览器选择一个目录并保存
+```
+
 ## 📊 监控
 
-- **健康检查**: http://localhost:3000/api/health
-- **系统信息**: http://localhost:3000/api/system/info
-- **目录映射**: http://localhost:3000/api/system/directories
+- **健康检查**: http://localhost:52389/api/health
+- **系统信息**: http://localhost:52389/api/system/info
+- **目录映射**: http://localhost:52389/api/system/directories
 
 ## 🔒 安全建议
 

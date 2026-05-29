@@ -121,6 +121,13 @@ router.post(
   validate,
   async (req, res, next) => {
     try {
+      if (!config.cacheDir) {
+        return res.status(400).json({
+          success: false,
+          error: '请先在设置中配置缓存目录'
+        });
+      }
+
       const { sourceFile, outputFile, presetId, customSettings } = req.body;
       const db = getDatabase();
 
@@ -369,6 +376,13 @@ router.post(
   validate,
   async (req, res, next) => {
     try {
+      if (!config.cacheDir) {
+        return res.status(400).json({
+          success: false,
+          error: '请先在设置中配置缓存目录'
+        });
+      }
+
       const {
         sourceDirectory,
         outputDirectory,

@@ -26,9 +26,7 @@ services:
       - 52389:52389
     volumes:
       - ./config:/config
-      - ./source:/source
-      - ./output:/output
-      - ./cache:/cache
+      - ./drive:/drive
     environment:
       - NODE_ENV=production
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -43,7 +41,7 @@ services:
 
 ```bash
 # 创建必要目录
-mkdir -p config source output
+mkdir -p config drive
 
 # 启动容器
 docker-compose up -d
@@ -56,10 +54,23 @@ docker-compose logs -f
 ```
 
 #### 3. 访问 Web UI
+
 - 默认地址: http://localhost:52389
-- 修改端口: 可以在 `docker-compose.yml` 中修改 `ports` 配置，例如改成 `8080:52389`
-- 自定义内部端口: 可以在 `environment` 中设置 `PORT=你的端口`
 - 首次访问: 请在页面上设置管理员账号密码
+
+#### 4. 目录结构说明
+
+容器使用统一的 `/drive` 挂载点，所有文件操作都在同一文件系统内：
+
+| 容器内路径 | 用途 | 说明 |
+|-----------|------|------|
+| `/config` | 配置和数据库 | 持久化配置和 SQLite 数据库 |
+| `/drive` | 文件存储根目录 | 存放源视频、转码输出、缓存文件 |
+| `/drive/转码/转码后` | 转码输出目录 | 转码完成的文件自动输出到此目录 |
+
+#### 5. 转码前配置
+
+首次使用需在 **设置 → 缓存目录** 中通过文件浏览器指定一个临时缓存目录（例如 `/drive/cache`），转码过程中的临时文件会写入此目录。
 
 ---
 
@@ -74,8 +85,7 @@ docker run -d \
   --name handbrake-webui \
   -p 52389:52389 \
   -v $(pwd)/config:/config \
-  -v $(pwd)/source:/source \
-  -v $(pwd)/output:/output \
+  -v $(pwd)/drive:/drive \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
   -e PORT=52389 \
   -e MAX_CONCURRENT_JOBS=2 \
@@ -122,9 +132,8 @@ handbrake-webui/
 ├── docker/              # Docker 配置
 ├── backend/             # 后端代码
 ├── frontend/            # 前端代码
-├── source/              # 源视频目录 (映射)
-├── output/              # 输出目录 (映射)
 ├── config/              # 配置目录 (映射)
+├── drive/               # 文件存储根目录 (映射)
 └── docker-compose.yml   # Docker Compose 配置
 ```
 
@@ -137,12 +146,18 @@ handbrake-webui/
 | JWT_SECRET | JWT 密钥 | (随机生成) |
 | PORT | 服务端口 | 52389 |
 | MAX_CONCURRENT_JOBS | 最大并发转码数 | 2 |
+| CONFIG_DIR | 配置目录 | /config |
 
-### 目录映射
+### 目录映射指南
 
-- `/source`: 源视频文件目录
-- `/output`: 转码输出目录
-- `/config`: 数据库和配置目录
+容器通过两个挂载点持久化数据：
+
+| 宿主机路径 | 容器内路径 | 用途 |
+|-----------|-----------|------|
+| `./config` | `/config` | SQLite 数据库和配置文件 |
+| `./drive` | `/drive` | 源文件、转码输出、缓存等所有文件 |
+
+`/drive` 为单挂载点设计，源文件、转码临时缓存和输出文件都在同一文件系统内，避免跨设备文件移动导致的 `EXDEV` 错误。
 
 ### 硬件加速配置
 
@@ -154,7 +169,6 @@ handbrake-webui/
 
 安装 nvidia-docker2 的步骤：
 ```bash
-# 详细步骤请参考 NVIDIA 官方文档
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list

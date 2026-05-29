@@ -30,7 +30,7 @@ handbrake-webui/
 │   │
 │   └── .github/
 │       ├── CODE_STYLE_CHECKLIST.md   # 代码规范检查清单
-│       └── workflows/ci.yml           # GitHub Actions CI 配置
+│       └── workflows/                 # GitHub Actions CI 配置
 │
 ├── 🐳 Docker
 │   ├── Dockerfile                     # Docker 镜像构建
@@ -113,15 +113,12 @@ handbrake-webui/
 │           ├── Login.jsx             # 登录页
 │           ├── Dashboard.jsx          # 仪表盘
 │           ├── Files.jsx              # 文件管理
-│           ├── Transcode.jsx         # 转码配置
 │           ├── Jobs.jsx              # 任务列表
 │           ├── JobDetail.jsx          # 任务详情
 │           ├── Presets.jsx            # 预设管理
 │           └── Settings.jsx           # 系统设置
 │
 └── 🛠️ 脚本
-    ├── check-codestyle.sh             # 代码规范检查
-    ├── format-code.sh                 # 代码格式化
     └── deploy.sh                      # Docker 部署
 ```
 
@@ -175,14 +172,14 @@ handbrake-webui/
 # 1. 克隆/下载代码
 
 # 2. 创建目录
-mkdir -p config source output
-chmod 777 config source output
+mkdir -p config drive
+chmod 777 config drive
 
 # 3. 启动服务
 docker-compose up -d
 
 # 4. 访问
-# http://localhost:3000
+# http://localhost:52389
 # 默认管理员: admin / changeme123
 ```
 

@@ -24,11 +24,11 @@ fi
 
 # 创建必要目录
 echo "📁 创建必要目录..."
-mkdir -p config source output
+mkdir -p config drive
 
 # 设置目录权限
 echo "🔐 设置目录权限..."
-chmod 777 config source output
+chmod 777 config drive
 
 # 复制环境变量文件
 if [ ! -f ".env" ]; then

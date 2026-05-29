@@ -17,7 +17,7 @@ router.get(
   validate,
   (req, res, next) => {
     try {
-      const directory = req.query.directory || '/source';
+      const directory = req.query.directory || '/drive';
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
       const offset = (page - 1) * limit;

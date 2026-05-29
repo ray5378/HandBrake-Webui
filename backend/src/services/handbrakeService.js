@@ -348,7 +348,7 @@ async function startTranscode(job) {
     }
   }
 
-  const cacheDir = process.env.CACHE_DIR || '/cache';
+  const cacheDir = config.cacheDir;
   const jobTempDir = `${cacheDir}/handbrake-temp/${job.id}`;
   fs.mkdirSync(jobTempDir, { recursive: true });
   const tempOutputFile = path.join(jobTempDir, path.basename(job.output_file));
