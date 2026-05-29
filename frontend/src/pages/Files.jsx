@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FolderOpen,
-  Upload,
   Download,
   Trash2,
   Video,
@@ -26,7 +25,6 @@ function Files() {
   const [currentPath, setCurrentPath] = useState('/source');
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
-  const [uploading, setUploading] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState(null);
@@ -48,32 +46,6 @@ function Files() {
       console.error('Failed to fetch files:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpload = async e => {
-    const uploadedFiles = e.target.files;
-    if (!uploadedFiles.length) return;
-
-    setUploading(true);
-
-    try {
-      for (const file of uploadedFiles) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('directory', currentPath);
-
-        await api.post('/files/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      }
-
-      fetchFiles();
-    } catch (error) {
-      console.error('Upload failed:', error);
-    } finally {
-      setUploading(false);
-      e.target.value = '';
     }
   };
 
@@ -211,18 +183,6 @@ function Files() {
             </button>
           </div>
 
-          <label className="btn btn-primary cursor-pointer inline-flex items-center space-x-2">
-            <Upload className="w-4 h-4" />
-            <span>{t('files.uploadFile')}</span>
-            <input
-              type="file"
-              accept="video/*"
-              multiple
-              onChange={handleUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
         </div>
       </div>
 
@@ -339,15 +299,6 @@ function Files() {
             </div>
           )}
         </>
-      )}
-
-      {uploading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-dark-800 rounded-lg p-6 text-center">
-            <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-white">{t('common.uploading') || 'Uploading...'}</p>
-          </div>
-        </div>
       )}
 
       {contextMenu && (

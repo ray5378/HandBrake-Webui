@@ -1,55 +1,12 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
 const { body, query } = require('express-validator');
 const config = require('../config');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
 
 const router = express.Router();
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = config.uploadDir;
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 * 1024
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedExtensions = [
-      '.mp4',
-      '.mkv',
-      '.avi',
-      '.mov',
-      '.wmv',
-      '.flv',
-      '.webm',
-      '.m4v',
-      '.mpg',
-      '.mpeg'
-    ];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowedExtensions.includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only video files are allowed.'));
-    }
-  }
-});
 
 router.get(
   '/',
@@ -237,25 +194,6 @@ router.get(
   }
 );
 
-router.post('/upload', authenticateToken, upload.single('file'), (req, res, next) => {
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      error: 'No file uploaded'
-    });
-  }
-
-  res.status(201).json({
-    success: true,
-    data: {
-      name: req.file.filename,
-      path: req.file.path,
-      size: req.file.size,
-      destination: req.file.destination
-    }
-  });
-});
-
 router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, res, next) => {
   try {
     const { path: filePath } = req.query;
@@ -271,8 +209,7 @@ router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, 
     const fileToDelete = path.resolve(filePath);
 
     if (
-      !fileToDelete.startsWith(outputDir) &&
-      !fileToDelete.startsWith(path.resolve(config.uploadDir))
+      !fileToDelete.startsWith(outputDir)
     ) {
       return res.status(403).json({
         success: false,

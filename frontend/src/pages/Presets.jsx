@@ -1494,7 +1494,7 @@ function Presets() {
                 <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-dark-700">
                   <button
                     onClick={() => handleEdit(preset)}
-                    className="btn btn-secondary flex-1 text-sm"
+                    className="btn btn-secondary flex-1 text-sm flex items-center justify-center"
                   >
                     <Edit className="w-4 h-4" />
                     <span className="ml-2">{t('common.edit')}</span>
