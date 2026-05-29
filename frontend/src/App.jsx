@@ -7,7 +7,6 @@ import Loading from './components/common/Loading';
 const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Files = lazy(() => import('./pages/Files'));
-const Transcode = lazy(() => import('./pages/Transcode'));
 const Jobs = lazy(() => import('./pages/Jobs'));
 const JobDetail = lazy(() => import('./pages/JobDetail'));
 const Presets = lazy(() => import('./pages/Presets'));
@@ -43,8 +42,6 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="files" element={<Files />} />
-            <Route path="transcode" element={<Transcode />} />
-            <Route path="transcode/:filePath" element={<Transcode />} />
             <Route path="jobs" element={<Jobs />} />
             <Route path="jobs/:id" element={<JobDetail />} />
             <Route path="presets" element={<Presets />} />

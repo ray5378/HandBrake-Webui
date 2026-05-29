@@ -228,7 +228,7 @@ router.get('/me', authenticateToken, (req, res) => {
 
 function saveRefreshToken(userId, token) {
   const db = getDatabase();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
 
   db.prepare(
     `

@@ -430,7 +430,7 @@ router.post(
         }
 
         const fileName = path.basename(sourceFile, path.extname(sourceFile));
-        const outputFile = path.join(outputDir, `${fileName}_encoded.${format}`);
+        const outputFile = path.join(outputDir, `${fileName}.${format}`);
 
         const jobId = uuidv4();
 

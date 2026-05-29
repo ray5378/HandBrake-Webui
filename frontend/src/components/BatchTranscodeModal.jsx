@@ -213,7 +213,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
               <ul className="text-gray-400 text-sm space-y-2">
                 <li>• 递归扫描源目录中的所有视频文件</li>
                 <li>• 保持原始目录结构</li>
-                <li>• 转码后的文件后缀添加 _encoded</li>
+                <li>• 转码后的文件保持原文件名，仅扩展名改为容器格式</li>
                 <li>• 所有任务会自动加入队列处理</li>
               </ul>
             </div>

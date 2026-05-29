@@ -430,17 +430,43 @@ async function startTranscode(job) {
 
 function parseProgress(jobId, data) {
   const db = getDatabase();
+  let progress = null;
 
-  const progressMatch = data.match(/Encoding:.*?(\d+\.?\d*)\s*%/);
-  if (progressMatch) {
-    const progress = parseFloat(progressMatch[1]);
+  progress = tryParseJsonProgress(data);
+  if (progress === null) {
+    progress = tryParseTextProgress(data);
+  }
 
+  if (progress !== null) {
     db.prepare(
       `
       UPDATE jobs SET progress = ? WHERE id = ?
       `
     ).run(progress, jobId);
   }
+}
+
+function tryParseJsonProgress(data) {
+  const lines = data.split('\n').filter(Boolean);
+  for (const line of lines) {
+    try {
+      const json = JSON.parse(line);
+      if (json.Event === 'Progress' && typeof json.Progress === 'number') {
+        return json.Progress;
+      }
+    } catch (e) {
+      // not JSON, skip
+    }
+  }
+  return null;
+}
+
+function tryParseTextProgress(data) {
+  const match = data.match(/Encoding:.*?(\d+\.?\d*)\s*%/);
+  if (match) {
+    return parseFloat(match[1]);
+  }
+  return null;
 }
 
 async function cancelTranscode(jobId) {

@@ -224,6 +224,25 @@ export const FRAMERATES = [
   { value: 120, label: '120 FPS' }
 ];
 
+// 获取编码器允许的码率控制选项
+export const getAllowedRateControls = codec => {
+  const codecLower = (codec || '').toLowerCase();
+  if (codecLower.includes('qsv')) {
+    return RATE_CONTROLS.filter(rc => rc.value === 'icq' || rc.value === 'cbr');
+  }
+  if (codecLower.includes('nvenc')) {
+    return RATE_CONTROLS.filter(rc => rc.value === 'cqp' || rc.value === 'cbr');
+  }
+  if (codecLower.includes('svt-av1')) {
+    return RATE_CONTROLS.filter(rc => rc.value === 'cq' || rc.value === 'cbr');
+  }
+  if (codecLower.includes('vp9')) {
+    return RATE_CONTROLS.filter(rc => rc.value === 'crf' || rc.value === 'cbr');
+  }
+  // x264/x265 默认
+  return RATE_CONTROLS.filter(rc => rc.value === 'crf' || rc.value === 'cbr' || rc.value === 'vbr');
+};
+
 // 编码器特定的码率控制类型
 export const getRateControlForCodec = codec => {
   if (!codec) return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };

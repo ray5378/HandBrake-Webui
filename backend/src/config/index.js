@@ -13,8 +13,8 @@ function generateSecret() {
 const config = {
   port: process.env.PORT ? parseInt(process.env.PORT) : 52389,
   jwtSecret: process.env.JWT_SECRET || generateSecret(),
-  jwtExpiresIn: '1h',
-  refreshTokenExpiresIn: '7d',
+  jwtExpiresIn: '24h',
+  refreshTokenExpiresIn: '90d',
   maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS) || 2,
   uploadDir: process.env.UPLOAD_DIR || '/source',
   outputDir: process.env.OUTPUT_DIR || '/output',

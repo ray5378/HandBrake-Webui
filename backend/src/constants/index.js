@@ -7,8 +7,8 @@
  * JWT Token 配置
  */
 const JWT_CONFIG = {
-  EXPIRES_IN: '1h',
-  REFRESH_EXPIRES_IN: '7d',
+  EXPIRES_IN: '24h',
+  REFRESH_EXPIRES_IN: '90d',
   ALGORITHM: 'HS256'
 };
 

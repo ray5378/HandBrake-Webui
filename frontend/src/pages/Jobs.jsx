@@ -21,13 +21,6 @@ function Jobs() {
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchJobs();
-
-    const interval = setInterval(fetchJobs, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchJobs = async () => {
     try {
       const params = filter !== 'all' ? { status: filter } : {};
@@ -40,6 +33,13 @@ function Jobs() {
       setRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    fetchJobs();
+
+    const interval = setInterval(fetchJobs, 3000);
+    return () => clearInterval(interval);
+  }, [filter, fetchJobs]);
 
   const handleRefresh = () => {
     setRefreshing(true);

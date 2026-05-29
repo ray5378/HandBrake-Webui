@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,7 +9,9 @@ import {
   XCircle,
   Clock,
   TrendingUp,
-  ArrowRight
+  ArrowRight,
+  X,
+  ListTodo
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -17,6 +19,9 @@ function Dashboard() {
   const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
+  const [modalStatus, setModalStatus] = useState(null);
+  const [modalJobs, setModalJobs] = useState([]);
+  const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -38,6 +43,21 @@ function Dashboard() {
     }
   };
 
+  const openJobModal = useCallback(async (status, label) => {
+    setModalStatus(label);
+    setModalLoading(true);
+    try {
+      const params = status ? { status } : {};
+      const res = await api.get('/jobs', { params });
+      setModalJobs(res.data.data.jobs);
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+      setModalJobs([]);
+    } finally {
+      setModalLoading(false);
+    }
+  }, []);
+
   const formatBytes = bytes => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -51,25 +71,29 @@ function Dashboard() {
       label: t('dashboard.totalJobs'),
       value: stats?.total || 0,
       icon: Video,
-      color: 'text-primary'
+      color: 'text-primary',
+      status: ''
     },
     {
       label: t('jobs.queue'),
       value: stats?.queued || 0,
       icon: Clock,
-      color: 'text-warning'
+      color: 'text-warning',
+      status: 'queued'
     },
     {
       label: t('transcode.transcoding'),
       value: stats?.processing || 0,
       icon: Play,
-      color: 'text-secondary'
+      color: 'text-secondary',
+      status: 'processing'
     },
     {
       label: t('dashboard.completedJobs'),
       value: stats?.completed || 0,
       icon: CheckCircle,
-      color: 'text-success'
+      color: 'text-success',
+      status: 'completed'
     }
   ];
 
@@ -85,27 +109,32 @@ function Dashboard() {
   };
 
   return (
+    <>
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white">{t('dashboard.title')}</h1>
           <p className="text-gray-400 mt-1">{t('dashboard.subtitle')}</p>
         </div>
-        <Link to="/transcode" className="btn btn-primary inline-flex items-center space-x-2">
-          <Play className="w-4 h-4" />
-          <span>{t('transcode.startTranscode')}</span>
+        <Link to="/jobs" className="btn btn-primary inline-flex items-center space-x-2">
+          <ListTodo className="w-4 h-4" />
+          <span>{t('jobs.title')}</span>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map(stat => (
-          <div key={stat.label} className="card">
+          <button
+            key={stat.label}
+            onClick={() => openJobModal(stat.status, stat.label)}
+            className="card text-left hover:border-primary/50 transition-colors cursor-pointer"
+          >
             <div className="flex items-center justify-between mb-4">
               <span className="text-gray-400 text-sm">{stat.label}</span>
               <stat.icon className={`w-5 h-5 ${stat.color}`} />
             </div>
             <div className="text-3xl font-bold text-white">{stat.value}</div>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -258,6 +287,63 @@ function Dashboard() {
         </div>
       </div>
     </div>
+
+      {modalStatus && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-800 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-dark-700">
+              <h2 className="text-xl font-bold text-white">{modalStatus}</h2>
+              <button
+                onClick={() => setModalStatus(null)}
+                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              {modalLoading ? (
+                <div className="text-center py-8 text-gray-400">{t('common.loading')}</div>
+              ) : modalJobs.length > 0 ? (
+                <div className="space-y-3">
+                  {modalJobs.map(job => (
+                    <Link
+                      key={job.id}
+                      to={`/jobs/${job.id}`}
+                      onClick={() => setModalStatus(null)}
+                      className="flex items-center justify-between p-3 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors block"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">
+                          {job.source_file.split('/').pop()}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(job.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`badge badge-${job.status}`}>
+                          {getJobStatusLabel(job.status)}
+                        </span>
+                        {job.status === 'processing' && (
+                          <div className="text-secondary font-mono text-sm">
+                            {job.progress.toFixed(0)}%
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <ListTodo className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>{t('dashboard.noJobs')}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

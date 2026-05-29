@@ -35,6 +35,7 @@ import {
   ANAMORPHIC_MODES,
   FRAMERATES,
   getRateControlForCodec,
+  getAllowedRateControls,
   OPTIMIZE_OPTIONS,
   getDefaultPresetSettings
 } from '../constants/presets';
@@ -246,7 +247,7 @@ function Presets() {
                   onChange={e => updateSettings('video.rateControl', e.target.value)}
                   className="input"
                 >
-                  {RATE_CONTROLS.map(rc => (
+                  {getAllowedRateControls(formData.settings.video?.codec).map(rc => (
                     <option key={rc.value} value={rc.value}>
                       {rc.label}
                     </option>
@@ -1559,6 +1560,19 @@ function Presets() {
                     className="btn btn-secondary"
                   >
                     {t('common.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        name: editingPreset?.name || '',
+                        description: editingPreset?.description || '',
+                        settings: getDefaultPresetSettings()
+                      });
+                    }}
+                    className="btn btn-warning"
+                  >
+                    {t('common.reset')}
                   </button>
                   <button type="submit" className="btn btn-primary">
                     {editingPreset ? t('common.save') : t('common.create')}

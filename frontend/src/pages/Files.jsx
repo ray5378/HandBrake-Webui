@@ -250,7 +250,7 @@ function Files() {
                     )}
                   >
                     <FolderOpen className="w-8 h-8 text-warning flex-shrink-0" />
-                    <span className="text-white truncate">{dir.name}</span>
+                    <span className="text-white break-all whitespace-normal text-center">{dir.name}</span>
                   </button>
                 ))}
               </div>
@@ -276,19 +276,11 @@ function Files() {
                       <div className="aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
                         <Video className="w-12 h-12 text-gray-600" />
                       </div>
-                      <h3 className="font-medium text-white truncate mb-2" title={file.name}>
+                      <h3 className="font-medium text-white break-all whitespace-normal mb-2">
                         {file.name}
                       </h3>
                       <p className="text-xs text-gray-400 mb-3">{formatSize(file.size)}</p>
                       <div className="flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() =>
-                            navigate(`/transcode?file=${encodeURIComponent(file.path)}`)
-                          }
-                          className="btn btn-primary text-xs py-1 px-3"
-                        >
-                          {t('transcode.title')}
-                        </button>
                         <button
                           onClick={() => handleDownload(file.path, file.name)}
                           className="btn btn-secondary text-xs py-1 px-3"
@@ -308,21 +300,13 @@ function Files() {
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
                         <Video className="w-8 h-8 text-gray-600 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium truncate">{file.name}</p>
+                          <p className="text-white font-medium break-all whitespace-normal">{file.name}</p>
                           <p className="text-sm text-gray-400">
                             {formatSize(file.size)} · {file.extension}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() =>
-                            navigate(`/transcode?file=${encodeURIComponent(file.path)}`)
-                          }
-                          className="btn btn-primary text-xs"
-                        >
-                          {t('transcode.title')}
-                        </button>
                         <button
                           onClick={() => handleDownload(file.path, file.name)}
                           className="btn btn-secondary text-xs"

@@ -1,12 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, FolderOpen, Play, ListTodo } from 'lucide-react';
+import { Home, FolderOpen, ListTodo } from 'lucide-react';
 import clsx from 'clsx';
 
 const navItems = [
   { path: '/', icon: Home, label: '首页' },
   { path: '/files', icon: FolderOpen, label: '文件' },
-  { path: '/transcode', icon: Play, label: '转码' },
+
   { path: '/jobs', icon: ListTodo, label: '任务' }
 ];
 

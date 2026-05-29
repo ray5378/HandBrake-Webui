@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home,
   FolderOpen,
-  Play,
   ListTodo,
   Settings,
   Layers,
@@ -13,12 +12,13 @@ import {
   Video
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
+import LanguageSwitcher from '../LanguageSwitcher';
 import clsx from 'clsx';
 
 const navItems = [
   { path: '/', icon: Home, label: '首页' },
   { path: '/files', icon: FolderOpen, label: '文件管理' },
-  { path: '/transcode', icon: Play, label: '转码' },
+
   { path: '/jobs', icon: ListTodo, label: '任务队列' },
   { path: '/presets', icon: Layers, label: '预设' },
   { path: '/settings', icon: Settings, label: '设置' }
@@ -103,6 +103,9 @@ function Sidebar() {
                   <p className="text-xs text-gray-400">{user?.role}</p>
                 </div>
               </div>
+            </div>
+            <div className="mb-3">
+              <LanguageSwitcher />
             </div>
             <button
               onClick={handleLogout}
