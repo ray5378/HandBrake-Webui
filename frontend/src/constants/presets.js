@@ -13,12 +13,21 @@ export const FORMATS = [
 export const VIDEO_CODECS = [
   // 软件编码器
   { value: 'x264', label: 'H.264 (x264)', group: 'software' },
+  { value: 'x264_10bit', label: 'H.264 10-bit (x264)', group: 'software' },
   { value: 'x265', label: 'H.265/HEVC (x265)', group: 'software' },
+  { value: 'x265_10bit', label: 'H.265/HEVC 10-bit (x265)', group: 'software' },
+  { value: 'x265_12bit', label: 'H.265/HEVC 12-bit (x265)', group: 'software' },
   { value: 'svt-av1', label: 'AV1 (SVT-AV1)', group: 'software' },
+  { value: 'svt-av1_10bit', label: 'AV1 10-bit (SVT-AV1)', group: 'software' },
   { value: 'vp9', label: 'VP9', group: 'software' },
+  { value: 'vp9_10bit', label: 'VP9 10-bit', group: 'software' },
+  { value: 'mpeg4', label: 'MPEG-4', group: 'software' },
+  { value: 'mpeg2', label: 'MPEG-2', group: 'software' },
+  { value: 'ffv1', label: 'FFV1', group: 'software' },
   // Intel QSV 硬件编码
-  { value: 'qsv_h264', label: 'H.264 (QSV)', group: 'qsv' },
-  { value: 'qsv_h265', label: 'H.265/HEVC (QSV)', group: 'qsv' },
+  { value: 'qsv_h264', label: 'H.264 (Intel QSV)', group: 'qsv' },
+  { value: 'qsv_h265', label: 'H.265/HEVC (Intel QSV)', group: 'qsv' },
+  { value: 'qsv_h265_10bit', label: 'H.265/HEVC 10-bit (Intel QSV)', group: 'qsv' },
   // NVIDIA NVENC 硬件编码
   { value: 'nvenc_h264', label: 'H.264 (NVENC)', group: 'nvenc' },
   { value: 'nvenc_h265', label: 'H.265/HEVC (NVENC)', group: 'nvenc' },
@@ -150,6 +159,34 @@ export const DRC_MODES = [
   { value: 'light', label: '轻度' },
   { value: 'medium', label: '中等' },
   { value: 'heavy', label: '重度' }
+];
+
+// 色彩范围
+export const COLOR_RANGES = [
+  { value: 'auto', label: '自动' },
+  { value: 'limited', label: '有限 (16-235)' },
+  { value: 'full', label: '完整 (0-255)' }
+];
+
+// 分辨率限制预设
+export const RESOLUTION_LIMITS = [
+  { value: '', label: '无限制' },
+  { value: '2160p', label: '2160p (4K 超高清)' },
+  { value: '1440p', label: '1440p (2K QHD)' },
+  { value: '1080p', label: '1080p (全高清)' },
+  { value: '720p', label: '720p (高清)' },
+  { value: '480p', label: '480p (标清)' },
+  { value: '360p', label: '360p' },
+  { value: '240p', label: '240p' }
+];
+
+// 变形模式
+export const ANAMORPHIC_MODES = [
+  { value: 'auto', label: '自动' },
+  { value: 'none', label: '无' },
+  { value: 'strict', label: '严格' },
+  { value: 'loose', label: '宽松' },
+  { value: 'custom', label: '自定义' }
 ];
 
 // 容器优化

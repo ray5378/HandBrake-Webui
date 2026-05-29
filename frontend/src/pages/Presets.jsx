@@ -33,6 +33,9 @@ import {
   AUDIO_SAMPLERATES,
   MIXDOWN_MODES,
   DRC_MODES,
+  COLOR_RANGES,
+  RESOLUTION_LIMITS,
+  ANAMORPHIC_MODES,
   OPTIMIZE_OPTIONS,
   getDefaultPresetSettings
 } from '../constants/presets';
@@ -502,6 +505,36 @@ function Presets() {
                 </select>
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="label">色彩范围</label>
+                <select
+                  value={formData.settings.video?.colorRange || 'auto'}
+                  onChange={e => updateSettings('video.colorRange', e.target.value)}
+                  className="input"
+                >
+                  {COLOR_RANGES.map(range => (
+                    <option key={range.value} value={range.value}>
+                      {range.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-6">
+                <input
+                  type="checkbox"
+                  id="multiPass"
+                  checked={formData.settings.video?.multiPass || false}
+                  onChange={e => updateSettings('video.multiPass', e.target.checked)}
+                  className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                />
+                <label htmlFor="multiPass" className="text-gray-200">
+                  多遍编码 (Multi-Pass)
+                </label>
+              </div>
+            </div>
           </div>
         );
 
@@ -652,6 +685,96 @@ function Presets() {
                   <option value={16}>16</option>
                   <option value={32}>32</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="label">分辨率限制</label>
+                <select
+                  value={formData.settings.dimensions?.resolutionLimit || ''}
+                  onChange={e => updateSettings('dimensions.resolutionLimit', e.target.value)}
+                  className="input"
+                >
+                  {RESOLUTION_LIMITS.map(limit => (
+                    <option key={limit.value} value={limit.value}>
+                      {limit.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="label">变形模式</label>
+                <select
+                  value={formData.settings.dimensions?.scaling?.anamorphic || 'auto'}
+                  onChange={e => updateSettings('dimensions.scaling.anamorphic', e.target.value)}
+                  className="input"
+                >
+                  {ANAMORPHIC_MODES.map(mode => (
+                    <option key={mode.value} value={mode.value}>
+                      {mode.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {formData.settings.dimensions?.scaling?.anamorphic === 'custom' && (
+                <div>
+                  <label className="label">像素宽高比</label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={formData.settings.dimensions?.scaling?.pixelAspectX || 1}
+                      onChange={e =>
+                        updateSettings('dimensions.scaling.pixelAspectX', parseInt(e.target.value))
+                      }
+                      className="input w-16"
+                    />
+                    <span className="text-gray-400">:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={formData.settings.dimensions?.scaling?.pixelAspectY || 1}
+                      onChange={e =>
+                        updateSettings('dimensions.scaling.pixelAspectY', parseInt(e.target.value))
+                      }
+                      className="input w-16"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="bestSize"
+                    checked={formData.settings.dimensions?.scaling?.bestSize || false}
+                    onChange={e => updateSettings('dimensions.scaling.bestSize', e.target.checked)}
+                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="bestSize" className="text-gray-200">
+                    最佳尺寸
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="allowUpscaling"
+                    checked={formData.settings.dimensions?.scaling?.allowUpscaling || false}
+                    onChange={e =>
+                      updateSettings('dimensions.scaling.allowUpscaling', e.target.checked)
+                    }
+                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="allowUpscaling" className="text-gray-200">
+                    允许放大
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -1188,7 +1311,79 @@ function Presets() {
                 </label>
               </div>
             </div>
-            <p className="text-gray-500 text-sm">标签管理即将推出</p>
+
+            {formData.settings.tags?.enabled && (
+              <div className="space-y-4">
+                <div>
+                  <label className="label">标题</label>
+                  <input
+                    type="text"
+                    value={formData.settings.tags?.values?.title || ''}
+                    onChange={e => updateSettings('tags.values.title', e.target.value)}
+                    className="input"
+                    placeholder="输入标题"
+                  />
+                </div>
+                <div>
+                  <label className="label">演员</label>
+                  <input
+                    type="text"
+                    value={formData.settings.tags?.values?.actor || ''}
+                    onChange={e => updateSettings('tags.values.actor', e.target.value)}
+                    className="input"
+                    placeholder="输入演员姓名"
+                  />
+                </div>
+                <div>
+                  <label className="label">导演</label>
+                  <input
+                    type="text"
+                    value={formData.settings.tags?.values?.director || ''}
+                    onChange={e => updateSettings('tags.values.director', e.target.value)}
+                    className="input"
+                    placeholder="输入导演姓名"
+                  />
+                </div>
+                <div>
+                  <label className="label">发布日期</label>
+                  <input
+                    type="date"
+                    value={formData.settings.tags?.values?.date || ''}
+                    onChange={e => updateSettings('tags.values.date', e.target.value)}
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="label">种类</label>
+                  <input
+                    type="text"
+                    value={formData.settings.tags?.values?.genre || ''}
+                    onChange={e => updateSettings('tags.values.genre', e.target.value)}
+                    className="input"
+                    placeholder="输入影片类型"
+                  />
+                </div>
+                <div>
+                  <label className="label">描述</label>
+                  <input
+                    type="text"
+                    value={formData.settings.tags?.values?.description || ''}
+                    onChange={e => updateSettings('tags.values.description', e.target.value)}
+                    className="input"
+                    placeholder="输入影片描述"
+                  />
+                </div>
+                <div>
+                  <label className="label">剧情</label>
+                  <textarea
+                    value={formData.settings.tags?.values?.plot || ''}
+                    onChange={e => updateSettings('tags.values.plot', e.target.value)}
+                    className="input h-32"
+                    placeholder="输入剧情简介"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         );
 
