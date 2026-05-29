@@ -36,6 +36,8 @@ import {
   COLOR_RANGES,
   RESOLUTION_LIMITS,
   ANAMORPHIC_MODES,
+  FRAMERATES,
+  getRateControlForCodec,
   OPTIMIZE_OPTIONS,
   getDefaultPresetSettings
 } from '../constants/presets';
@@ -255,40 +257,55 @@ function Presets() {
               </div>
             </div>
 
-            {formData.settings.video?.rateControl === 'crf' && (
-              <div>
-                <label className="label">恒定质量 (RF)</label>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="number"
-                    min="0"
-                    max="51"
-                    step="0.5"
-                    value={formData.settings.video?.crf ?? 22}
-                    onChange={e => {
-                      const val = parseFloat(e.target.value);
-                      if (!isNaN(val) && val >= 0 && val <= 51) {
-                        updateSettings('video.crf', val);
-                      }
-                    }}
-                    className="input w-24"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="51"
-                    step="0.5"
-                    value={formData.settings.video?.crf ?? 22}
-                    onChange={e => updateSettings('video.crf', parseFloat(e.target.value))}
-                    className="flex-1"
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>体积更小</span>
-                  <span>画质更高</span>
-                </div>
-              </div>
-            )}
+            {(() => {
+              const codec = formData.settings.video?.codec;
+              const rateControl = formData.settings.video?.rateControl;
+              const rcInfo = getRateControlForCodec(codec);
+              
+              if (rateControl === 'crf' || rateControl === 'icq' || rateControl === 'cqp' || rateControl === 'cq') {
+                const fieldName = rcInfo.type;
+                const currentValue = formData.settings.video?.[fieldName] ?? rcInfo.default;
+                
+                return (
+                  <div>
+                    <label className="label">{rcInfo.label}</label>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="number"
+                        min={rcInfo.min}
+                        max={rcInfo.max}
+                        step={rcInfo.type === 'crf' || rcInfo.type === 'icq' ? '0.5' : '1'}
+                        value={currentValue}
+                        onChange={e => {
+                          const val = rcInfo.type === 'crf' || rcInfo.type === 'icq' ? parseFloat(e.target.value) : parseInt(e.target.value);
+                          if (!isNaN(val) && val >= rcInfo.min && val <= rcInfo.max) {
+                            updateSettings(`video.${fieldName}`, val);
+                          }
+                        }}
+                        className="input w-24"
+                      />
+                      <input
+                        type="range"
+                        min={rcInfo.min}
+                        max={rcInfo.max}
+                        step={rcInfo.type === 'crf' || rcInfo.type === 'icq' ? '0.5' : '1'}
+                        value={currentValue}
+                        onChange={e => {
+                          const val = rcInfo.type === 'crf' || rcInfo.type === 'icq' ? parseFloat(e.target.value) : parseInt(e.target.value);
+                          updateSettings(`video.${fieldName}`, val);
+                        }}
+                        className="flex-1"
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>体积更小</span>
+                      <span>画质更高</span>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             {(formData.settings.video?.rateControl === 'cbr' ||
               formData.settings.video?.rateControl === 'vbr') && (
@@ -453,28 +470,21 @@ function Presets() {
               <div>
                 <label className="label">帧率 (FPS)</label>
                 <select
-                  value={formData.settings.video?.framerate === null || formData.settings.video?.framerate === undefined ? '' : 'custom'}
+                  value={formData.settings.video?.framerate === null || formData.settings.video?.framerate === undefined ? '' : String(formData.settings.video?.framerate)}
                   onChange={e => {
                     if (e.target.value === '') {
                       updateSettings('video.framerate', null);
-                    } else if (e.target.value === 'custom') {
-                      updateSettings('video.framerate', 30);
                     } else {
                       updateSettings('video.framerate', parseFloat(e.target.value));
                     }
                   }}
                   className="input"
                 >
-                  <option value="">与源文件相同</option>
-                  <option value="23.976">23.976</option>
-                  <option value="24">24</option>
-                  <option value="25">25</option>
-                  <option value="29.97">29.97</option>
-                  <option value="30">30</option>
-                  <option value="50">50</option>
-                  <option value="59.94">59.94</option>
-                  <option value="60">60</option>
-                  <option value="custom">自定义</option>
+                  {FRAMERATES.map(fr => (
+                    <option key={fr.value === null ? 'null' : fr.value} value={fr.value === null ? '' : String(fr.value)}>
+                      {fr.label}
+                    </option>
+                  ))}
                 </select>
                 {formData.settings.video?.framerate !== null && formData.settings.video?.framerate !== undefined && (
                   <div className="mt-2">

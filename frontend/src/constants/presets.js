@@ -171,11 +171,13 @@ export const COLOR_RANGES = [
 // 分辨率限制预设
 export const RESOLUTION_LIMITS = [
   { value: '', label: '无限制' },
-  { value: '2160p', label: '2160p (4K 超高清)' },
-  { value: '1440p', label: '1440p (2K QHD)' },
-  { value: '1080p', label: '1080p (全高清)' },
-  { value: '720p', label: '720p (高清)' },
-  { value: '480p', label: '480p (标清)' },
+  { value: '4320p', label: '4320p 8K 超高清' },
+  { value: '2160p', label: '2160p 4K 超高清' },
+  { value: '1440p', label: '1440p 2.5K 四倍高清' },
+  { value: '1080p', label: '1080p 全高清' },
+  { value: '720p', label: '720p 高清' },
+  { value: '576p', label: '576p PAL' },
+  { value: '480p', label: '480p NTSC' },
   { value: '360p', label: '360p' },
   { value: '240p', label: '240p' }
 ];
@@ -195,6 +197,60 @@ export const OPTIMIZE_OPTIONS = [
   { value: 'fast-start', label: '快速启动（Web 优化）' },
   { value: 'fragmented', label: '分段 (Fragmented)' }
 ];
+
+// 帧率选项
+export const FRAMERATES = [
+  { value: null, label: '与源视频相同' },
+  { value: 5, label: '5' },
+  { value: 10, label: '10' },
+  { value: 12, label: '12' },
+  { value: 15, label: '15' },
+  { value: 20, label: '20' },
+  { value: 23.976, label: '23.976 (NTSC 电影)' },
+  { value: 24, label: '24' },
+  { value: 25, label: '25 (PAL 电影/视频)' },
+  { value: 29.97, label: '29.97 (NTSC 视频)' },
+  { value: 30, label: '30' },
+  { value: 48, label: '48' },
+  { value: 50, label: '50' },
+  { value: 59.94, label: '59.94' },
+  { value: 60, label: '60' },
+  { value: 72, label: '72' },
+  { value: 75, label: '75' },
+  { value: 90, label: '90' },
+  { value: 100, label: '100' },
+  { value: 120, label: '120' }
+];
+
+// 编码器特定的码率控制类型
+export const getRateControlForCodec = codec => {
+  if (!codec) return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
+  
+  const codecLower = codec.toLowerCase();
+  
+  // Intel QSV 使用 ICQ
+  if (codecLower.includes('qsv')) {
+    return { type: 'icq', label: '恒定质量 (ICQ)', default: 22, min: 0, max: 51 };
+  }
+  
+  // NVIDIA NVENC 使用 CQP
+  if (codecLower.includes('nvenc')) {
+    return { type: 'cqp', label: '恒定质量 (CQP)', default: 22, min: 0, max: 51 };
+  }
+  
+  // SVT-AV1 使用 CQ
+  if (codecLower.includes('svt-av1')) {
+    return { type: 'cq', label: '恒定质量 (CQ)', default: 30, min: 0, max: 63 };
+  }
+  
+  // VP9 使用 CRF
+  if (codecLower.includes('vp9')) {
+    return { type: 'crf', label: '恒定质量 (CRF)', default: 31, min: 0, max: 63 };
+  }
+  
+  // 默认 x264/x265 使用 CRF
+  return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
+};
 
 // 获取默认预设设置
 export function getDefaultPresetSettings() {
