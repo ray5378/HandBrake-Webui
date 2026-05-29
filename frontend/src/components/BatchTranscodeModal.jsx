@@ -13,7 +13,23 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 
+const VIDEO_EXTENSIONS = [
+  '.mp4',
+  '.mkv',
+  '.avi',
+  '.mov',
+  '.wmv',
+  '.flv',
+  '.webm',
+  '.m4v',
+  '.mpg',
+  '.mpeg'
+];
+
 function BatchTranscodeModal({ directory, onClose, onSuccess }) {
+  const isSingleFile = VIDEO_EXTENSIONS.includes(
+    '.' + (directory || '').split('.').pop()?.toLowerCase()
+  );
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState('');
   const [outputDirectory, setOutputDirectory] = useState('/drive/转码/转码后');
@@ -67,13 +83,13 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
     try {
-      const [presetsRes, treeRes] = await Promise.all([
-        api.get('/presets', { signal }),
-        api.get('/files/tree', { params: { path: directory }, signal })
-      ]);
-
+      const presetsRes = await api.get('/presets', { signal });
       setPresets(presetsRes.data.data.presets);
-      setSourceTree(treeRes.data.data.directories || []);
+
+      if (!isSingleFile) {
+        const treeRes = await api.get('/files/tree', { params: { path: directory }, signal });
+        setSourceTree(treeRes.data.data.directories || []);
+      }
 
       setBrowsePath(ROOT_OUTPUT_PATH);
       if (lastDir) {
@@ -127,14 +143,29 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     setError('');
 
     try {
-      await api.post('/jobs/batch', {
-        sourceDirectory: directory,
-        outputDirectory,
-        presetId: selectedPreset || undefined,
-        customSettings: customSettings ? settings : undefined,
-        copyNonVideoFiles,
-        moveNonVideoFiles
-      });
+      if (isSingleFile) {
+        const fileName =
+          directory
+            .split('/')
+            .pop()
+            .replace(/\.[^.]+$/, '') + '.mp4';
+        const outputFile = outputDirectory + '/' + fileName;
+        await api.post('/jobs', {
+          sourceFile: directory,
+          outputFile,
+          presetId: selectedPreset || undefined,
+          customSettings: customSettings ? settings : undefined
+        });
+      } else {
+        await api.post('/jobs/batch', {
+          sourceDirectory: directory,
+          outputDirectory,
+          presetId: selectedPreset || undefined,
+          customSettings: customSettings ? settings : undefined,
+          copyNonVideoFiles,
+          moveNonVideoFiles
+        });
+      }
 
       setSuccess(true);
       successTimeoutRef.current = setTimeout(() => {
@@ -207,9 +238,11 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
           <div>
             <h2 className='text-2xl font-bold text-white flex items-center space-x-3'>
               <Video className='w-6 h-6' />
-              <span>批量转码</span>
+              <span>{isSingleFile ? '转码' : '批量转码'}</span>
             </h2>
-            <p className='text-gray-400 mt-1'>源目录: {directory}</p>
+            <p className='text-gray-400 mt-1'>
+              {isSingleFile ? '源文件' : '源目录'}: {directory}
+            </p>
           </div>
           <button onClick={onClose} className='p-2 hover:bg-dark-700 rounded-lg transition-colors'>
             <X className='w-5 h-5 text-gray-400' />
@@ -352,7 +385,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                {sourceTree.length > 0 && (
+                {!isSingleFile && sourceTree.length > 0 && (
                   <div className='p-3 bg-dark-600 rounded-lg'>
                     <h4 className='text-sm font-semibold text-white mb-2 flex items-center space-x-1'>
                       <GitBranch className='w-4 h-4 text-primary' />
@@ -396,31 +429,35 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   )}
                 </div>
 
-                <div className='flex items-center space-x-2'>
-                  <input
-                    type='checkbox'
-                    id='copyNonVideoFiles'
-                    checked={copyNonVideoFiles}
-                    onChange={e => setCopyNonVideoFiles(e.target.checked)}
-                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
-                  />
-                  <label htmlFor='copyNonVideoFiles' className='text-sm text-gray-300'>
-                    把源目录不能转码的文件复制到目标目录
-                  </label>
-                </div>
+                {!isSingleFile && (
+                  <div className='flex items-center space-x-2'>
+                    <input
+                      type='checkbox'
+                      id='copyNonVideoFiles'
+                      checked={copyNonVideoFiles}
+                      onChange={e => setCopyNonVideoFiles(e.target.checked)}
+                      className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                    />
+                    <label htmlFor='copyNonVideoFiles' className='text-sm text-gray-300'>
+                      把源目录不能转码的文件复制到目标目录
+                    </label>
+                  </div>
+                )}
 
-                <div className='flex items-center space-x-2'>
-                  <input
-                    type='checkbox'
-                    id='moveNonVideoFiles'
-                    checked={moveNonVideoFiles}
-                    onChange={e => setMoveNonVideoFiles(e.target.checked)}
-                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
-                  />
-                  <label htmlFor='moveNonVideoFiles' className='text-sm text-gray-300'>
-                    把源目录不能转码的文件移动到目标目录
-                  </label>
-                </div>
+                {!isSingleFile && (
+                  <div className='flex items-center space-x-2'>
+                    <input
+                      type='checkbox'
+                      id='moveNonVideoFiles'
+                      checked={moveNonVideoFiles}
+                      onChange={e => setMoveNonVideoFiles(e.target.checked)}
+                      className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                    />
+                    <label htmlFor='moveNonVideoFiles' className='text-sm text-gray-300'>
+                      把源目录不能转码的文件移动到目标目录
+                    </label>
+                  </div>
+                )}
 
                 <div className='flex items-center space-x-2'>
                   <input
@@ -494,10 +531,20 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
             <div className='bg-dark-700 rounded-lg p-4'>
               <h3 className='text-lg font-semibold text-white mb-3'>说明</h3>
               <ul className='text-gray-400 text-sm space-y-2'>
-                <li>• 递归扫描源目录中的所有视频文件</li>
-                <li>• 保持原始目录结构</li>
-                <li>• 转码后的文件保持原文件名，仅扩展名改为容器格式</li>
-                <li>• 所有任务会自动加入队列处理</li>
+                {isSingleFile ? (
+                  <>
+                    <li>• 转码单个视频文件</li>
+                    <li>• 转码后的文件保持原文件名，扩展名改为 .mp4</li>
+                    <li>• 任务会自动加入队列处理</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• 递归扫描源目录中的所有视频文件</li>
+                    <li>• 保持原始目录结构</li>
+                    <li>• 转码后的文件保持原文件名，仅扩展名改为容器格式</li>
+                    <li>• 所有任务会自动加入队列处理</li>
+                  </>
+                )}
               </ul>
             </div>
 
@@ -518,7 +565,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                 ) : (
                   <>
                     <Settings className='w-4 h-4' />
-                    <span>开始批量转码</span>
+                    <span>{isSingleFile ? '开始转码' : '开始批量转码'}</span>
                   </>
                 )}
               </button>
