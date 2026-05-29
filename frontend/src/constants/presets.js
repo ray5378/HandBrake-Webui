@@ -15,8 +15,18 @@ export const VIDEO_CODECS = [
   { value: 'x264', label: 'H.264', i18nKey: 'codecs.x264', group: 'software' },
   { value: 'x264_10bit', label: 'H.264 10位', i18nKey: 'codecs.x264_10bit', group: 'software' },
   { value: 'x265', label: 'H.265/HEVC', i18nKey: 'codecs.x265', group: 'software' },
-  { value: 'x265_10bit', label: 'H.265/HEVC 10位', i18nKey: 'codecs.x265_10bit', group: 'software' },
-  { value: 'x265_12bit', label: 'H.265/HEVC 12位', i18nKey: 'codecs.x265_12bit', group: 'software' },
+  {
+    value: 'x265_10bit',
+    label: 'H.265/HEVC 10位',
+    i18nKey: 'codecs.x265_10bit',
+    group: 'software'
+  },
+  {
+    value: 'x265_12bit',
+    label: 'H.265/HEVC 12位',
+    i18nKey: 'codecs.x265_12bit',
+    group: 'software'
+  },
   { value: 'svt-av1', label: 'AV1', i18nKey: 'codecs.svt_av1', group: 'software' },
   { value: 'svt-av1_10bit', label: 'AV1 10位', i18nKey: 'codecs.svt_av1_10bit', group: 'software' },
   { value: 'vp9', label: 'VP9', i18nKey: 'codecs.vp9', group: 'software' },
@@ -27,7 +37,12 @@ export const VIDEO_CODECS = [
   // Intel QSV 硬件编码
   { value: 'qsv_h264', label: 'H.264 QSV', i18nKey: 'codecs.qsv_h264', group: 'qsv' },
   { value: 'qsv_h265', label: 'H.265/HEVC QSV', i18nKey: 'codecs.qsv_h265', group: 'qsv' },
-  { value: 'qsv_h265_10bit', label: 'H.265/HEVC 10位 QSV', i18nKey: 'codecs.qsv_h265_10bit', group: 'qsv' },
+  {
+    value: 'qsv_h265_10bit',
+    label: 'H.265/HEVC 10位 QSV',
+    i18nKey: 'codecs.qsv_h265_10bit',
+    group: 'qsv'
+  },
   // NVIDIA NVENC 硬件编码
   { value: 'nvenc_h264', label: 'H.264 NVENC', i18nKey: 'codecs.nvenc_h264', group: 'nvenc' },
   { value: 'nvenc_h265', label: 'H.265/HEVC NVENC', i18nKey: 'codecs.nvenc_h265', group: 'nvenc' },
@@ -246,29 +261,29 @@ export const getAllowedRateControls = codec => {
 // 编码器特定的码率控制类型
 export const getRateControlForCodec = codec => {
   if (!codec) return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
-  
+
   const codecLower = codec.toLowerCase();
-  
+
   // Intel QSV 使用 ICQ
   if (codecLower.includes('qsv')) {
     return { type: 'icq', label: '智能恒定质量 (ICQ)', default: 22, min: 0, max: 51 };
   }
-  
+
   // NVIDIA NVENC 使用 CQP
   if (codecLower.includes('nvenc')) {
     return { type: 'cqp', label: '恒定量化参数 (CQP)', default: 22, min: 0, max: 51 };
   }
-  
+
   // SVT-AV1 使用 CQ
   if (codecLower.includes('svt-av1')) {
     return { type: 'cq', label: '恒定质量 (CQ)', default: 30, min: 0, max: 63 };
   }
-  
+
   // VP9 使用 CRF
   if (codecLower.includes('vp9')) {
     return { type: 'crf', label: '恒定质量 (CRF)', default: 31, min: 0, max: 63 };
   }
-  
+
   // 默认 x264/x265 使用 CRF
   return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
 };

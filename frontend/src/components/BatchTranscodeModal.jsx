@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Video, Settings, Loader2, CheckCircle, FolderOpen, ChevronRight, GitBranch, Plus } from 'lucide-react';
+import {
+  X,
+  Video,
+  Settings,
+  Loader2,
+  CheckCircle,
+  FolderOpen,
+  ChevronRight,
+  GitBranch,
+  Plus
+} from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 
@@ -29,7 +39,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     fetchData();
   }, []);
 
-  const fetchBrowseDirs = async (path) => {
+  const fetchBrowseDirs = async path => {
     setBrowseLoading(true);
     try {
       const res = await api.get('/files', { params: { directory: path } });
@@ -57,7 +67,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     }
   };
 
-  const handleBrowse = (path) => {
+  const handleBrowse = path => {
     setBrowsePath(path);
     setOutputDirectory(path);
     fetchBrowseDirs(path);
@@ -111,7 +121,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   const pathParts = (browsePath || '/output').split('/').filter(Boolean);
 
-  const buildTree = (paths) => {
+  const buildTree = paths => {
     const tree = {};
     for (const p of paths) {
       if (!p) continue;
@@ -134,13 +144,18 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       const hasChildren = Object.keys(children).length > 0;
       return (
         <React.Fragment key={name}>
-          <div className="text-xs text-gray-400 flex items-center space-x-1 font-mono"
-               style={{ paddingLeft: depth * 20 }}>
+          <div
+            className="text-xs text-gray-400 flex items-center space-x-1 font-mono"
+            style={{ paddingLeft: depth * 20 }}
+          >
             <span className="text-gray-600 shrink-0">{connector}</span>
             <FolderOpen className="w-3 h-3 text-warning shrink-0" />
             <span className="truncate">{name}</span>
             <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />
-            <span className="text-primary truncate">{outputDirectory}/{prefix}{name}</span>
+            <span className="text-primary truncate">
+              {outputDirectory}/{prefix}
+              {name}
+            </span>
           </div>
           {hasChildren && renderTree(children, prefix + name + '/', depth + 1)}
         </React.Fragment>
@@ -199,8 +214,14 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   ) : (
                     <>
                       <div className="flex items-center space-x-1 text-sm mb-3 flex-wrap">
-                        <button type="button" onClick={() => handleBrowse('/output')}
-                          className={clsx('hover:underline', browsePath === '/output' ? 'text-white font-medium' : 'text-primary')}>
+                        <button
+                          type="button"
+                          onClick={() => handleBrowse('/output')}
+                          className={clsx(
+                            'hover:underline',
+                            browsePath === '/output' ? 'text-white font-medium' : 'text-primary'
+                          )}
+                        >
                           output
                         </button>
                         {pathParts.slice(1).map((part, i) => {
@@ -208,8 +229,16 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                           return (
                             <React.Fragment key={i}>
                               <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />
-                              <button type="button" onClick={() => handleBrowse(fullPath)}
-                                className={clsx('hover:underline', browsePath === fullPath ? 'text-white font-medium' : 'text-primary')}>
+                              <button
+                                type="button"
+                                onClick={() => handleBrowse(fullPath)}
+                                className={clsx(
+                                  'hover:underline',
+                                  browsePath === fullPath
+                                    ? 'text-white font-medium'
+                                    : 'text-primary'
+                                )}
+                              >
                                 {part}
                               </button>
                             </React.Fragment>
@@ -219,9 +248,14 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto">
                         {browseDirs.map(dir => (
-                          <button type="button" key={dir.path}
+                          <button
+                            type="button"
+                            key={dir.path}
                             onClick={() => handleBrowse(dir.path)}
-                            onDoubleClick={(e) => { e.preventDefault(); setOutputDirectory(dir.path); }}
+                            onDoubleClick={e => {
+                              e.preventDefault();
+                              setOutputDirectory(dir.path);
+                            }}
                             className={clsx(
                               'flex items-center space-x-2 p-2 rounded-lg transition-colors text-left',
                               outputDirectory === dir.path
@@ -247,18 +281,44 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                     <div className="flex space-x-2">
                       {showNewDirInput ? (
                         <div className="flex space-x-1">
-                          <input type="text" value={newDirName}
+                          <input
+                            type="text"
+                            value={newDirName}
                             onChange={e => setNewDirName(e.target.value)}
-                            className="input text-xs py-1 w-28" placeholder="目录名"
-                            onKeyDown={e => { if (e.key === 'Enter') handleCreateDir(); if (e.key === 'Escape') { setShowNewDirInput(false); setNewDirName(''); } }} />
-                          <button type="button" onClick={handleCreateDir}
-                            className="btn btn-primary text-xs py-1">创建</button>
-                          <button type="button" onClick={() => { setShowNewDirInput(false); setNewDirName(''); }}
-                            className="btn btn-secondary text-xs py-1">取消</button>
+                            className="input text-xs py-1 w-28"
+                            placeholder="目录名"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') handleCreateDir();
+                              if (e.key === 'Escape') {
+                                setShowNewDirInput(false);
+                                setNewDirName('');
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleCreateDir}
+                            className="btn btn-primary text-xs py-1"
+                          >
+                            创建
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowNewDirInput(false);
+                              setNewDirName('');
+                            }}
+                            className="btn btn-secondary text-xs py-1"
+                          >
+                            取消
+                          </button>
                         </div>
                       ) : (
-                        <button type="button" onClick={() => setShowNewDirInput(true)}
-                          className="text-xs text-primary hover:underline flex items-center space-x-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowNewDirInput(true)}
+                          className="text-xs text-primary hover:underline flex items-center space-x-1"
+                        >
                           <Plus className="w-3 h-3" />
                           <span>新建目录</span>
                         </button>

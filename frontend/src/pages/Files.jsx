@@ -232,7 +232,9 @@ function Files() {
         <>
           {directories.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-medium text-gray-400 mb-3">{t('common.directories') || 'Directories'}</h2>
+              <h2 className="text-sm font-medium text-gray-400 mb-3">
+                {t('common.directories') || 'Directories'}
+              </h2>
               <div
                 className={clsx(
                   'grid gap-4',
@@ -250,7 +252,9 @@ function Files() {
                     )}
                   >
                     <FolderOpen className="w-8 h-8 text-warning flex-shrink-0" />
-                    <span className="text-white break-all whitespace-normal text-center">{dir.name}</span>
+                    <span className="text-white break-all whitespace-normal text-center">
+                      {dir.name}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -300,7 +304,9 @@ function Files() {
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
                         <Video className="w-8 h-8 text-gray-600 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium break-all whitespace-normal">{file.name}</p>
+                          <p className="text-white font-medium break-all whitespace-normal">
+                            {file.name}
+                          </p>
                           <p className="text-sm text-gray-400">
                             {formatSize(file.size)} · {file.extension}
                           </p>

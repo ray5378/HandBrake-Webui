@@ -235,26 +235,28 @@ const FRAMERATES = [
 
 // 获取编码器特定的码率控制配置
 const getRateControlForCodec = codec => {
-  if (!codec) return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
-  
+  if (!codec) {
+    return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
+  }
+
   const codecLower = codec.toLowerCase();
-  
+
   if (codecLower.includes('qsv')) {
     return { type: 'icq', label: '恒定质量 (ICQ)', default: 22, min: 0, max: 51 };
   }
-  
+
   if (codecLower.includes('nvenc')) {
     return { type: 'cqp', label: '恒定质量 (CQP)', default: 22, min: 0, max: 51 };
   }
-  
+
   if (codecLower.includes('svt-av1')) {
     return { type: 'cq', label: '恒定质量 (CQ)', default: 30, min: 0, max: 63 };
   }
-  
+
   if (codecLower.includes('vp9')) {
     return { type: 'crf', label: '恒定质量 (CRF)', default: 31, min: 0, max: 63 };
   }
-  
+
   return { type: 'crf', label: '恒定质量 (RF)', default: 22, min: 0, max: 51 };
 };
 

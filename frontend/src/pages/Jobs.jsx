@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  ListTodo,
-  Play,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Trash2,
-  Eye,
-  RefreshCw
-} from 'lucide-react';
+import { ListTodo, Play, CheckCircle, XCircle, Clock, Trash2, Eye, RefreshCw } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 
@@ -141,9 +132,17 @@ function Jobs() {
                   </div>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                    <span>{t('jobs.outputFile')}: {job.output_file.split('/').pop()}</span>
-                    {job.preset_name && <span>{t('jobs.preset')}: {job.preset_name}</span>}
-                    <span>{t('jobs.startTime')}: {new Date(job.created_at).toLocaleString()}</span>
+                    <span>
+                      {t('jobs.outputFile')}: {job.output_file.split('/').pop()}
+                    </span>
+                    {job.preset_name && (
+                      <span>
+                        {t('jobs.preset')}: {job.preset_name}
+                      </span>
+                    )}
+                    <span>
+                      {t('jobs.startTime')}: {new Date(job.created_at).toLocaleString()}
+                    </span>
                   </div>
 
                   {job.status === 'processing' && (

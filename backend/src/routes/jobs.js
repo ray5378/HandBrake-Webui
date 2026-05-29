@@ -351,7 +351,14 @@ router.post(
   validate,
   async (req, res, next) => {
     try {
-      const { sourceDirectory, outputDirectory, presetId, customSettings, copyNonVideoFiles, moveNonVideoFiles } = req.body;
+      const {
+        sourceDirectory,
+        outputDirectory,
+        presetId,
+        customSettings,
+        copyNonVideoFiles,
+        moveNonVideoFiles
+      } = req.body;
       const db = getDatabase();
 
       const videoExtensions = [
@@ -486,7 +493,11 @@ router.post(
             if (entry.isDirectory()) {
               fs.mkdirSync(destPath, { recursive: true });
               moveNonVideoRecursive(srcPath, destPath);
-              try { fs.rmdirSync(srcPath); } catch (e) { /* 非空目录保留 */ }
+              try {
+                fs.rmdirSync(srcPath);
+              } catch (e) {
+                /* 非空目录保留，忽略错误 */
+              }
             } else {
               const ext = path.extname(entry.name).toLowerCase();
               if (!videoExtensions.includes(ext)) {

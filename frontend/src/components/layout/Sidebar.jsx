@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import {
-  Home,
-  FolderOpen,
-  ListTodo,
-  Settings,
-  Layers,
-  LogOut,
-  Menu,
-  X,
-  Video
-} from 'lucide-react';
+import { Home, FolderOpen, ListTodo, Settings, Layers, LogOut, Menu, X, Video } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';

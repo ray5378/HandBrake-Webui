@@ -261,7 +261,12 @@ function Presets() {
               const rateControl = formData.settings.video?.rateControl;
               const rcInfo = getRateControlForCodec(codec);
 
-              if (rateControl === 'crf' || rateControl === 'icq' || rateControl === 'cqp' || rateControl === 'cq') {
+              if (
+                rateControl === 'crf' ||
+                rateControl === 'icq' ||
+                rateControl === 'cqp' ||
+                rateControl === 'cq'
+              ) {
                 const fieldName = rcInfo.type;
                 const currentValue = formData.settings.video?.[fieldName] ?? rcInfo.default;
 
@@ -276,7 +281,10 @@ function Presets() {
                         step={rcInfo.type === 'crf' || rcInfo.type === 'icq' ? '0.5' : '1'}
                         value={currentValue}
                         onChange={e => {
-                          const val = rcInfo.type === 'crf' || rcInfo.type === 'icq' ? parseFloat(e.target.value) : parseInt(e.target.value);
+                          const val =
+                            rcInfo.type === 'crf' || rcInfo.type === 'icq'
+                              ? parseFloat(e.target.value)
+                              : parseInt(e.target.value);
                           if (!isNaN(val) && val >= rcInfo.min && val <= rcInfo.max) {
                             updateSettings(`video.${fieldName}`, val);
                           }
@@ -290,7 +298,10 @@ function Presets() {
                         step={rcInfo.type === 'crf' || rcInfo.type === 'icq' ? '0.5' : '1'}
                         value={currentValue}
                         onChange={e => {
-                          const val = rcInfo.type === 'crf' || rcInfo.type === 'icq' ? parseFloat(e.target.value) : parseInt(e.target.value);
+                          const val =
+                            rcInfo.type === 'crf' || rcInfo.type === 'icq'
+                              ? parseFloat(e.target.value)
+                              : parseInt(e.target.value);
                           updateSettings(`video.${fieldName}`, val);
                         }}
                         className="flex-1"
@@ -393,7 +404,11 @@ function Presets() {
                   <option value="">{t('common.none')}</option>
                   {(() => {
                     const codec = formData.settings.video?.codec || 'x264';
-                    if (codec.startsWith('qsv_') || codec.startsWith('nvenc_') || codec.startsWith('vce_')) {
+                    if (
+                      codec.startsWith('qsv_') ||
+                      codec.startsWith('nvenc_') ||
+                      codec.startsWith('vce_')
+                    ) {
                       return null;
                     }
                     return (codec === 'x265' ? X265_TUNES : X264_TUNES).map(tune => (
@@ -469,7 +484,12 @@ function Presets() {
               <div>
                 <label className="label">{t('video.framerate')}</label>
                 <select
-                  value={formData.settings.video?.framerate === null || formData.settings.video?.framerate === undefined ? '' : String(formData.settings.video?.framerate)}
+                  value={
+                    formData.settings.video?.framerate === null ||
+                    formData.settings.video?.framerate === undefined
+                      ? ''
+                      : String(formData.settings.video?.framerate)
+                  }
                   onChange={e => {
                     if (e.target.value === '') {
                       updateSettings('video.framerate', null);
@@ -480,25 +500,31 @@ function Presets() {
                   className="input"
                 >
                   {FRAMERATES.map(fr => (
-                    <option key={fr.value === null ? 'null' : fr.value} value={fr.value === null ? '' : String(fr.value)}>
+                    <option
+                      key={fr.value === null ? 'null' : fr.value}
+                      value={fr.value === null ? '' : String(fr.value)}
+                    >
                       {fr.label}
                     </option>
                   ))}
                 </select>
-                {formData.settings.video?.framerate !== null && formData.settings.video?.framerate !== undefined && (
-                  <div className="mt-2">
-                    <input
-                      type="number"
-                      step="0.001"
-                      min="1"
-                      max="240"
-                      value={formData.settings.video?.framerate || 30}
-                      onChange={e => updateSettings('video.framerate', parseFloat(e.target.value) || null)}
-                      className="input"
-                      placeholder={t('common.placeholder.enterFramerate')}
-                    />
-                  </div>
-                )}
+                {formData.settings.video?.framerate !== null &&
+                  formData.settings.video?.framerate !== undefined && (
+                    <div className="mt-2">
+                      <input
+                        type="number"
+                        step="0.001"
+                        min="1"
+                        max="240"
+                        value={formData.settings.video?.framerate || 30}
+                        onChange={e =>
+                          updateSettings('video.framerate', parseFloat(e.target.value) || null)
+                        }
+                        className="input"
+                        placeholder={t('common.placeholder.enterFramerate')}
+                      />
+                    </div>
+                  )}
               </div>
 
               <div>
@@ -1444,7 +1470,9 @@ function Presets() {
                 </div>
                 {preset.settings.video?.crf !== undefined && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">{t('video.crf')} ({t('video.quality')})</span>
+                    <span className="text-gray-400">
+                      {t('video.crf')} ({t('video.quality')})
+                    </span>
                     <span className="text-white">{preset.settings.video.crf}</span>
                   </div>
                 )}

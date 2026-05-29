@@ -139,7 +139,9 @@ function Settings() {
                       <p className="text-white font-mono">{systemInfo.nodeVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">{t('settings.platform') || 'Platform'}</p>
+                      <p className="text-sm text-gray-400">
+                        {t('settings.platform') || 'Platform'}
+                      </p>
                       <p className="text-white">
                         {systemInfo.platform} ({systemInfo.arch})
                       </p>
@@ -154,7 +156,9 @@ function Settings() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-400 mb-2">{t('settings.memoryUsage') || 'Memory Usage'}</p>
+                    <p className="text-sm text-gray-400 mb-2">
+                      {t('settings.memoryUsage') || 'Memory Usage'}
+                    </p>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <p className="text-xs text-gray-500">RSS</p>
@@ -163,13 +167,17 @@ function Settings() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">{t('common.heapTotal') || 'Heap Total'}</p>
+                        <p className="text-xs text-gray-500">
+                          {t('common.heapTotal') || 'Heap Total'}
+                        </p>
                         <p className="text-white font-mono">
                           {formatBytes(systemInfo.memoryUsage?.heapTotal)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">{t('common.heapUsed') || 'Heap Used'}</p>
+                        <p className="text-xs text-gray-500">
+                          {t('common.heapUsed') || 'Heap Used'}
+                        </p>
                         <p className="text-white font-mono">
                           {formatBytes(systemInfo.memoryUsage?.heapUsed)}
                         </p>
@@ -186,7 +194,9 @@ function Settings() {
           {activeTab === 'account' && (
             <div className="space-y-6">
               <div className="card">
-                <h2 className="text-xl font-semibold text-white mb-4">{t('settings.accountInfo') || 'Account Information'}</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  {t('settings.accountInfo') || 'Account Information'}
+                </h2>
 
                 <div className="space-y-3">
                   <div>
@@ -201,7 +211,9 @@ function Settings() {
               </div>
 
               <div className="card">
-                <h2 className="text-xl font-semibold text-white mb-4">{t('settings.changePassword') || 'Change Password'}</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  {t('settings.changePassword') || 'Change Password'}
+                </h2>
 
                 {error && (
                   <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
@@ -219,7 +231,9 @@ function Settings() {
 
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div>
-                    <label className="label">{t('settings.currentPassword') || 'Current Password'}</label>
+                    <label className="label">
+                      {t('settings.currentPassword') || 'Current Password'}
+                    </label>
                     <input
                       type="password"
                       value={passwordForm.currentPassword}
@@ -251,7 +265,9 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="label">{t('settings.confirmPassword') || 'Confirm Password'}</label>
+                    <label className="label">
+                      {t('settings.confirmPassword') || 'Confirm Password'}
+                    </label>
                     <input
                       type="password"
                       value={passwordForm.confirmPassword}
@@ -295,7 +311,9 @@ function Settings() {
               {directories && systemInfo ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">{t('settings.directoryMapping') || 'Directory Mapping'}</h3>
+                    <h3 className="text-sm font-medium text-gray-400 mb-3">
+                      {t('settings.directoryMapping') || 'Directory Mapping'}
+                    </h3>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
                         <div className="flex items-center space-x-3">
@@ -330,7 +348,9 @@ function Settings() {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">{t('dashboard.diskUsage')}</h3>
+                    <h3 className="text-sm font-medium text-gray-400 mb-3">
+                      {t('dashboard.diskUsage')}
+                    </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-300">{t('common.used') || 'Used'}</span>
