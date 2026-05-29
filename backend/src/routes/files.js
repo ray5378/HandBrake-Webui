@@ -208,9 +208,7 @@ router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, 
     const outputDir = path.resolve(config.outputDir);
     const fileToDelete = path.resolve(filePath);
 
-    if (
-      !fileToDelete.startsWith(outputDir)
-    ) {
+    if (!fileToDelete.startsWith(outputDir)) {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
