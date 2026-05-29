@@ -57,7 +57,9 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositor
     libx265 \
     libvpx \
     libdav1d \
-    aom-libs
+    aom-libs \
+    intel-media-driver \
+    onevpl-intel-gpu
 
 # 设置时区
 ENV TZ=Asia/Shanghai
