@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ListTodo, Play, CheckCircle, XCircle, Clock, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { ListTodo, Play, CheckCircle, XCircle, Clock, Trash2, Eye, RefreshCw, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 
@@ -59,6 +59,17 @@ function Jobs() {
     }
   };
 
+  const handleClearAll = async () => {
+    if (!confirm(t('jobs.confirmClearAll'))) return;
+
+    try {
+      await api.delete('/jobs/all');
+      fetchJobs();
+    } catch (error) {
+      console.error('Failed to clear all jobs:', error);
+    }
+  };
+
   const getStatusLabel = status => {
     const statusMap = {
       queued: t('jobs.queue'),
@@ -86,14 +97,25 @@ function Jobs() {
           <p className="text-gray-400 mt-1">{t('jobs.subtitle')}</p>
         </div>
 
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="btn btn-secondary inline-flex items-center space-x-2"
-        >
-          <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
-          <span>{t('common.refresh')}</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          {jobs.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="btn btn-danger inline-flex items-center space-x-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>{t('jobs.clearAll')}</span>
+            </button>
+          )}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="btn btn-secondary inline-flex items-center space-x-2"
+          >
+            <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
+            <span>{t('common.refresh')}</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center space-x-2 overflow-x-auto pb-2">
@@ -207,9 +229,9 @@ function Jobs() {
         <div className="card text-center py-12">
           <ListTodo className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400 mb-4">{t('jobs.noJobs')}</p>
-          <Link to="/transcode" className="btn btn-primary inline-flex items-center space-x-2">
+          <Link to="/files" className="btn btn-primary inline-flex items-center space-x-2">
             <Play className="w-4 h-4" />
-            <span>{t('transcode.startTranscode')}</span>
+            <span>{t('files.title')}</span>
           </Link>
         </div>
       )}

@@ -134,6 +134,8 @@
     "noJobs": "No jobs found",
     "queue": "Queue",
     "history": "History",
+    "clearAll": "Clear All",
+    "confirmClearAll": "Are you sure you want to clear all jobs?\n\nProcessing jobs will also be cancelled.",
     "clearHistory": "Clear History",
     "confirmClearHistory": "Are you sure you want to clear all job history?"
   },

@@ -157,6 +157,29 @@ router.post(
   }
 );
 
+router.delete('/all', authenticateToken, async (req, res, next) => {
+  try {
+    const db = getDatabase();
+
+    const processingJobs = db
+      .prepare("SELECT id FROM jobs WHERE status = 'processing'")
+      .all();
+
+    for (const job of processingJobs) {
+      await cancelTranscode(job.id);
+    }
+
+    db.prepare('DELETE FROM jobs').run();
+
+    res.json({
+      success: true,
+      message: 'All jobs cleared successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete('/:id', authenticateToken, async (req, res, next) => {
   try {
     const db = getDatabase();
