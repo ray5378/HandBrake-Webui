@@ -30,6 +30,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend && npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend && npm run build
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
