@@ -14,6 +14,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [showNewDirInput, setShowNewDirInput] = useState(false);
   const [newDirName, setNewDirName] = useState('');
   const [copyNonVideoFiles, setCopyNonVideoFiles] = useState(false);
+  const [moveNonVideoFiles, setMoveNonVideoFiles] = useState(false);
   const [customSettings, setCustomSettings] = useState(false);
   const [settings, setSettings] = useState({
     crf: 23,
@@ -92,7 +93,8 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
         outputDirectory,
         presetId: selectedPreset || undefined,
         customSettings: customSettings ? settings : undefined,
-        copyNonVideoFiles
+        copyNonVideoFiles,
+        moveNonVideoFiles
       });
 
       setSuccess(true);
@@ -313,6 +315,19 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   />
                   <label htmlFor="copyNonVideoFiles" className="text-sm text-gray-300">
                     把源目录不能转码的文件复制到目标目录
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="moveNonVideoFiles"
+                    checked={moveNonVideoFiles}
+                    onChange={e => setMoveNonVideoFiles(e.target.checked)}
+                    className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="moveNonVideoFiles" className="text-sm text-gray-300">
+                    把源目录不能转码的文件移动到目标目录
                   </label>
                 </div>
 

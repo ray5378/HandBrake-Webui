@@ -351,7 +351,7 @@ router.post(
   validate,
   async (req, res, next) => {
     try {
-      const { sourceDirectory, outputDirectory, presetId, customSettings, copyNonVideoFiles } = req.body;
+      const { sourceDirectory, outputDirectory, presetId, customSettings, copyNonVideoFiles, moveNonVideoFiles } = req.body;
       const db = getDatabase();
 
       const videoExtensions = [
@@ -475,6 +475,28 @@ router.post(
           }
         };
         copyNonVideoRecursive(sourceDirectory, outputDirectory);
+      }
+
+      if (moveNonVideoFiles) {
+        const moveNonVideoRecursive = (src, dest) => {
+          const entries = fs.readdirSync(src, { withFileTypes: true });
+          for (const entry of entries) {
+            const srcPath = path.join(src, entry.name);
+            const destPath = path.join(dest, entry.name);
+            if (entry.isDirectory()) {
+              fs.mkdirSync(destPath, { recursive: true });
+              moveNonVideoRecursive(srcPath, destPath);
+              try { fs.rmdirSync(srcPath); } catch (e) { /* 非空目录保留 */ }
+            } else {
+              const ext = path.extname(entry.name).toLowerCase();
+              if (!videoExtensions.includes(ext)) {
+                fs.mkdirSync(path.dirname(destPath), { recursive: true });
+                fs.renameSync(srcPath, destPath);
+              }
+            }
+          }
+        };
+        moveNonVideoRecursive(sourceDirectory, outputDirectory);
       }
 
       res.status(201).json({
