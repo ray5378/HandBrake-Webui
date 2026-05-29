@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   FolderOpen,
   Upload,
@@ -18,6 +19,7 @@ import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
 
 function Files() {
+  const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [directories, setDirectories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ function Files() {
   };
 
   const handleDelete = async filePath => {
-    if (!confirm('确定要删除这个文件吗？')) return;
+    if (!confirm(t('files.confirmDelete'))) return;
 
     try {
       await api.delete('/files', { params: { path: filePath } });
@@ -118,7 +120,6 @@ function Files() {
     setSearchTerm('');
   };
 
-  // 右键菜单处理
   const handleContextMenu = (e, directory) => {
     e.preventDefault();
     setContextMenu({
@@ -161,7 +162,7 @@ function Files() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">文件管理</h1>
+          <h1 className="text-3xl font-bold text-white">{t('files.title')}</h1>
           <div className="flex items-center space-x-2 mt-2 text-sm text-gray-400">
             {pathParts.map((part, index) => (
               <React.Fragment key={index}>
@@ -182,7 +183,7 @@ function Files() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索文件..."
+              placeholder={t('common.search') + '...'}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="input pl-10 w-48"
@@ -212,7 +213,7 @@ function Files() {
 
           <label className="btn btn-primary cursor-pointer inline-flex items-center space-x-2">
             <Upload className="w-4 h-4" />
-            <span>上传</span>
+            <span>{t('files.uploadFile')}</span>
             <input
               type="file"
               accept="video/*"
@@ -226,12 +227,12 @@ function Files() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">加载中...</div>
+        <div className="text-center py-12 text-gray-400">{t('common.loading')}</div>
       ) : (
         <>
           {directories.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-medium text-gray-400 mb-3">文件夹</h2>
+              <h2 className="text-sm font-medium text-gray-400 mb-3">{t('common.directories') || 'Directories'}</h2>
               <div
                 className={clsx(
                   'grid gap-4',
@@ -286,7 +287,7 @@ function Files() {
                           }
                           className="btn btn-primary text-xs py-1 px-3"
                         >
-                          转码
+                          {t('transcode.title')}
                         </button>
                         <button
                           onClick={() => handleDownload(file.path, file.name)}
@@ -320,7 +321,7 @@ function Files() {
                           }
                           className="btn btn-primary text-xs"
                         >
-                          转码
+                          {t('transcode.title')}
                         </button>
                         <button
                           onClick={() => handleDownload(file.path, file.name)}
@@ -343,8 +344,8 @@ function Files() {
           ) : (
             <div className="text-center py-12">
               <Video className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400">暂无文件</p>
-              <p className="text-sm text-gray-500 mt-1">上传视频文件开始转码</p>
+              <p className="text-gray-400">{t('files.noFiles')}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('files.dragDropHint')}</p>
             </div>
           )}
         </>
@@ -354,12 +355,11 @@ function Files() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-dark-800 rounded-lg p-6 text-center">
             <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-white">上传中...</p>
+            <p className="text-white">{t('common.uploading') || 'Uploading...'}</p>
           </div>
         </div>
       )}
 
-      {/* 右键菜单 */}
       {contextMenu && (
         <div
           ref={contextMenuRef}
@@ -374,12 +374,11 @@ function Files() {
             className="w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3"
           >
             <PlayCircle className="w-4 h-4 text-primary" />
-            <span>批量转码此文件夹</span>
+            <span>{t('common.batchTranscode') || 'Batch Transcode'}</span>
           </button>
         </div>
       )}
 
-      {/* 批量转码对话框 */}
       {showBatchModal && selectedDirectory && (
         <BatchTranscodeModal
           directory={selectedDirectory}

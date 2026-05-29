@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Video,
   FolderOpen,
@@ -13,6 +14,7 @@ import {
 import api from '../services/api';
 
 function Dashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
 
@@ -46,41 +48,52 @@ function Dashboard() {
 
   const statCards = [
     {
-      label: '总任务数',
+      label: t('dashboard.totalJobs'),
       value: stats?.total || 0,
       icon: Video,
       color: 'text-primary'
     },
     {
-      label: '排队中',
+      label: t('jobs.queue'),
       value: stats?.queued || 0,
       icon: Clock,
       color: 'text-warning'
     },
     {
-      label: '转码中',
+      label: t('transcode.transcoding'),
       value: stats?.processing || 0,
       icon: Play,
       color: 'text-secondary'
     },
     {
-      label: '已完成',
+      label: t('dashboard.completedJobs'),
       value: stats?.completed || 0,
       icon: CheckCircle,
       color: 'text-success'
     }
   ];
 
+  const getJobStatusLabel = status => {
+    const statusMap = {
+      queued: t('jobs.queue'),
+      processing: t('transcode.transcoding'),
+      completed: t('common.success'),
+      failed: t('common.error'),
+      cancelled: t('common.cancel')
+    };
+    return statusMap[status] || status;
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">仪表盘</h1>
-          <p className="text-gray-400 mt-1">系统概览和快速操作</p>
+          <h1 className="text-3xl font-bold text-white">{t('dashboard.title')}</h1>
+          <p className="text-gray-400 mt-1">{t('dashboard.subtitle')}</p>
         </div>
         <Link to="/transcode" className="btn btn-primary inline-flex items-center space-x-2">
           <Play className="w-4 h-4" />
-          <span>开始转码</span>
+          <span>{t('transcode.startTranscode')}</span>
         </Link>
       </div>
 
@@ -99,12 +112,12 @@ function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">最近任务</h2>
+            <h2 className="text-xl font-semibold text-white">{t('dashboard.recentJobs')}</h2>
             <Link
               to="/jobs"
               className="text-primary hover:text-primary/80 text-sm flex items-center space-x-1"
             >
-              <span>查看全部</span>
+              <span>{t('jobs.viewDetails')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -122,16 +135,12 @@ function Dashboard() {
                       {job.source_file.split('/').pop()}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(job.created_at).toLocaleString('zh-CN')}
+                      {new Date(job.created_at).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className={`badge badge-${job.status}`}>
-                      {job.status === 'queued' && '排队'}
-                      {job.status === 'processing' && '转码中'}
-                      {job.status === 'completed' && '完成'}
-                      {job.status === 'failed' && '失败'}
-                      {job.status === 'cancelled' && '取消'}
+                      {getJobStatusLabel(job.status)}
                     </span>
                     {job.status === 'processing' && (
                       <div className="text-secondary font-mono text-sm">
@@ -145,32 +154,32 @@ function Dashboard() {
           ) : (
             <div className="text-center py-8 text-gray-400">
               <Video className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>暂无任务</p>
+              <p>{t('dashboard.noJobs')}</p>
             </div>
           )}
         </div>
 
         <div className="card">
-          <h2 className="text-xl font-semibold text-white mb-4">系统信息</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">{t('settings.about')}</h2>
 
           {systemInfo ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-400">HandBrake 版本</p>
+                  <p className="text-sm text-gray-400">HandBrake {t('settings.version')}</p>
                   <p className="text-white font-mono">{systemInfo.handbrakeVersion}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Node.js 版本</p>
+                  <p className="text-sm text-gray-400">Node.js {t('settings.version')}</p>
                   <p className="text-white font-mono">{systemInfo.nodeVersion}</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-gray-400 mb-2">存储空间</p>
+                <p className="text-sm text-gray-400 mb-2">{t('dashboard.diskUsage')}</p>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">已使用</span>
+                    <span className="text-gray-300">{t('common.used') || 'Used'}</span>
                     <span className="text-white font-mono">
                       {formatBytes(systemInfo.diskUsage?.used || 0)}
                     </span>
@@ -191,28 +200,28 @@ function Dashboard() {
                     />
                   </div>
                   <p className="text-xs text-gray-400">
-                    共 {formatBytes(systemInfo.diskUsage?.total || 0)}， 可用{' '}
+                    {t('common.total') || 'Total'}: {formatBytes(systemInfo.diskUsage?.total || 0)}, {t('common.free') || 'Free'}:{' '}
                     {formatBytes(systemInfo.diskUsage?.free || 0)}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-gray-400 mb-2">运行时间</p>
+                <p className="text-sm text-gray-400 mb-2">{t('common.uptime') || 'Uptime'}</p>
                 <p className="text-white font-mono">
-                  {Math.floor(systemInfo.uptime / 3600)} 小时{' '}
-                  {Math.floor((systemInfo.uptime % 3600) / 60)} 分钟
+                  {Math.floor(systemInfo.uptime / 3600)} h{' '}
+                  {Math.floor((systemInfo.uptime % 3600) / 60)} m
                 </p>
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-400">加载中...</div>
+            <div className="text-center py-8 text-gray-400">{t('common.loading')}</div>
           )}
         </div>
       </div>
 
       <div className="card">
-        <h2 className="text-xl font-semibold text-white mb-4">快捷操作</h2>
+        <h2 className="text-xl font-semibold text-white mb-4">{t('common.quickActions') || 'Quick Actions'}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             to="/files"
@@ -220,8 +229,8 @@ function Dashboard() {
           >
             <FolderOpen className="w-8 h-8 text-primary" />
             <div>
-              <p className="text-white font-medium">文件管理</p>
-              <p className="text-sm text-gray-400">浏览和上传视频文件</p>
+              <p className="text-white font-medium">{t('files.title')}</p>
+              <p className="text-sm text-gray-400">{t('files.subtitle')}</p>
             </div>
           </Link>
 
@@ -231,8 +240,8 @@ function Dashboard() {
           >
             <TrendingUp className="w-8 h-8 text-secondary" />
             <div>
-              <p className="text-white font-medium">预设管理</p>
-              <p className="text-sm text-gray-400">创建和管理转码预设</p>
+              <p className="text-white font-medium">{t('presets.title')}</p>
+              <p className="text-sm text-gray-400">{t('presets.subtitle')}</p>
             </div>
           </Link>
 
@@ -242,8 +251,8 @@ function Dashboard() {
           >
             <XCircle className="w-8 h-8 text-warning" />
             <div>
-              <p className="text-white font-medium">系统设置</p>
-              <p className="text-sm text-gray-400">配置和用户管理</p>
+              <p className="text-white font-medium">{t('settings.title')}</p>
+              <p className="text-sm text-gray-400">{t('settings.subtitle')}</p>
             </div>
           </Link>
         </div>

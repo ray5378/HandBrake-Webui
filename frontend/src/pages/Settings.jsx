@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Settings as SettingsIcon,
   User,
   FolderOpen,
   HardDrive,
-  Shield,
-  Bell,
   Save,
   Loader2,
   AlertCircle,
@@ -15,6 +14,7 @@ import api from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 
 function Settings() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [systemInfo, setSystemInfo] = useState(null);
   const [directories, setDirectories] = useState(null);
@@ -51,12 +51,12 @@ function Settings() {
     e.preventDefault();
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError('两次输入的密码不一致');
+      setError(t('settings.passwordMismatch') || 'Passwords do not match');
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setError('新密码长度至少为 6 个字符');
+      setError(t('settings.passwordTooShort') || 'Password must be at least 6 characters');
       return;
     }
 
@@ -70,14 +70,14 @@ function Settings() {
         newPassword: passwordForm.newPassword
       });
 
-      setSuccess('密码修改成功');
+      setSuccess(t('settings.passwordChanged') || 'Password changed successfully');
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
     } catch (error) {
-      setError(error.response?.data?.error || '密码修改失败');
+      setError(error.response?.data?.error || t('errors.unknownError'));
     } finally {
       setLoading(false);
     }
@@ -92,16 +92,16 @@ function Settings() {
   };
 
   const tabs = [
-    { id: 'general', label: '常规', icon: SettingsIcon },
-    { id: 'account', label: '账户', icon: User },
-    { id: 'storage', label: '存储', icon: HardDrive }
+    { id: 'general', label: t('settings.general'), icon: SettingsIcon },
+    { id: 'account', label: t('settings.account') || 'Account', icon: User },
+    { id: 'storage', label: t('settings.storage'), icon: HardDrive }
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white">设置</h1>
-        <p className="text-gray-400 mt-1">系统配置和用户管理</p>
+        <h1 className="text-3xl font-bold text-white">{t('settings.title')}</h1>
+        <p className="text-gray-400 mt-1">{t('settings.subtitle')}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -125,36 +125,36 @@ function Settings() {
         <div className="flex-1">
           {activeTab === 'general' && (
             <div className="card">
-              <h2 className="text-xl font-semibold text-white mb-4">系统信息</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('settings.about')}</h2>
 
               {systemInfo ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-400">HandBrake 版本</p>
+                      <p className="text-sm text-gray-400">HandBrake {t('settings.version')}</p>
                       <p className="text-white font-mono">{systemInfo.handbrakeVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">Node.js 版本</p>
+                      <p className="text-sm text-gray-400">Node.js {t('settings.version')}</p>
                       <p className="text-white font-mono">{systemInfo.nodeVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">平台</p>
+                      <p className="text-sm text-gray-400">{t('settings.platform') || 'Platform'}</p>
                       <p className="text-white">
                         {systemInfo.platform} ({systemInfo.arch})
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">运行时间</p>
+                      <p className="text-sm text-gray-400">{t('common.uptime') || 'Uptime'}</p>
                       <p className="text-white font-mono">
-                        {Math.floor(systemInfo.uptime / 3600)} 小时{' '}
-                        {Math.floor((systemInfo.uptime % 3600) / 60)} 分钟
+                        {Math.floor(systemInfo.uptime / 3600)} h{' '}
+                        {Math.floor((systemInfo.uptime % 3600) / 60)} m
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-400 mb-2">内存使用</p>
+                    <p className="text-sm text-gray-400 mb-2">{t('settings.memoryUsage') || 'Memory Usage'}</p>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <p className="text-xs text-gray-500">RSS</p>
@@ -163,13 +163,13 @@ function Settings() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">堆总计</p>
+                        <p className="text-xs text-gray-500">{t('common.heapTotal') || 'Heap Total'}</p>
                         <p className="text-white font-mono">
                           {formatBytes(systemInfo.memoryUsage?.heapTotal)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">堆使用</p>
+                        <p className="text-xs text-gray-500">{t('common.heapUsed') || 'Heap Used'}</p>
                         <p className="text-white font-mono">
                           {formatBytes(systemInfo.memoryUsage?.heapUsed)}
                         </p>
@@ -178,7 +178,7 @@ function Settings() {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-400">加载中...</p>
+                <p className="text-gray-400">{t('common.loading')}</p>
               )}
             </div>
           )}
@@ -186,22 +186,22 @@ function Settings() {
           {activeTab === 'account' && (
             <div className="space-y-6">
               <div className="card">
-                <h2 className="text-xl font-semibold text-white mb-4">账户信息</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">{t('settings.accountInfo') || 'Account Information'}</h2>
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-400">用户名</p>
+                    <p className="text-sm text-gray-400">{t('auth.username')}</p>
                     <p className="text-white text-lg">{user?.username}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">角色</p>
+                    <p className="text-sm text-gray-400">{t('settings.role') || 'Role'}</p>
                     <p className="text-white capitalize">{user?.role}</p>
                   </div>
                 </div>
               </div>
 
               <div className="card">
-                <h2 className="text-xl font-semibold text-white mb-4">修改密码</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">{t('settings.changePassword') || 'Change Password'}</h2>
 
                 {error && (
                   <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm">
@@ -219,7 +219,7 @@ function Settings() {
 
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div>
-                    <label className="label">当前密码</label>
+                    <label className="label">{t('settings.currentPassword') || 'Current Password'}</label>
                     <input
                       type="password"
                       value={passwordForm.currentPassword}
@@ -235,7 +235,7 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="label">新密码</label>
+                    <label className="label">{t('settings.newPassword') || 'New Password'}</label>
                     <input
                       type="password"
                       value={passwordForm.newPassword}
@@ -251,7 +251,7 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="label">确认新密码</label>
+                    <label className="label">{t('settings.confirmPassword') || 'Confirm Password'}</label>
                     <input
                       type="password"
                       value={passwordForm.confirmPassword}
@@ -274,12 +274,12 @@ function Settings() {
                     {loading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>保存中...</span>
+                        <span>{t('common.saving') || 'Saving...'}</span>
                       </>
                     ) : (
                       <>
                         <Save className="w-4 h-4" />
-                        <span>保存</span>
+                        <span>{t('common.save')}</span>
                       </>
                     )}
                   </button>
@@ -290,18 +290,18 @@ function Settings() {
 
           {activeTab === 'storage' && (
             <div className="card">
-              <h2 className="text-xl font-semibold text-white mb-4">存储信息</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('settings.storage')}</h2>
 
               {directories && systemInfo ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">目录映射</h3>
+                    <h3 className="text-sm font-medium text-gray-400 mb-3">{t('settings.directoryMapping') || 'Directory Mapping'}</h3>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <FolderOpen className="w-5 h-5 text-primary" />
                           <div>
-                            <p className="text-white">源文件目录</p>
+                            <p className="text-white">{t('files.sourceFiles')}</p>
                             <p className="text-xs text-gray-400 font-mono">{directories.source}</p>
                           </div>
                         </div>
@@ -311,7 +311,7 @@ function Settings() {
                         <div className="flex items-center space-x-3">
                           <FolderOpen className="w-5 h-5 text-success" />
                           <div>
-                            <p className="text-white">输出目录</p>
+                            <p className="text-white">{t('files.outputFiles')}</p>
                             <p className="text-xs text-gray-400 font-mono">{directories.output}</p>
                           </div>
                         </div>
@@ -321,7 +321,7 @@ function Settings() {
                         <div className="flex items-center space-x-3">
                           <FolderOpen className="w-5 h-5 text-warning" />
                           <div>
-                            <p className="text-white">配置目录</p>
+                            <p className="text-white">{t('settings.configDir')}</p>
                             <p className="text-xs text-gray-400 font-mono">{directories.config}</p>
                           </div>
                         </div>
@@ -330,10 +330,10 @@ function Settings() {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">磁盘使用</h3>
+                    <h3 className="text-sm font-medium text-gray-400 mb-3">{t('dashboard.diskUsage')}</h3>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">已使用</span>
+                        <span className="text-gray-300">{t('common.used') || 'Used'}</span>
                         <span className="text-white font-mono">
                           {formatBytes(systemInfo.diskUsage?.used || 0)}
                         </span>
@@ -354,13 +354,13 @@ function Settings() {
                         />
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">总计</span>
+                        <span className="text-gray-400">{t('common.total') || 'Total'}</span>
                         <span className="text-gray-300 font-mono">
                           {formatBytes(systemInfo.diskUsage?.total || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">可用</span>
+                        <span className="text-gray-400">{t('common.free') || 'Free'}</span>
                         <span className="text-gray-300 font-mono">
                           {formatBytes(systemInfo.diskUsage?.free || 0)}
                         </span>
@@ -369,7 +369,7 @@ function Settings() {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-400">加载中...</p>
+                <p className="text-gray-400">{t('common.loading')}</p>
               )}
             </div>
           )}
