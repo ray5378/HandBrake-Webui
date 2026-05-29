@@ -12,121 +12,121 @@ export const FORMATS = [
 // 视频编码器
 export const VIDEO_CODECS = [
   // 软件编码器
-  { value: 'x264', label: 'H.264 (x264)', group: 'software' },
-  { value: 'x264_10bit', label: 'H.264 10-bit (x264)', group: 'software' },
-  { value: 'x265', label: 'H.265/HEVC (x265)', group: 'software' },
-  { value: 'x265_10bit', label: 'H.265/HEVC 10-bit (x265)', group: 'software' },
-  { value: 'x265_12bit', label: 'H.265/HEVC 12-bit (x265)', group: 'software' },
-  { value: 'svt-av1', label: 'AV1 (SVT-AV1)', group: 'software' },
-  { value: 'svt-av1_10bit', label: 'AV1 10-bit (SVT-AV1)', group: 'software' },
-  { value: 'vp9', label: 'VP9', group: 'software' },
-  { value: 'vp9_10bit', label: 'VP9 10-bit', group: 'software' },
-  { value: 'mpeg4', label: 'MPEG-4', group: 'software' },
-  { value: 'mpeg2', label: 'MPEG-2', group: 'software' },
-  { value: 'ffv1', label: 'FFV1', group: 'software' },
+  { value: 'x264', label: 'H.264 软件编码', group: 'software' },
+  { value: 'x264_10bit', label: 'H.264 10位 软件编码', group: 'software' },
+  { value: 'x265', label: 'H.265/HEVC 软件编码', group: 'software' },
+  { value: 'x265_10bit', label: 'H.265/HEVC 10位 软件编码', group: 'software' },
+  { value: 'x265_12bit', label: 'H.265/HEVC 12位 软件编码', group: 'software' },
+  { value: 'svt-av1', label: 'AV1 (SVT-AV1) 软件编码', group: 'software' },
+  { value: 'svt-av1_10bit', label: 'AV1 10位 (SVT-AV1) 软件编码', group: 'software' },
+  { value: 'vp9', label: 'VP9 软件编码', group: 'software' },
+  { value: 'vp9_10bit', label: 'VP9 10位 软件编码', group: 'software' },
+  { value: 'mpeg4', label: 'MPEG-4 软件编码', group: 'software' },
+  { value: 'mpeg2', label: 'MPEG-2 软件编码', group: 'software' },
+  { value: 'ffv1', label: 'FFV1 无损编码', group: 'software' },
   // Intel QSV 硬件编码
-  { value: 'qsv_h264', label: 'H.264 (Intel QSV)', group: 'qsv' },
-  { value: 'qsv_h265', label: 'H.265/HEVC (Intel QSV)', group: 'qsv' },
-  { value: 'qsv_h265_10bit', label: 'H.265/HEVC 10-bit (Intel QSV)', group: 'qsv' },
+  { value: 'qsv_h264', label: 'H.264 Intel QSV 硬件加速', group: 'qsv' },
+  { value: 'qsv_h265', label: 'H.265/HEVC Intel QSV 硬件加速', group: 'qsv' },
+  { value: 'qsv_h265_10bit', label: 'H.265/HEVC 10位 Intel QSV 硬件加速', group: 'qsv' },
   // NVIDIA NVENC 硬件编码
-  { value: 'nvenc_h264', label: 'H.264 (NVENC)', group: 'nvenc' },
-  { value: 'nvenc_h265', label: 'H.265/HEVC (NVENC)', group: 'nvenc' },
+  { value: 'nvenc_h264', label: 'H.264 NVIDIA NVENC 硬件加速', group: 'nvenc' },
+  { value: 'nvenc_h265', label: 'H.265/HEVC NVIDIA NVENC 硬件加速', group: 'nvenc' },
   // AMD VCE 硬件编码
-  { value: 'vce_h264', label: 'H.264 (VCE)', group: 'vce' },
-  { value: 'vce_h265', label: 'H.265/HEVC (VCE)', group: 'vce' }
+  { value: 'vce_h264', label: 'H.264 AMD VCE 硬件加速', group: 'vce' },
+  { value: 'vce_h265', label: 'H.265/HEVC AMD VCE 硬件加速', group: 'vce' }
 ];
 
 // 视频编码器预设
 export const X264_PRESETS = [
-  { value: 'ultrafast', label: 'Ultrafast（极速）' },
-  { value: 'superfast', label: 'Superfast（超快）' },
-  { value: 'veryfast', label: 'Veryfast（非常快）' },
-  { value: 'faster', label: 'Faster（很快）' },
-  { value: 'fast', label: 'Fast（快）' },
-  { value: 'medium', label: 'Medium（中等）' },
-  { value: 'slow', label: 'Slow（慢）' },
-  { value: 'slower', label: 'Slower（更慢）' },
-  { value: 'veryslow', label: 'Veryslow（非常慢）' },
-  { value: 'placebo', label: 'Placebo（极致）' }
+  { value: 'ultrafast', label: '极速' },
+  { value: 'superfast', label: '超快' },
+  { value: 'veryfast', label: '非常快' },
+  { value: 'faster', label: '很快' },
+  { value: 'fast', label: '快' },
+  { value: 'medium', label: '中等' },
+  { value: 'slow', label: '慢' },
+  { value: 'slower', label: '更慢' },
+  { value: 'veryslow', label: '非常慢' },
+  { value: 'placebo', label: '极致（最慢）' }
 ];
 
 export const X265_PRESETS = [
-  { value: 'ultrafast', label: 'Ultrafast（极速）' },
-  { value: 'superfast', label: 'Superfast（超快）' },
-  { value: 'veryfast', label: 'Veryfast（非常快）' },
-  { value: 'faster', label: 'Faster（很快）' },
-  { value: 'fast', label: 'Fast（快）' },
-  { value: 'medium', label: 'Medium（中等）' },
-  { value: 'slow', label: 'Slow（慢）' },
-  { value: 'slower', label: 'Slower（更慢）' },
-  { value: 'veryslow', label: 'Veryslow（非常慢）' },
-  { value: 'placebo', label: 'Placebo（极致）' }
+  { value: 'ultrafast', label: '极速' },
+  { value: 'superfast', label: '超快' },
+  { value: 'veryfast', label: '非常快' },
+  { value: 'faster', label: '很快' },
+  { value: 'fast', label: '快' },
+  { value: 'medium', label: '中等' },
+  { value: 'slow', label: '慢' },
+  { value: 'slower', label: '更慢' },
+  { value: 'veryslow', label: '非常慢' },
+  { value: 'placebo', label: '极致（最慢）' }
 ];
 
 // 硬件编码器预设
 export const QSV_PRESETS = [
-  { value: 'speed', label: 'Speed（速度优先）' },
-  { value: 'balanced', label: 'Balanced（均衡）' },
-  { value: 'quality', label: 'Quality（画质优先）' }
+  { value: 'speed', label: '速度优先' },
+  { value: 'balanced', label: '均衡' },
+  { value: 'quality', label: '画质优先' }
 ];
 
 export const NVENC_PRESETS = [
-  { value: 'fast', label: 'Fast（快速）' },
-  { value: 'medium', label: 'Medium（中等）' },
-  { value: 'slow', label: 'Slow（高质量）' }
+  { value: 'fast', label: '快速' },
+  { value: 'medium', label: '中等' },
+  { value: 'slow', label: '高质量' }
 ];
 
 export const VCE_PRESETS = [
-  { value: 'speed', label: 'Speed（速度优先）' },
-  { value: 'balanced', label: 'Balanced（均衡）' },
-  { value: 'quality', label: 'Quality（画质优先）' }
+  { value: 'speed', label: '速度优先' },
+  { value: 'balanced', label: '均衡' },
+  { value: 'quality', label: '画质优先' }
 ];
 
 // 视频调优
 export const X264_TUNES = [
-  { value: 'film', label: 'Film（电影）' },
-  { value: 'animation', label: 'Animation（动画）' },
-  { value: 'grain', label: 'Grain（颗粒）' },
-  { value: 'stillimage', label: 'Still Image（静态影像）' },
-  { value: 'psnr', label: 'PSNR（峰值信噪比）' },
-  { value: 'ssim', label: 'SSIM（结构相似性）' },
-  { value: 'fastdecode', label: 'Fast Decode（快速解码）' },
-  { value: 'zerolatency', label: 'Zero Latency（零延迟）' }
+  { value: 'film', label: '电影' },
+  { value: 'animation', label: '动画' },
+  { value: 'grain', label: '颗粒/噪点' },
+  { value: 'stillimage', label: '静态图像' },
+  { value: 'psnr', label: 'PSNR 优化' },
+  { value: 'ssim', label: 'SSIM 优化' },
+  { value: 'fastdecode', label: '快速解码' },
+  { value: 'zerolatency', label: '零延迟' }
 ];
 
 export const X265_TUNES = [
-  { value: 'film', label: 'Film（电影）' },
-  { value: 'animation', label: 'Animation（动画）' },
-  { value: 'grain', label: 'Grain（颗粒）' },
-  { value: 'stillimage', label: 'Still Image（静态影像）' },
-  { value: 'psnr', label: 'PSNR（峰值信噪比）' },
-  { value: 'ssim', label: 'SSIM（结构相似性）' },
-  { value: 'fastdecode', label: 'Fast Decode（快速解码）' },
-  { value: 'zerolatency', label: 'Zero Latency（零延迟）' }
+  { value: 'film', label: '电影' },
+  { value: 'animation', label: '动画' },
+  { value: 'grain', label: '颗粒/噪点' },
+  { value: 'stillimage', label: '静态图像' },
+  { value: 'psnr', label: 'PSNR 优化' },
+  { value: 'ssim', label: 'SSIM 优化' },
+  { value: 'fastdecode', label: '快速解码' },
+  { value: 'zerolatency', label: '零延迟' }
 ];
 
 // 视频编码方式
 export const RATE_CONTROLS = [
-  { value: 'crf', label: '恒定质量 (CRF)' },
+  { value: 'crf', label: '恒定质量 (RF)' },
   { value: 'cbr', label: '恒定码率 (CBR)' },
   { value: 'vbr', label: '可变码率 (VBR)' },
   { value: 'cqp', label: '恒定量化参数 (CQP)' },
-  { value: 'icq', label: 'Intel QSV ICQ' },
-  { value: 'cq', label: 'SVT-AV1 CQ' }
+  { value: 'icq', label: '智能恒定质量 (ICQ)' },
+  { value: 'cq', label: '恒定质量 (CQ)' }
 ];
 
 // 音频编码器
 export const AUDIO_CODECS = [
-  { value: 'copy', label: '直通 (Passthrough)' },
+  { value: 'copy', label: '音频直通' },
   { value: 'av_aac', label: 'AAC (avcodec)' },
   { value: 'ca_aac', label: 'AAC (CoreAudio)' },
   { value: 'mp3', label: 'MP3 (lame)' },
   { value: 'opus', label: 'Opus' },
   { value: 'vorbis', label: 'Vorbis' },
-  { value: 'ac3', label: 'AC3' },
-  { value: 'eac3', label: 'EAC3' },
-  { value: 'flac16', label: 'FLAC 16-bit' },
-  { value: 'flac24', label: 'FLAC 24-bit' }
+  { value: 'ac3', label: 'AC3 (杜比数字)' },
+  { value: 'eac3', label: 'EAC3 (杜比数字增强)' },
+  { value: 'flac16', label: 'FLAC 16位 无损' },
+  { value: 'flac24', label: 'FLAC 24位 无损' }
 ];
 
 // 音频采样率
@@ -138,11 +138,11 @@ export const AUDIO_SAMPLERATES = [
   { value: 22050, label: '22.05 kHz' },
   { value: 24000, label: '24 kHz' },
   { value: 32000, label: '32 kHz' },
-  { value: 44100, label: '44.1 kHz（默认）' },
-  { value: 48000, label: '48 kHz' },
+  { value: 44100, label: '44.1 kHz (CD音质)' },
+  { value: 48000, label: '48 kHz (默认)' },
   { value: 64000, label: '64 kHz' },
   { value: 88200, label: '88.2 kHz' },
-  { value: 96000, label: '96 kHz' }
+  { value: 96000, label: '96 kHz (高清音频)' }
 ];
 
 // 混合声道
@@ -150,14 +150,14 @@ export const MIXDOWN_MODES = [
   { value: 'none', label: '自动' },
   { value: 'mono', label: '单声道' },
   { value: 'stereo', label: '立体声' },
-  { value: 'dpl2', label: 'Dolby Pro Logic II' },
-  { value: '5.1', label: '5.1 声道' },
-  { value: '7.1', label: '7.1 声道' }
+  { value: 'dpl2', label: '杜比定向逻辑II' },
+  { value: '5.1', label: '5.1 环绕声' },
+  { value: '7.1', label: '7.1 环绕声' }
 ];
 
 // DRC 模式
 export const DRC_MODES = [
-  { value: 'none', label: '无（默认）' },
+  { value: 'none', label: '无' },
   { value: 'light', label: '轻度' },
   { value: 'medium', label: '中等' },
   { value: 'heavy', label: '重度' }
@@ -166,8 +166,8 @@ export const DRC_MODES = [
 // 色彩范围
 export const COLOR_RANGES = [
   { value: 'auto', label: '自动' },
-  { value: 'limited', label: '有限 (16-235)' },
-  { value: 'full', label: '完整 (0-255)' }
+  { value: 'limited', label: '有限范围 (16-235)' },
+  { value: 'full', label: '完整范围 (0-255)' }
 ];
 
 // 分辨率限制预设
@@ -178,10 +178,10 @@ export const RESOLUTION_LIMITS = [
   { value: '1440p', label: '1440p 2.5K 四倍高清' },
   { value: '1080p', label: '1080p 全高清' },
   { value: '720p', label: '720p 高清' },
-  { value: '576p', label: '576p PAL' },
-  { value: '480p', label: '480p NTSC' },
-  { value: '360p', label: '360p' },
-  { value: '240p', label: '240p' }
+  { value: '576p', label: '576p PAL标清' },
+  { value: '480p', label: '480p NTSC标清' },
+  { value: '360p', label: '360p 低清' },
+  { value: '240p', label: '240p 流畅' }
 ];
 
 // 变形模式
@@ -196,32 +196,32 @@ export const ANAMORPHIC_MODES = [
 // 容器优化
 export const OPTIMIZE_OPTIONS = [
   { value: 'none', label: '无' },
-  { value: 'fast-start', label: '快速启动（Web 优化）' },
-  { value: 'fragmented', label: '分段 (Fragmented)' }
+  { value: 'fast-start', label: '快速启动（网页播放优化）' },
+  { value: 'fragmented', label: '分片（流媒体优化）' }
 ];
 
 // 帧率选项
 export const FRAMERATES = [
   { value: null, label: '与源视频相同' },
-  { value: 5, label: '5' },
-  { value: 10, label: '10' },
-  { value: 12, label: '12' },
-  { value: 15, label: '15' },
-  { value: 20, label: '20' },
-  { value: 23.976, label: '23.976 (NTSC 电影)' },
-  { value: 24, label: '24' },
-  { value: 25, label: '25 (PAL 电影/视频)' },
-  { value: 29.97, label: '29.97 (NTSC 视频)' },
-  { value: 30, label: '30' },
-  { value: 48, label: '48' },
-  { value: 50, label: '50' },
-  { value: 59.94, label: '59.94' },
-  { value: 60, label: '60' },
-  { value: 72, label: '72' },
-  { value: 75, label: '75' },
-  { value: 90, label: '90' },
-  { value: 100, label: '100' },
-  { value: 120, label: '120' }
+  { value: 5, label: '5 FPS' },
+  { value: 10, label: '10 FPS' },
+  { value: 12, label: '12 FPS' },
+  { value: 15, label: '15 FPS' },
+  { value: 20, label: '20 FPS' },
+  { value: 23.976, label: '23.976 FPS (电影标准)' },
+  { value: 24, label: '24 FPS (电影)' },
+  { value: 25, label: '25 FPS (PAL制式)' },
+  { value: 29.97, label: '29.97 FPS (NTSC制式)' },
+  { value: 30, label: '30 FPS' },
+  { value: 48, label: '48 FPS' },
+  { value: 50, label: '50 FPS' },
+  { value: 59.94, label: '59.94 FPS' },
+  { value: 60, label: '60 FPS' },
+  { value: 72, label: '72 FPS' },
+  { value: 75, label: '75 FPS' },
+  { value: 90, label: '90 FPS' },
+  { value: 100, label: '100 FPS' },
+  { value: 120, label: '120 FPS' }
 ];
 
 // 编码器特定的码率控制类型
@@ -232,12 +232,12 @@ export const getRateControlForCodec = codec => {
   
   // Intel QSV 使用 ICQ
   if (codecLower.includes('qsv')) {
-    return { type: 'icq', label: '恒定质量 (ICQ)', default: 22, min: 0, max: 51 };
+    return { type: 'icq', label: '智能恒定质量 (ICQ)', default: 22, min: 0, max: 51 };
   }
   
   // NVIDIA NVENC 使用 CQP
   if (codecLower.includes('nvenc')) {
-    return { type: 'cqp', label: '恒定质量 (CQP)', default: 22, min: 0, max: 51 };
+    return { type: 'cqp', label: '恒定量化参数 (CQP)', default: 22, min: 0, max: 51 };
   }
   
   // SVT-AV1 使用 CQ
