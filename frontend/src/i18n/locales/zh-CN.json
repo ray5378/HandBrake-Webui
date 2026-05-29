@@ -381,7 +381,8 @@
     "passwordTooShort": "密码长度至少为6个字符",
     "passwordChanged": "密码修改成功",
     "platform": "平台",
-    "memoryUsage": "内存使用"
+    "memoryUsage": "内存使用",
+    "commit": "构建版本"
   },
   "errors": {
     "networkError": "网络错误，请重试",

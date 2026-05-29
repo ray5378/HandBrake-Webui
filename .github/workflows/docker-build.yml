@@ -41,7 +41,7 @@ jobs:
 
       - name: Build frontend
         run: |
-          cd frontend && npm run build
+          cd frontend && VITE_GIT_COMMIT=${GITHUB_SHA::7} npm run build
 
       - name: Extract metadata for Docker
         id: meta
@@ -91,7 +91,7 @@ jobs:
 
       - name: Build frontend
         run: |
-          cd frontend && npm run build
+          cd frontend && VITE_GIT_COMMIT=${GITHUB_SHA::7} npm run build
 
       - name: Build Docker image
         uses: docker/build-push-action@v6

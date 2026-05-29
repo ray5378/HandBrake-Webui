@@ -64,6 +64,8 @@ ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "/app/backend/server.js"]
 
 # 标签信息
+ARG VITE_GIT_COMMIT=unknown
+ENV VITE_GIT_COMMIT=${VITE_GIT_COMMIT}
 LABEL maintainer="HandBrake Web UI Team"
 LABEL description="HandBrake Web UI - Web-based video transcoding management"
 LABEL org.opencontainers.image.source="https://github.com/ray5378/HandBrake-Webui"

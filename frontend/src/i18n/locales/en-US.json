@@ -381,7 +381,8 @@
     "passwordTooShort": "Password must be at least 6 characters",
     "passwordChanged": "Password changed successfully",
     "platform": "Platform",
-    "memoryUsage": "Memory Usage"
+    "memoryUsage": "Memory Usage",
+    "commit": "Build Commit"
   },
   "errors": {
     "networkError": "Network error, please try again",
