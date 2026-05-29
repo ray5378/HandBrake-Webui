@@ -194,25 +194,31 @@ function Jobs() {
             <div key={job.id} className='card hover:border-primary/50 transition-colors'>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>
-                  <div className='flex items-center space-x-3 mb-2'>
-                    <h3 className='text-white font-medium truncate'>
-                      {job.source_file.split('/').pop()}
-                    </h3>
+                  <div className='space-y-1 mb-2'>
+                    <p className='text-white font-mono text-sm truncate' title={job.source_file}>
+                      {job.source_file}
+                    </p>
+                    <div className='flex items-center space-x-2'>
+                      <span className='text-xs text-gray-500'>{t('jobs.outputFile')}:</span>
+                      <span
+                        className='text-primary font-mono text-xs truncate'
+                        title={job.output_file}
+                      >
+                        {job.output_file}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center space-x-3 mb-1'>
                     <span className={clsx('badge', `badge-${job.status}`)}>
                       {getStatusLabel(job.status)}
                     </span>
-                  </div>
-
-                  <div className='flex flex-wrap gap-4 text-sm text-gray-400'>
-                    <span>
-                      {t('jobs.outputFile')}: {job.output_file.split('/').pop()}
-                    </span>
                     {job.preset_name && (
-                      <span>
+                      <span className='text-sm text-gray-400'>
                         {t('jobs.preset')}: {job.preset_name}
                       </span>
                     )}
-                    <span>
+                    <span className='text-sm text-gray-400'>
                       {t('jobs.startTime')}: {new Date(job.created_at).toLocaleString()}
                     </span>
                   </div>
