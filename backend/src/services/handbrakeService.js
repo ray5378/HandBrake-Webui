@@ -371,16 +371,22 @@ async function startTranscode(job) {
   const handbrake = spawn('HandBrakeCLI', args);
   activeJobs.set(job.id, handbrake);
 
-  let outputData = '';
   let errorData = '';
+  let progressBuffer = '';
 
-  handbrake.stdout.on('data', data => {
-    outputData += data.toString();
-    parseProgress(job.id, outputData);
-  });
+  const onProgress = data => {
+    progressBuffer += data.toString();
+    if (progressBuffer.length > 100000) {
+      progressBuffer = progressBuffer.slice(-50000);
+    }
+    parseProgress(job.id, progressBuffer);
+  };
+
+  handbrake.stdout.on('data', onProgress);
 
   handbrake.stderr.on('data', data => {
     errorData += data.toString();
+    onProgress(data);
   });
 
   handbrake.on('close', code => {
