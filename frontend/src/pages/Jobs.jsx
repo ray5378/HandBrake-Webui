@@ -10,7 +10,8 @@ import {
   Trash2,
   Eye,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Trash
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -91,6 +92,16 @@ function Jobs() {
     setConfirmAction(null);
   };
 
+  const handleClearCache = async () => {
+    try {
+      const res = await api.post('/system/cache-clear');
+      console.log(res.data.message);
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+    }
+    setConfirmAction(null);
+  };
+
   const getStatusLabel = status => {
     const statusMap = {
       queued: t('jobs.queue'),
@@ -132,6 +143,13 @@ function Jobs() {
           >
             <Trash2 className='w-4 h-4' />
             <span>{t('jobs.clearHistory')}</span>
+          </button>
+          <button
+            onClick={() => setConfirmAction('clearCache')}
+            className='btn btn-danger inline-flex items-center space-x-2'
+          >
+            <Trash className='w-4 h-4' />
+            <span>{t('jobs.clearCache') || '清空转码缓存'}</span>
           </button>
           <button
             onClick={handleRefresh}
@@ -285,6 +303,19 @@ function Jobs() {
         confirmText={t('common.confirm') || '确认清理'}
         cancelText={t('common.cancel') || '取消'}
         onConfirm={handleClearHistory}
+        onCancel={() => setConfirmAction(null)}
+        danger
+      />
+      <ConfirmDialog
+        open={confirmAction === 'clearCache'}
+        title={t('jobs.confirmClearCacheTitle') || '清空转码缓存'}
+        message={
+          t('jobs.confirmClearCache') ||
+          '确定要清空转码缓存目录吗？正在进行的转码任务可能会受到影响。'
+        }
+        confirmText={t('common.confirm') || '确认清空'}
+        cancelText={t('common.cancel') || '取消'}
+        onConfirm={handleClearCache}
         onCancel={() => setConfirmAction(null)}
         danger
       />

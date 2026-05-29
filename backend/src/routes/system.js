@@ -119,6 +119,42 @@ router.post('/cache-dir', authenticateToken, (req, res, next) => {
   }
 });
 
+router.post('/cache-clear', authenticateToken, async (req, res, next) => {
+  try {
+    if (!config.cacheDir) {
+      return res.status(400).json({
+        success: false,
+        error: '未配置缓存目录'
+      });
+    }
+
+    const tempDir = path.join(config.cacheDir, 'handbrake-temp');
+
+    if (!fs.existsSync(tempDir)) {
+      return res.json({
+        success: true,
+        message: '缓存目录已为空'
+      });
+    }
+
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch (e) {
+      return res.status(500).json({
+        success: false,
+        error: `清理缓存失败: ${e.message}`
+      });
+    }
+
+    res.json({
+      success: true,
+      message: '缓存已清理完成'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/handbrake/version', authenticateToken, (req, res) => {
   exec('HandBrakeCLI --version', (error, stdout) => {
     if (error) {
