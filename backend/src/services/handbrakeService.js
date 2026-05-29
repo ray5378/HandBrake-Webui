@@ -482,12 +482,12 @@ function parseProgress(jobId, data) {
 }
 
 function tryParseJsonProgress(data) {
-  const lines = data.split('\n').filter(Boolean);
+  const lines = data.split(/\r?\n|\r/).filter(Boolean);
   let lastProgress = null;
   for (const line of lines) {
     try {
       const json = JSON.parse(line);
-      if (json.Event === 'Progress' && typeof json.Progress === 'number') {
+      if (typeof json.Progress === 'number') {
         lastProgress = json.Progress;
       }
     } catch (e) {
