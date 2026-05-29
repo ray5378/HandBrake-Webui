@@ -1547,9 +1547,9 @@ function Presets() {
                 </nav>
               </div>
 
-              <form onSubmit={handleSubmit} className='flex-1 overflow-y-auto'>
+              <form onSubmit={handleSubmit} className='flex-1 overflow-y-auto overflow-x-auto'>
                 <div className='p-6 space-y-6'>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <div>
                       <label className='label'>{t('presets.presetName')}</label>
                       <input
@@ -1576,7 +1576,7 @@ function Presets() {
                   <div className='border-t border-dark-700 pt-6'>{tabContent}</div>
                 </div>
 
-                <div className='p-6 border-t border-dark-700 flex items-center justify-end space-x-3'>
+                <div className='p-6 border-t border-dark-700 flex flex-wrap items-center justify-end gap-3'>
                   <button
                     type='button'
                     onClick={() => {

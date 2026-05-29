@@ -247,7 +247,7 @@ function Settings() {
                     <p className='text-sm text-gray-400 mb-2'>
                       {t('settings.memoryUsage') || 'Memory Usage'}
                     </p>
-                    <div className='grid grid-cols-3 gap-4'>
+                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
                       <div>
                         <p className='text-xs text-gray-500'>RSS</p>
                         <p className='text-white font-mono'>
@@ -417,7 +417,9 @@ function Settings() {
                           <FolderOpen className='w-5 h-5 text-primary' />
                           <div>
                             <p className='text-white'>{t('files.sourceFiles')}</p>
-                            <p className='text-xs text-gray-400 font-mono'>{directories.source}</p>
+                            <p className='text-xs text-gray-400 font-mono truncate'>
+                              {directories.source}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -427,7 +429,9 @@ function Settings() {
                           <FolderOpen className='w-5 h-5 text-success' />
                           <div>
                             <p className='text-white'>{t('files.outputFiles')}</p>
-                            <p className='text-xs text-gray-400 font-mono'>{directories.output}</p>
+                            <p className='text-xs text-gray-400 font-mono truncate'>
+                              {directories.output}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -437,7 +441,9 @@ function Settings() {
                           <FolderOpen className='w-5 h-5 text-warning' />
                           <div>
                             <p className='text-white'>{t('settings.configDir')}</p>
-                            <p className='text-xs text-gray-400 font-mono'>{directories.config}</p>
+                            <p className='text-xs text-gray-400 font-mono truncate'>
+                              {directories.config}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -514,7 +520,7 @@ function Settings() {
 
               <div className='mb-4'>
                 <label className='label'>当前缓存目录</label>
-                <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1'>
+                <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1 truncate'>
                   {cacheDir || '（未设置）'}
                 </p>
               </div>
@@ -529,11 +535,11 @@ function Settings() {
                   </div>
                 ) : (
                   <>
-                    <div className='flex items-center space-x-1 text-sm mb-3 flex-wrap'>
+                    <div className='flex flex-wrap items-center gap-1 text-sm mb-3'>
                       <button
                         type='button'
                         onClick={() => handleBrowse('/drive')}
-                        className={`hover:underline ${
+                        className={`hover:underline truncate max-w-[100px] ${
                           browsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
                         }`}
                       >
@@ -547,7 +553,7 @@ function Settings() {
                             <button
                               type='button'
                               onClick={() => handleBrowse(fullPath)}
-                              className={`hover:underline ${
+                              className={`hover:underline truncate max-w-[100px] ${
                                 browsePath === fullPath ? 'text-white font-medium' : 'text-primary'
                               }`}
                             >
@@ -558,7 +564,7 @@ function Settings() {
                       })}
                     </div>
 
-                    <div className='grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto'>
+                    <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
                       {browseDirs.map(dir => (
                         <button
                           type='button'
@@ -582,7 +588,7 @@ function Settings() {
                 )}
 
                 <p className='text-xs text-gray-400'>
-                  已选: <span className='text-primary'>{cacheDir || '（未选择）'}</span>
+                  已选: <span className='text-primary truncate'>{cacheDir || '（未选择）'}</span>
                 </p>
               </div>
 

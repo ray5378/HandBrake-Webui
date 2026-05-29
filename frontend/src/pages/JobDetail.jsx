@@ -151,7 +151,7 @@ function JobDetail() {
             </div>
           </div>
 
-          <div className='flex items-center space-x-2'>
+          <div className='flex flex-wrap items-center gap-2'>
             {job.status === 'processing' && (
               <button onClick={handleCancel} className='btn btn-danger'>
                 <XCircle className='w-4 h-4' />

@@ -188,7 +188,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
               <FolderOpen className='w-3 h-3 text-warning shrink-0 relative top-0.5' />
               <span className='text-gray-400'>{name}</span>
               <ChevronRight className='w-3 h-3 text-gray-600 shrink-0 relative top-0.5' />
-              <span className='text-primary whitespace-nowrap'>
+              <span className='text-primary truncate max-w-[200px]'>
                 {outputDirectory}/{prefix}
                 {name}
               </span>
@@ -271,7 +271,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                         })}
                       </div>
 
-                      <div className='grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 mb-3 max-h-48 overflow-y-auto'>
+                      <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
                         {browseDirs.map(dir => (
                           <button
                             type='button'
@@ -300,7 +300,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   )}
 
                   <div className='flex items-center justify-between'>
-                    <p className='text-xs text-gray-400'>
+                    <p className='text-xs text-gray-400 truncate max-w-[250px] sm:max-w-none'>
                       已选: <span className='text-primary'>{outputDirectory}</span>
                     </p>
                     <div className='flex space-x-2'>
@@ -310,7 +310,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             type='text'
                             value={newDirName}
                             onChange={e => setNewDirName(e.target.value)}
-                            className='input text-xs py-1 w-28'
+                            className='input text-xs py-1 w-20 sm:w-28'
                             placeholder='目录名'
                             onKeyDown={e => {
                               if (e.key === 'Enter') handleCreateDir();
@@ -358,17 +358,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       <GitBranch className='w-4 h-4 text-primary' />
                       <span>目录结构预览</span>
                     </h4>
-                    <div className='max-h-48 overflow-y-auto space-y-0.5'>
-                      <div className='text-xs font-mono space-y-1'>
+                    <div className='max-h-48 overflow-y-auto overflow-x-auto space-y-0.5'>
+                      <div className='text-xs font-mono space-y-1 min-w-0'>
                         <div className='flex items-center space-x-1'>
                           <FolderOpen className='w-3 h-3 text-warning shrink-0' />
                           <span className='text-gray-400'>源:</span>
-                          <span className='text-gray-400 break-all'>{directory}</span>
+                          <span className='text-gray-400 break-all truncate'>{directory}</span>
                         </div>
                         <div className='flex items-center space-x-1'>
                           <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
                           <span className='text-primary'>输出:</span>
-                          <span className='text-primary break-all'>{outputDirectory}</span>
+                          <span className='text-primary truncate'>{outputDirectory}</span>
                         </div>
                       </div>
                       {renderTree(treeData, '', 1)}

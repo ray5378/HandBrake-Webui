@@ -135,7 +135,7 @@ function Jobs() {
           <p className='text-gray-400 mt-1'>{t('jobs.subtitle')}</p>
         </div>
 
-        <div className='flex items-center space-x-2'>
+        <div className='flex flex-wrap items-center gap-2'>
           <button
             onClick={() => setConfirmAction('clearAll')}
             className='btn btn-danger inline-flex items-center space-x-2'
@@ -233,7 +233,7 @@ function Jobs() {
                   )}
                 </div>
 
-                <div className='flex items-center space-x-2'>
+                <div className='flex flex-wrap items-center gap-2'>
                   {job.status === 'processing' && (
                     <button onClick={() => handleCancel(job.id)} className='btn btn-danger text-sm'>
                       <XCircle className='w-4 h-4' />

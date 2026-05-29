@@ -171,11 +171,11 @@ function Dashboard() {
                       <p className='text-sm font-medium text-white truncate'>
                         {job.source_file.split('/').pop()}
                       </p>
-                      <p className='text-xs text-gray-400'>
+                      <p className='text-xs text-gray-400 truncate'>
                         {new Date(job.created_at).toLocaleString()}
                       </p>
                     </div>
-                    <div className='flex items-center space-x-2'>
+                    <div className='flex items-center space-x-2 shrink-0'>
                       <span className={`badge badge-${job.status}`}>
                         {getJobStatusLabel(job.status)}
                       </span>
@@ -329,11 +329,11 @@ function Dashboard() {
                         <p className='text-sm font-medium text-white truncate'>
                           {job.source_file.split('/').pop()}
                         </p>
-                        <p className='text-xs text-gray-400'>
+                        <p className='text-xs text-gray-400 truncate'>
                           {new Date(job.created_at).toLocaleString()}
                         </p>
                       </div>
-                      <div className='flex items-center space-x-2'>
+                      <div className='flex items-center space-x-2 shrink-0'>
                         <span className={`badge badge-${job.status}`}>
                           {getJobStatusLabel(job.status)}
                         </span>

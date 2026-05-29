@@ -3,15 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FolderOpen,
-  Download,
-  Trash2,
   Video,
-  RefreshCw,
   Grid,
   List,
   Search,
   ChevronRight,
-  PlayCircle
+  PlayCircle,
+  Settings
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -54,37 +52,6 @@ function Files() {
       console.error('Failed to fetch files:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async filePath => {
-    if (!confirm(t('files.confirmDelete'))) return;
-
-    try {
-      await api.delete('/files', { params: { path: filePath } });
-      fetchFiles();
-    } catch (error) {
-      console.error('Delete failed:', error);
-    }
-  };
-
-  const handleDownload = async (filePath, fileName) => {
-    try {
-      const response = await api.get('/files/download', {
-        params: { path: filePath },
-        responseType: 'blob'
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    } catch (error) {
-      console.error('Download failed:', error);
     }
   };
 
@@ -145,13 +112,13 @@ function Files() {
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h1 className='text-3xl font-bold text-white'>{t('files.title')}</h1>
-          <div className='flex items-center space-x-2 mt-2 text-sm text-gray-400'>
+          <div className='flex flex-wrap items-center gap-1 mt-2 text-sm text-gray-400'>
             {pathParts.map((part, index) => (
               <React.Fragment key={index}>
-                {index > 0 && <ChevronRight className='w-4 h-4' />}
+                {index > 0 && <ChevronRight className='w-4 h-4 shrink-0' />}
                 <button
                   onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
-                  className='hover:text-white transition-colors'
+                  className='hover:text-white transition-colors truncate max-w-[120px]'
                 >
                   {part}
                 </button>
@@ -160,19 +127,19 @@ function Files() {
           </div>
         </div>
 
-        <div className='flex items-center space-x-3'>
-          <div className='relative'>
+        <div className='flex items-center gap-2 flex-wrap'>
+          <div className='relative flex-1 min-w-[140px]'>
             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400' />
             <input
               type='text'
               placeholder={t('common.search') + '...'}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className='input pl-10 w-48'
+              className='input pl-10 w-full'
             />
           </div>
 
-          <div className='flex items-center space-x-1 bg-dark-700 rounded-lg p-1'>
+          <div className='flex items-center space-x-1 bg-dark-700 rounded-lg p-1 shrink-0'>
             <button
               onClick={() => setViewMode('grid')}
               className={clsx(
@@ -240,10 +207,7 @@ function Files() {
               )}
             >
               {filteredFiles.map(file => (
-                <div
-                  key={file.path}
-                  className='card hover:border-primary/50 transition-colors group'
-                >
+                <div key={file.path} className='card hover:border-primary/50 transition-colors'>
                   {viewMode === 'grid' ? (
                     <>
                       <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
@@ -253,18 +217,16 @@ function Files() {
                         {file.name}
                       </h3>
                       <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
-                      <div className='flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity'>
+                      <div className='flex items-center justify-center space-x-2'>
                         <button
-                          onClick={() => handleDownload(file.path, file.name)}
-                          className='btn btn-secondary text-xs py-1 px-3'
+                          onClick={() => {
+                            setSelectedDirectory(file.path);
+                            setShowBatchModal(true);
+                          }}
+                          className='btn btn-primary text-xs py-2 px-3'
                         >
-                          <Download className='w-3 h-3' />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(file.path)}
-                          className='btn btn-danger text-xs py-1 px-3'
-                        >
-                          <Trash2 className='w-3 h-3' />
+                          <Settings className='w-3 h-3' />
+                          <span className='ml-1'>{t('common.batchTranscode') || '转码'}</span>
                         </button>
                       </div>
                     </>
@@ -281,20 +243,18 @@ function Files() {
                           </p>
                         </div>
                       </div>
-                      <div className='flex items-center space-x-2'>
-                        <button
-                          onClick={() => handleDownload(file.path, file.name)}
-                          className='btn btn-secondary text-xs'
-                        >
-                          <Download className='w-4 h-4' />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(file.path)}
-                          className='btn btn-danger text-xs'
-                        >
-                          <Trash2 className='w-4 h-4' />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedDirectory(file.path);
+                          setShowBatchModal(true);
+                        }}
+                        className='btn btn-primary text-xs min-h-[44px]'
+                      >
+                        <Settings className='w-4 h-4' />
+                        <span className='ml-1 hidden sm:inline'>
+                          {t('common.batchTranscode') || '转码'}
+                        </span>
+                      </button>
                     </div>
                   )}
                 </div>

@@ -89,9 +89,9 @@ function Sidebar() {
                     {user?.username?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <div>
-                  <p className='text-sm font-medium text-white'>{user?.username}</p>
-                  <p className='text-xs text-gray-400'>{user?.role}</p>
+                <div className='min-w-0'>
+                  <p className='text-sm font-medium text-white truncate'>{user?.username}</p>
+                  <p className='text-xs text-gray-400 truncate'>{user?.role}</p>
                 </div>
               </div>
             </div>
