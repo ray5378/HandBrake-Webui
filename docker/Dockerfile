@@ -6,7 +6,7 @@ FROM jlesage/baseimage-gui:alpine-3.20-v4.11.3
 WORKDIR /app
 
 # jlesage/baseimage-gui 已包含:
-# - HandBrake CLI (ghb / HandBrakeCLI)
+# - HandBrake CLI
 # - Intel VA-API / QSV 驱动
 # - FFmpeg
 # - 视频编解码库
@@ -43,6 +43,6 @@ CMD ["node", "/app/backend/server.js"]
 
 # 标签信息
 LABEL maintainer="HandBrake Web UI Team"
-LABEL description="HandBrake Web UI - Web-based video transcoding management with Intel QSV support"
+LABEL description="HandBrake Web UI - Web-based video transcoding management"
 LABEL org.opencontainers.image.source="https://github.com/ray5378/HandBrake-Webui"
 LABEL org.opencontainers.image.licenses="MIT"

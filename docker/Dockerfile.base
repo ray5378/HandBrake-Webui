@@ -1,25 +1,6 @@
-# HandBrake with Intel QSV Base Image
-# 基于 jlesage/baseimage-gui，包含预编译的 HandBrake 和 Intel QSV 硬件加速支持
+# HandBrake Base Image
+# 基于 jlesage/baseimage-gui
 
 FROM jlesage/baseimage-gui:alpine-3.20-v4.11.3
 
-# jlesage/baseimage-gui 已经包含：
-# - HandBrake CLI (ghb / HandBrakeCLI)
-# - Intel VA-API / QSV 驱动
-# - FFmpeg
-# - 视频编解码库
-
-# 安装运行时依赖（如果需要额外的话）
-RUN add-pkg \
-    libva \
-    mesa-va-drivers \
-    libdrm \
-    libx264 \
-    libx265 \
-    libvpx \
-    dav1d \
-    && true
-
-# 标签信息
-LABEL maintainer="HandBrake Web UI Team"
-LABEL description="HandBrake with Intel QSV hardware acceleration support (pre-built by jlesage)"
+# jlesage/baseimage-gui 已包含完整的手Brake 和硬件加速支持
