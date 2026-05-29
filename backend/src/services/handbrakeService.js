@@ -393,7 +393,11 @@ async function startTranscode(job) {
   });
 
   handbrake.on('close', code => {
+    const wasActive = activeJobs.has(job.id);
     activeJobs.delete(job.id);
+    if (!wasActive) {
+      return;
+    }
     processingCount--;
 
     if (code === 0) {
@@ -449,7 +453,11 @@ async function startTranscode(job) {
   });
 
   handbrake.on('error', error => {
+    const wasActive = activeJobs.has(job.id);
     activeJobs.delete(job.id);
+    if (!wasActive) {
+      return;
+    }
     processingCount--;
 
     try {
