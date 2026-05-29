@@ -61,7 +61,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setPresets(presetsRes.data.data.presets);
       setSourceTree(treeRes.data.data.directories || []);
 
-      const lastDir = directory.split('/').filter(Boolean).pop();
       setBrowsePath(ROOT_OUTPUT_PATH);
       if (lastDir) {
         setOutputDirectory(`${ROOT_OUTPUT_PATH}/${lastDir}`);
@@ -79,6 +78,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   const handleBreadcrumbClick = path => {
     setBrowsePath(path);
+    setOutputDirectory(lastDir ? `${path}/${lastDir}` : path);
     fetchBrowseDirs(path);
   };
 
@@ -141,6 +141,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   const ROOT_OUTPUT_PATH = '/drive/转码/转码后';
   const pathParts = (browsePath || ROOT_OUTPUT_PATH).split('/').filter(Boolean);
+  const lastDir = directory.split('/').filter(Boolean).pop();
 
   const buildTree = paths => {
     const tree = {};
