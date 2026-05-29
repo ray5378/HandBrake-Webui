@@ -18,14 +18,12 @@
 #### 1. 创建 docker-compose.yml
 
 ```yaml
-version: '3.8'
-
 services:
   handbrake-webui:
     image: ray5378/handbrake-webui:latest
     container_name: handbrake-webui
     ports:
-      - "52389:52389"  # 宿主机:内部端口，可以自行修改宿主机端口
+      - 52389:52389
     volumes:
       - ./config:/config
       - ./source:/source
@@ -36,23 +34,9 @@ services:
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - PORT=52389
       - MAX_CONCURRENT_JOBS=2
-    devices:
-      - /dev/dri:/dev/dri  # Intel/AMD 硬件转码支持
-    # NVIDIA 硬件加速支持 (需先配置 nvidia-docker2 运行时)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
     restart: unless-stopped
-    networks:
-      - handbrake-network
-
-networks:
-  handbrake-network:
-    driver: bridge
+    devices:
+      - /dev/dri:/dev/dri
 ```
 
 #### 2. 启动服务

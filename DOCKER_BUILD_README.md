@@ -101,25 +101,26 @@ git push origin v1.0.0
 ### Docker Compose
 
 ```yaml
-version: '3.8'
-
 services:
   handbrake-webui:
     image: your-username/handbrake-webui:latest
     container_name: handbrake-webui
     ports:
-      - "3000:3000"
+      - 52389:52389
     volumes:
       - ./config:/config
       - ./source:/source
       - ./output:/output
       - ./cache:/cache
     environment:
+      - NODE_ENV=production
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme123
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
+    devices:
+      - /dev/dri:/dev/dri
 ```
 
 ### Docker 命令

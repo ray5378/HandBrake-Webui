@@ -1,17 +1,9 @@
-version: '3.8'
-
 services:
   handbrake-webui:
-    # 选项 1: 使用 Docker Hub 拉取 (推荐)
     image: ray5378/handbrake-webui:latest
-    # 选项 2: 本地构建 (取消下面的注释，注释掉上面一行)
-    # build:
-    #   context: .
-    #   dockerfile: docker/Dockerfile
     container_name: handbrake-webui
-    # 端口映射: 用户可以设置自己想要的端口
     ports:
-      - "52389:52389"  # 默认映射到 52389
+      - 52389:52389
     volumes:
       - ./config:/config
       - ./source:/source
@@ -20,22 +12,8 @@ services:
     environment:
       - NODE_ENV=production
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - PORT=52389  # 固定内部端口为 52389，方便映射
+      - PORT=52389
       - MAX_CONCURRENT_JOBS=2
-    devices:
-      - /dev/dri:/dev/dri  # Intel/AMD 硬件转码支持
-    # NVIDIA 硬件加速支持 (取消注释并配置 nvidia-docker2 运行时)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
     restart: unless-stopped
-    networks:
-      - handbrake-network
-
-networks:
-  handbrake-network:
-    driver: bridge
+    devices:
+      - /dev/dri:/dev/dri

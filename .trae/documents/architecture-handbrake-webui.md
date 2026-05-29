@@ -555,26 +555,25 @@ CMD ["node", "/app/backend/server.js"]
 
 ### 6.2 docker-compose.yml
 ```yaml
-version: '3.8'
-
 services:
   handbrake-webui:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
+    image: ray5378/handbrake-webui:latest
+    container_name: handbrake-webui
     ports:
-      - "3000:3000"
+      - 52389:52389
     volumes:
       - ./config:/config
       - ./source:/source
       - ./output:/output
       - ./cache:/cache
     environment:
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=changeme
-      - JWT_SECRET=your-secret-key
+      - NODE_ENV=production
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - PORT=52389
       - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
+    devices:
+      - /dev/dri:/dev/dri
 ```
 
 ## 7. 安全策略
