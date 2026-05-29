@@ -43,7 +43,9 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(morgan('combined'));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('combined'));
+}
 
 const authStrictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
