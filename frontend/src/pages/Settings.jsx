@@ -531,9 +531,7 @@ function Settings() {
                               type="button"
                               onClick={() => handleBrowse(fullPath)}
                               className={`hover:underline ${
-                                browsePath === fullPath
-                                  ? 'text-white font-medium'
-                                  : 'text-primary'
+                                browsePath === fullPath ? 'text-white font-medium' : 'text-primary'
                               }`}
                             >
                               {part}

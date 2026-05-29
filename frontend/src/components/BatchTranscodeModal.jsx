@@ -234,13 +234,16 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                           onClick={() => handleBrowse('/drive/转码/转码后')}
                           className={clsx(
                             'hover:underline',
-                            browsePath === '/drive/转码/转码后' ? 'text-white font-medium' : 'text-primary'
+                            browsePath === '/drive/转码/转码后'
+                              ? 'text-white font-medium'
+                              : 'text-primary'
                           )}
                         >
                           转码后
                         </button>
                         {pathParts.slice(1).map((part, i) => {
-                          const fullPath = '/drive/转码/转码后/' + pathParts.slice(1, i + 2).join('/');
+                          const fullPath =
+                            '/drive/转码/转码后/' + pathParts.slice(1, i + 2).join('/');
                           return (
                             <React.Fragment key={i}>
                               <ChevronRight className="w-3 h-3 text-gray-500 shrink-0" />

@@ -362,7 +362,9 @@ async function startTranscode(job) {
 
   const args = buildHandBrakeArgs(job, settings);
   const oIdx = args.indexOf('-o');
-  if (oIdx !== -1) args[oIdx + 1] = tempOutputFile;
+  if (oIdx !== -1) {
+    args[oIdx + 1] = tempOutputFile;
+  }
 
   console.log('Starting HandBrake with args:', args);
 

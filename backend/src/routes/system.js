@@ -70,7 +70,7 @@ router.get('/cache-dir', authenticateToken, (req, res) => {
   });
 });
 
-router.post('/cache-dir', authenticateToken, (req, res) => {
+router.post('/cache-dir', authenticateToken, (req, res, next) => {
   try {
     const { path: cachePath } = req.body;
 
