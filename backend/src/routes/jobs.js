@@ -187,9 +187,7 @@ router.delete('/all-force', authenticateToken, async (req, res, next) => {
   try {
     const db = getDatabase();
 
-    const processingJobs = db
-      .prepare("SELECT id FROM jobs WHERE status = 'processing'")
-      .all();
+    const processingJobs = db.prepare("SELECT id FROM jobs WHERE status = 'processing'").all();
 
     for (const job of processingJobs) {
       await cancelTranscode(job.id);
