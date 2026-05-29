@@ -33,7 +33,16 @@ const config = {
     if (fs.existsSync(configPath)) {
       const savedConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       Object.assign(config, savedConfig);
-    } else {
+    }
+
+    if (process.env.MAX_CONCURRENT_JOBS) {
+      config.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS) || 2;
+    }
+    if (process.env.JWT_SECRET) {
+      config.jwtSecret = process.env.JWT_SECRET;
+    }
+
+    if (!fs.existsSync(configPath)) {
       if (!fs.existsSync(config.configDir)) {
         fs.mkdirSync(config.configDir, { recursive: true });
       }

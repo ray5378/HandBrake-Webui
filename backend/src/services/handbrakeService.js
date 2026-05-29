@@ -385,8 +385,11 @@ async function startTranscode(job) {
   handbrake.stdout.on('data', onProgress);
 
   handbrake.stderr.on('data', data => {
-    errorData += data.toString();
-    onProgress(data);
+    const str = data.toString();
+    if (errorData.length < 1000000) {
+      errorData += str;
+    }
+    onProgress(str);
   });
 
   handbrake.on('close', code => {
