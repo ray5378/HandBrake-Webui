@@ -161,19 +161,14 @@ router.delete('/all', authenticateToken, async (req, res, next) => {
   try {
     const db = getDatabase();
 
-    const processingJobs = db
-      .prepare("SELECT id FROM jobs WHERE status = 'processing'")
-      .all();
-
-    for (const job of processingJobs) {
-      await cancelTranscode(job.id);
-    }
-
-    db.prepare('DELETE FROM jobs').run();
+    const result = db
+      .prepare("DELETE FROM jobs WHERE status IN ('completed', 'failed', 'cancelled')")
+      .run();
 
     res.json({
       success: true,
-      message: 'All jobs cleared successfully'
+      message: 'Historical jobs cleared successfully',
+      deleted: result.changes
     });
   } catch (error) {
     next(error);

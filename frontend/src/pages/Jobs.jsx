@@ -59,14 +59,14 @@ function Jobs() {
     }
   };
 
-  const handleClearAll = async () => {
-    if (!confirm(t('jobs.confirmClearAll'))) return;
+  const handleClearHistory = async () => {
+    if (!confirm(t('jobs.confirmClearHistory'))) return;
 
     try {
       await api.delete('/jobs/all');
       fetchJobs();
     } catch (error) {
-      console.error('Failed to clear all jobs:', error);
+      console.error('Failed to clear history:', error);
     }
   };
 
@@ -98,13 +98,13 @@ function Jobs() {
         </div>
 
         <div className="flex items-center space-x-2">
-          {jobs.length > 0 && (
+          {jobs.some(j => ['completed', 'failed', 'cancelled'].includes(j.status)) && (
             <button
-              onClick={handleClearAll}
+              onClick={handleClearHistory}
               className="btn btn-danger inline-flex items-center space-x-2"
             >
               <Trash2 className="w-4 h-4" />
-              <span>{t('jobs.clearAll')}</span>
+              <span>{t('jobs.clearHistory')}</span>
             </button>
           )}
           <button

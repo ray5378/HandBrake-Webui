@@ -137,7 +137,7 @@
     "clearAll": "清理所有",
     "confirmClearAll": "确定要清理所有任务吗？\n\n正在处理中的任务也会被取消。",
     "clearHistory": "清空历史",
-    "confirmClearHistory": "确定要清空所有任务历史吗？"
+    "confirmClearHistory": "确定要清空所有已完成/失败/取消的历史记录吗？"
   },
   "files": {
     "title": "文件",

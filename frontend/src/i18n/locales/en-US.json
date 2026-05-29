@@ -137,7 +137,7 @@
     "clearAll": "Clear All",
     "confirmClearAll": "Are you sure you want to clear all jobs?\n\nProcessing jobs will also be cancelled.",
     "clearHistory": "Clear History",
-    "confirmClearHistory": "Are you sure you want to clear all job history?"
+    "confirmClearHistory": "Are you sure you want to clear all completed/failed/cancelled history?"
   },
   "files": {
     "title": "Files",
