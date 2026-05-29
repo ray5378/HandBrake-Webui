@@ -6,6 +6,7 @@ const config = require('../config');
 
 const activeJobs = new Map();
 let processingCount = 0;
+const lastProgressWrite = new Map();
 
 function buildHandBrakeArgs(job, settings) {
   const args = ['-i', job.source_file, '-o', job.output_file, '--json'];
@@ -382,17 +383,55 @@ async function startTranscode(job) {
     parseProgress(job.id, progressBuffer);
   };
 
-  handbrake.stdout.on('data', onProgress);
-
-  handbrake.stderr.on('data', data => {
+  const onStderr = data => {
     const str = data.toString();
     if (errorData.length < 1000000) {
       errorData += str;
     }
     onProgress(str);
-  });
+  };
 
-  handbrake.on('close', code => {
+  const moveTempFile = () => {
+    const finalDir = path.dirname(job.output_file);
+    if (!fs.existsSync(finalDir)) {
+      fs.mkdirSync(finalDir, { recursive: true });
+    }
+    try {
+      fs.renameSync(tempOutputFile, job.output_file);
+    } catch (e) {
+      if (e.code === 'EXDEV') {
+        try {
+          fs.copyFileSync(tempOutputFile, job.output_file);
+          fs.unlinkSync(tempOutputFile);
+        } catch (copyErr) {
+          console.error(`Failed to copy temp file for job ${job.id}:`, copyErr);
+        }
+      } else {
+        console.error(`Failed to move temp file for job ${job.id}:`, e);
+      }
+    }
+    try {
+      fs.rmSync(jobTempDir, { recursive: true, force: true });
+    } catch (e) {
+      // ignore cleanup error
+    }
+  };
+
+  const cleanupJob = () => {
+    try {
+      fs.rmSync(jobTempDir, { recursive: true, force: true });
+    } catch (e) {
+      // ignore cleanup error
+    }
+  };
+
+  const onClose = code => {
+    handbrake.stdout.removeListener('data', onProgress);
+    handbrake.stderr.removeListener('data', onStderr);
+    handbrake.removeListener('close', onClose);
+    handbrake.removeListener('error', onError);
+    lastProgressWrite.delete(job.id);
+
     const wasActive = activeJobs.has(job.id);
     activeJobs.delete(job.id);
     if (!wasActive) {
@@ -401,21 +440,7 @@ async function startTranscode(job) {
     processingCount--;
 
     if (code === 0) {
-      const finalDir = path.dirname(job.output_file);
-      if (!fs.existsSync(finalDir)) {
-        fs.mkdirSync(finalDir, { recursive: true });
-      }
-      try {
-        fs.renameSync(tempOutputFile, job.output_file);
-      } catch (e) {
-        console.error(`Failed to move temp file for job ${job.id}:`, e);
-      }
-      try {
-        fs.rmSync(jobTempDir, { recursive: true, force: true });
-      } catch (e) {
-        // ignore cleanup error
-      }
-
+      moveTempFile();
       db.prepare(
         `
         UPDATE jobs
@@ -423,21 +448,12 @@ async function startTranscode(job) {
         WHERE id = ?
         `
       ).run(job.id);
-
       console.log(`Job ${job.id} completed successfully`);
     } else if (code === null) {
-      try {
-        fs.rmSync(jobTempDir, { recursive: true, force: true });
-      } catch (e) {
-        // ignore cleanup error
-      }
+      cleanupJob();
       console.log(`Job ${job.id} was cancelled`);
     } else {
-      try {
-        fs.rmSync(jobTempDir, { recursive: true, force: true });
-      } catch (e) {
-        // ignore cleanup error
-      }
+      cleanupJob();
       db.prepare(
         `
         UPDATE jobs
@@ -445,14 +461,19 @@ async function startTranscode(job) {
         WHERE id = ?
         `
       ).run(errorData, job.id);
-
       console.error(`Job ${job.id} failed with code ${code}:`, errorData);
     }
 
     processNextJob();
-  });
+  };
 
-  handbrake.on('error', error => {
+  const onError = error => {
+    handbrake.stdout.removeListener('data', onProgress);
+    handbrake.stderr.removeListener('data', onStderr);
+    handbrake.removeListener('close', onClose);
+    handbrake.removeListener('error', onError);
+    lastProgressWrite.delete(job.id);
+
     const wasActive = activeJobs.has(job.id);
     activeJobs.delete(job.id);
     if (!wasActive) {
@@ -460,11 +481,7 @@ async function startTranscode(job) {
     }
     processingCount--;
 
-    try {
-      fs.rmSync(jobTempDir, { recursive: true, force: true });
-    } catch (e) {
-      // ignore cleanup error
-    }
+    cleanupJob();
 
     db.prepare(
       `
@@ -477,7 +494,12 @@ async function startTranscode(job) {
     console.error(`Job ${job.id} error:`, error);
 
     processNextJob();
-  });
+  };
+
+  handbrake.stdout.on('data', onProgress);
+  handbrake.stderr.on('data', onStderr);
+  handbrake.on('close', onClose);
+  handbrake.on('error', onError);
 }
 
 function parseProgress(jobId, data) {
@@ -490,12 +512,19 @@ function parseProgress(jobId, data) {
   }
 
   if (progress !== null) {
-    db.prepare(
-      `
-      UPDATE jobs SET progress = ? WHERE id = ?
-      `
-    ).run(progress, jobId);
+    const now = Date.now();
+    const last = lastProgressWrite.get(jobId) || 0;
+    if (now - last >= 1000) {
+      lastProgressWrite.set(jobId, now);
+      db.prepare(
+        `
+        UPDATE jobs SET progress = ? WHERE id = ?
+        `
+      ).run(progress, jobId);
+    }
   }
+
+  return progress;
 }
 
 function tryParseJsonProgress(data) {
@@ -578,11 +607,24 @@ function getProcessingCount() {
   return processingCount;
 }
 
+function killAllJobs() {
+  for (const [jobId, proc] of activeJobs) {
+    try {
+      proc.kill('SIGTERM');
+    } catch (e) {
+      // ignore
+    }
+    activeJobs.delete(jobId);
+  }
+  processingCount = 0;
+}
+
 module.exports = {
   startTranscode,
   cancelTranscode,
   pauseTranscode,
   resumeTranscode,
   getActiveJobs,
-  getProcessingCount
+  getProcessingCount,
+  killAllJobs
 };

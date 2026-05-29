@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Layers,
@@ -162,8 +162,8 @@ function Presets() {
     { id: 'tags', label: t('presetTabs.tags'), icon: Tag }
   ];
 
-  const TabContent = ({ tab }) => {
-    switch (tab) {
+  const tabContent = useMemo(() => {
+    switch (activeTab) {
       case 'summary':
         return (
           <div className='space-y-6'>
@@ -1425,7 +1425,7 @@ function Presets() {
       default:
         return null;
     }
-  };
+  }, [activeTab, formData, t]);
 
   return (
     <div className='space-y-6'>
@@ -1573,9 +1573,7 @@ function Presets() {
                     </div>
                   </div>
 
-                  <div className='border-t border-dark-700 pt-6'>
-                    <TabContent tab={activeTab} />
-                  </div>
+                  <div className='border-t border-dark-700 pt-6'>{tabContent}</div>
                 </div>
 
                 <div className='p-6 border-t border-dark-700 flex items-center justify-end space-x-3'>

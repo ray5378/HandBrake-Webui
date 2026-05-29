@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useTranslation } from 'react-i18next';
@@ -14,10 +14,13 @@ function Login() {
   const [isSetupMode, setIsSetupMode] = useState(false);
   const { checkInitialization, setupAdmin, login, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const abortRef = useRef(null);
 
   useEffect(() => {
     const check = async () => {
       try {
+        if (abortRef.current) abortRef.current.abort();
+        abortRef.current = new AbortController();
         const initialized = await checkInitialization();
         if (initialized === false) {
           setIsSetupMode(true);

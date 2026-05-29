@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -17,29 +17,38 @@ function JobDetail() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const statusRef = useRef(null);
+  const abortRef = useRef(null);
 
-  useEffect(() => {
-    fetchJobDetail();
-
-    const interval = setInterval(() => {
-      if (job && (job.status === 'queued' || job.status === 'processing')) {
-        fetchJobDetail();
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [id, job?.status]);
-
-  const fetchJobDetail = async () => {
+  const fetchJobDetail = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
     try {
-      const response = await api.get(`/jobs/${id}`);
+      const response = await api.get(`/jobs/${id}`, { signal: abortRef.current.signal });
       setJob(response.data.data);
+      statusRef.current = response.data.data.status;
     } catch (error) {
       console.error('Failed to fetch job detail:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchJobDetail();
+
+    const interval = setInterval(() => {
+      const s = statusRef.current;
+      if (s === 'queued' || s === 'processing') {
+        fetchJobDetail();
+      }
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [fetchJobDetail]);
 
   const handleCancel = async () => {
     if (!confirm('确定要取消这个任务吗？')) return;
@@ -80,6 +89,7 @@ function JobDetail() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (error) {
       console.error('Download failed:', error);
     }

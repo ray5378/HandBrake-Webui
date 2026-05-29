@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
   Video,
@@ -34,15 +34,26 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const abortRef = useRef(null);
+  const successTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchData();
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+      if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+    };
   }, []);
 
   const fetchBrowseDirs = async path => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
     setBrowseLoading(true);
     try {
-      const res = await api.get('/files', { params: { directory: path } });
+      const res = await api.get('/files', {
+        params: { directory: path },
+        signal: abortRef.current.signal
+      });
       setBrowseDirs(res.data.data.directories);
     } catch (err) {
       console.error('Failed to fetch directories:', err);
@@ -52,10 +63,13 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   };
 
   const fetchData = async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
     try {
       const [presetsRes, treeRes] = await Promise.all([
-        api.get('/presets'),
-        api.get('/files/tree', { params: { path: directory } })
+        api.get('/presets', { signal }),
+        api.get('/files/tree', { params: { path: directory }, signal })
       ]);
 
       setPresets(presetsRes.data.data.presets);
@@ -99,7 +113,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     }
 
     try {
-      const cacheRes = await api.get('/system/cache-dir');
+      const cacheRes = await api.get('/system/cache-dir', { signal: abortRef.current?.signal });
       if (!cacheRes.data.data.cacheDir) {
         setError('请先在设置中配置缓存目录');
         return;
@@ -123,7 +137,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       });
 
       setSuccess(true);
-      setTimeout(() => {
+      successTimeoutRef.current = setTimeout(() => {
         onSuccess();
         onClose();
       }, 2000);
@@ -135,29 +149,36 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   };
 
   const ROOT_OUTPUT_PATH = '/drive/转码/转码后';
-  const pathParts = (browsePath || ROOT_OUTPUT_PATH).split('/').filter(Boolean);
-  const lastDir = directory.split('/').filter(Boolean).pop();
+  const pathParts = useMemo(
+    () => (browsePath || ROOT_OUTPUT_PATH).split('/').filter(Boolean),
+    [browsePath]
+  );
+  const lastDir = useMemo(() => directory.split('/').filter(Boolean).pop(), [directory]);
 
-  const buildTree = paths => {
-    const tree = {};
-    for (const p of paths) {
-      if (!p) continue;
-      const parts = p.split('/');
-      let current = tree;
-      for (const part of parts) {
-        if (!current[part]) current[part] = {};
-        current = current[part];
+  const buildTree = useMemo(
+    () => paths => {
+      const tree = {};
+      for (const p of paths) {
+        if (!p) continue;
+        const parts = p.split('/');
+        let current = tree;
+        for (const part of parts) {
+          if (!current[part]) current[part] = {};
+          current = current[part];
+        }
       }
-    }
-    return tree;
-  };
+      return tree;
+    },
+    []
+  );
+
+  const treeData = useMemo(() => buildTree(sourceTree), [buildTree, sourceTree]);
 
   const renderTree = (node, prefix = '', depth = 0) => {
     const entries = Object.entries(node).sort(([a], [b]) => a.localeCompare(b));
     return entries.map(([name, children], idx) => {
       const isLast = idx === entries.length - 1;
       const connector = isLast ? '└── ' : '├── ';
-      const childPrefix = prefix + (isLast ? '    ' : '│   ');
       const hasChildren = Object.keys(children).length > 0;
       return (
         <React.Fragment key={name}>
@@ -178,8 +199,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       );
     });
   };
-
-  const treeData = buildTree(sourceTree);
 
   return (
     <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4'>

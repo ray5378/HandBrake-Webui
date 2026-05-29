@@ -156,7 +156,7 @@ router.post('/cache-clear', authenticateToken, async (req, res, next) => {
 });
 
 router.get('/handbrake/version', authenticateToken, (req, res) => {
-  exec('HandBrakeCLI --version', (error, stdout) => {
+  exec('HandBrakeCLI --version', { timeout: 10000 }, (error, stdout) => {
     if (error) {
       return res.json({
         success: true,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Settings as SettingsIcon,
@@ -36,20 +36,29 @@ function Settings() {
   const [browseDirs, setBrowseDirs] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(false);
   const [savingCacheDir, setSavingCacheDir] = useState(false);
+  const abortRef = useRef(null);
 
   useEffect(() => {
     fetchSystemInfo();
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
   }, []);
 
   useEffect(() => {
     if (activeTab === 'cache') {
       fetchCacheDir();
     }
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
   }, [activeTab]);
 
   const fetchCacheDir = async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
     try {
-      const res = await api.get('/system/cache-dir');
+      const res = await api.get('/system/cache-dir', { signal: abortRef.current.signal });
       const dir = res.data.data.cacheDir;
       if (dir) {
         setCacheDir(dir);
@@ -64,9 +73,14 @@ function Settings() {
   };
 
   const fetchBrowseDirs = async path => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
     setBrowseLoading(true);
     try {
-      const res = await api.get('/files', { params: { directory: path } });
+      const res = await api.get('/files', {
+        params: { directory: path },
+        signal: abortRef.current.signal
+      });
       setBrowseDirs(res.data.data.directories);
     } catch (err) {
       console.error('Failed to fetch directories:', err);
@@ -76,10 +90,13 @@ function Settings() {
   };
 
   const fetchSystemInfo = async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
     try {
       const [infoRes, dirsRes] = await Promise.all([
-        api.get('/system/info'),
-        api.get('/system/directories')
+        api.get('/system/info', { signal }),
+        api.get('/system/directories', { signal })
       ]);
 
       setSystemInfo(infoRes.data.data);

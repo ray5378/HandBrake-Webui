@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const fsPromises = fs.promises;
 const { body, query } = require('express-validator');
 const config = require('../config');
 const { authenticateToken } = require('../middleware/auth');
@@ -161,7 +162,9 @@ router.get(
                       codec: videoStream.codec_name,
                       width: videoStream.width,
                       height: videoStream.height,
-                      fps: eval(videoStream.r_frame_rate) || 0,
+                      fps: videoStream.r_frame_rate
+                        ? videoStream.r_frame_rate.split('/').reduce((a, b) => a / b, 0)
+                        : 0,
                       bitrate: parseInt(videoStream.bit_rate) || 0
                     }
                   : null,
@@ -243,32 +246,47 @@ router.get('/download', authenticateToken, query('path').notEmpty(), validate, (
   }
 });
 
-router.get('/tree', authenticateToken, query('path').notEmpty(), validate, (req, res, next) => {
-  try {
-    const dir = req.query.path;
-    if (!fs.existsSync(dir)) {
-      return res.json({ success: true, data: { directories: [] } });
-    }
-
-    const scanTree = (base, relative = '') => {
-      const results = [];
-      const items = fs.readdirSync(base, { withFileTypes: true });
-      for (const item of items) {
-        if (item.isDirectory()) {
-          const relPath = relative ? `${relative}/${item.name}` : item.name;
-          results.push(relPath);
-          results.push(...scanTree(path.join(base, item.name), relPath));
-        }
+router.get(
+  '/tree',
+  authenticateToken,
+  query('path').notEmpty(),
+  validate,
+  async (req, res, next) => {
+    try {
+      const dir = req.query.path;
+      if (!fs.existsSync(dir)) {
+        return res.json({ success: true, data: { directories: [] } });
       }
-      return results;
-    };
 
-    const directories = scanTree(dir);
-    res.json({ success: true, data: { directories } });
-  } catch (error) {
-    next(error);
+      const scanTree = async (base, relative = '', depth = 0) => {
+        if (depth > 20) {
+          return [];
+        }
+        const results = [];
+        let items;
+        try {
+          items = await fsPromises.readdir(base, { withFileTypes: true });
+        } catch (e) {
+          return [];
+        }
+        for (const item of items) {
+          if (item.isDirectory()) {
+            const relPath = relative ? `${relative}/${item.name}` : item.name;
+            results.push(relPath);
+            const sub = await scanTree(path.join(base, item.name), relPath, depth + 1);
+            results.push(...sub);
+          }
+        }
+        return results;
+      };
+
+      const directories = await scanTree(dir);
+      res.json({ success: true, data: { directories } });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 router.post('/mkdir', authenticateToken, body('path').notEmpty(), validate, (req, res, next) => {
   try {

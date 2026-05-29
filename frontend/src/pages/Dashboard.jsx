@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,18 +22,25 @@ function Dashboard() {
   const [modalStatus, setModalStatus] = useState(null);
   const [modalJobs, setModalJobs] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
+  const abortRef = useRef(null);
 
   useEffect(() => {
     fetchDashboardData();
     const interval = setInterval(fetchDashboardData, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (abortRef.current) abortRef.current.abort();
+    };
   }, []);
 
   const fetchDashboardData = async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
     try {
       const [jobsRes, systemRes] = await Promise.all([
-        api.get('/jobs/stats/summary'),
-        api.get('/system/info')
+        api.get('/jobs/stats/summary', { signal }),
+        api.get('/system/info', { signal })
       ]);
 
       setStats(jobsRes.data.data);
@@ -46,9 +53,10 @@ function Dashboard() {
   const openJobModal = useCallback(async (status, label) => {
     setModalStatus(label);
     setModalLoading(true);
+    const controller = new AbortController();
     try {
       const params = status ? { status } : {};
-      const res = await api.get('/jobs', { params });
+      const res = await api.get('/jobs', { params, signal: controller.signal });
       setModalJobs(res.data.data.jobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);

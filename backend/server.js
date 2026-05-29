@@ -32,16 +32,20 @@ if (cacheDir) {
   }
 }
 
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: false
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false
+  })
+);
 
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? false : '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === 'production' ? false : '*',
+    credentials: true
+  })
+);
 
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('combined'));
@@ -83,12 +87,33 @@ app.get('*', (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(config.port, '0.0.0.0', () => {
+const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(`HandBrake Web UI server running on port ${config.port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  process.exit(0);
-});
+const shutdown = async signal => {
+  console.log(`${signal} received, shutting down gracefully...`);
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+
+  try {
+    const { closeDatabase } = require('./src/models/database');
+    closeDatabase();
+  } catch (e) {
+    // ignore
+  }
+
+  try {
+    const { killAllJobs } = require('./src/services/handbrakeService');
+    killAllJobs();
+  } catch (e) {
+    // ignore
+  }
+
+  setTimeout(() => process.exit(0), 5000).unref();
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

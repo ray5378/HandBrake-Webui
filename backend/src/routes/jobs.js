@@ -6,6 +6,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
 const path = require('path');
 const fs = require('fs');
+const fsPromises = fs.promises;
 const config = require('../config');
 const {
   startTranscode,
@@ -429,15 +430,31 @@ router.post(
         '.mpeg'
       ];
 
-      // 递归查找所有视频文件
-      const findVideoFiles = dir => {
+      if (!fs.existsSync(sourceDirectory)) {
+        return res.status(400).json({
+          success: false,
+          error: '源目录不存在'
+        });
+      }
+
+      // 递归查找所有视频文件（最多 20 层深度）
+      const findVideoFiles = async (dir, depth = 0) => {
+        if (depth > 20) {
+          return [];
+        }
         const videoFiles = [];
-        const items = fs.readdirSync(dir, { withFileTypes: true });
+        let items;
+        try {
+          items = await fsPromises.readdir(dir, { withFileTypes: true });
+        } catch (e) {
+          return [];
+        }
 
         for (const item of items) {
           const itemPath = path.join(dir, item.name);
           if (item.isDirectory()) {
-            videoFiles.push(...findVideoFiles(itemPath));
+            const sub = await findVideoFiles(itemPath, depth + 1);
+            videoFiles.push(...sub);
           } else {
             const ext = path.extname(item.name).toLowerCase();
             if (videoExtensions.includes(ext)) {
@@ -448,14 +465,7 @@ router.post(
         return videoFiles;
       };
 
-      if (!fs.existsSync(sourceDirectory)) {
-        return res.status(400).json({
-          success: false,
-          error: '源目录不存在'
-        });
-      }
-
-      const videoFiles = findVideoFiles(sourceDirectory);
+      const videoFiles = await findVideoFiles(sourceDirectory);
 
       if (videoFiles.length === 0) {
         return res.status(400).json({
@@ -519,50 +529,66 @@ router.post(
       }
 
       if (copyNonVideoFiles) {
-        const copyNonVideoRecursive = (src, dest) => {
-          const entries = fs.readdirSync(src, { withFileTypes: true });
+        const copyNonVideoRecursive = async (src, dest, depth = 0) => {
+          if (depth > 20) {
+            return;
+          }
+          let entries;
+          try {
+            entries = await fsPromises.readdir(src, { withFileTypes: true });
+          } catch (e) {
+            return;
+          }
           for (const entry of entries) {
             const srcPath = path.join(src, entry.name);
             const destPath = path.join(dest, entry.name);
             if (entry.isDirectory()) {
-              fs.mkdirSync(destPath, { recursive: true });
-              copyNonVideoRecursive(srcPath, destPath);
+              await fsPromises.mkdir(destPath, { recursive: true });
+              await copyNonVideoRecursive(srcPath, destPath, depth + 1);
             } else {
               const ext = path.extname(entry.name).toLowerCase();
               if (!videoExtensions.includes(ext)) {
-                fs.mkdirSync(path.dirname(destPath), { recursive: true });
-                fs.copyFileSync(srcPath, destPath);
+                await fsPromises.mkdir(path.dirname(destPath), { recursive: true });
+                await fsPromises.copyFile(srcPath, destPath);
               }
             }
           }
         };
-        copyNonVideoRecursive(sourceDirectory, outputDirectory);
+        await copyNonVideoRecursive(sourceDirectory, outputDirectory);
       }
 
       if (moveNonVideoFiles) {
-        const moveNonVideoRecursive = (src, dest) => {
-          const entries = fs.readdirSync(src, { withFileTypes: true });
+        const moveNonVideoRecursive = async (src, dest, depth = 0) => {
+          if (depth > 20) {
+            return;
+          }
+          let entries;
+          try {
+            entries = await fsPromises.readdir(src, { withFileTypes: true });
+          } catch (e) {
+            return;
+          }
           for (const entry of entries) {
             const srcPath = path.join(src, entry.name);
             const destPath = path.join(dest, entry.name);
             if (entry.isDirectory()) {
-              fs.mkdirSync(destPath, { recursive: true });
-              moveNonVideoRecursive(srcPath, destPath);
+              await fsPromises.mkdir(destPath, { recursive: true });
+              await moveNonVideoRecursive(srcPath, destPath, depth + 1);
               try {
-                fs.rmdirSync(srcPath);
+                await fsPromises.rmdir(srcPath);
               } catch (e) {
                 /* 非空目录保留，忽略错误 */
               }
             } else {
               const ext = path.extname(entry.name).toLowerCase();
               if (!videoExtensions.includes(ext)) {
-                fs.mkdirSync(path.dirname(destPath), { recursive: true });
-                fs.renameSync(srcPath, destPath);
+                await fsPromises.mkdir(path.dirname(destPath), { recursive: true });
+                await fsPromises.rename(srcPath, destPath);
               }
             }
           }
         };
-        moveNonVideoRecursive(sourceDirectory, outputDirectory);
+        await moveNonVideoRecursive(sourceDirectory, outputDirectory);
       }
 
       res.status(201).json({

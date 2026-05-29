@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,6 +19,7 @@ import BatchTranscodeModal from '../components/BatchTranscodeModal';
 
 function Files() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [directories, setDirectories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,16 +30,23 @@ function Files() {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState(null);
   const contextMenuRef = useRef(null);
+  const abortRef = useRef(null);
 
   useEffect(() => {
     fetchFiles();
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
   }, [currentPath]);
 
   const fetchFiles = async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
     setLoading(true);
     try {
       const response = await api.get('/files', {
-        params: { directory: currentPath }
+        params: { directory: currentPath },
+        signal: abortRef.current.signal
       });
       setFiles(response.data.data.files);
       setDirectories(response.data.data.directories);
@@ -74,6 +82,7 @@ function Files() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (error) {
       console.error('Download failed:', error);
     }
@@ -124,8 +133,9 @@ function Files() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const filteredFiles = files.filter(file =>
-    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFiles = useMemo(
+    () => files.filter(file => file.name.toLowerCase().includes(searchTerm.toLowerCase())),
+    [files, searchTerm]
   );
 
   const pathParts = currentPath.split('/').filter(Boolean);

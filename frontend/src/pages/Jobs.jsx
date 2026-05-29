@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -24,11 +24,14 @@ function Jobs() {
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const abortRef = useRef(null);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
     try {
       const params = filter !== 'all' ? { status: filter } : {};
-      const response = await api.get('/jobs', { params });
+      const response = await api.get('/jobs', { params, signal: abortRef.current.signal });
       setJobs(response.data.data.jobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
@@ -36,14 +39,17 @@ function Jobs() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [filter]);
 
   useEffect(() => {
     fetchJobs();
 
     const interval = setInterval(fetchJobs, 10000);
-    return () => clearInterval(interval);
-  }, [filter, fetchJobs]);
+    return () => {
+      clearInterval(interval);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [fetchJobs]);
 
   const handleRefresh = () => {
     setRefreshing(true);
