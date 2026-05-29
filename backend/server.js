@@ -37,20 +37,9 @@ const authStrictLimiter = rateLimit({
   message: { success: false, error: 'Too many attempts, please try again later.' }
 });
 
-const dataLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 2000,
-  message: { success: false, error: 'Too many requests, please try again later.' }
-});
-
 app.use('/api/auth/login', authStrictLimiter);
 app.use('/api/auth/setup-admin', authStrictLimiter);
 app.use('/api/auth/logout', authStrictLimiter);
-
-app.use('/api/jobs', dataLimiter);
-app.use('/api/files', dataLimiter);
-app.use('/api/system', dataLimiter);
-app.use('/api/presets', dataLimiter);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
