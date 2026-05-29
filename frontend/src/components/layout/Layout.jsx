@@ -1,15 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
-import { useAuthStore } from '../../stores/authStore';
-
 function Layout() {
-  const { user } = useAuthStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className='min-h-screen bg-dark-900'>
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       <div className='lg:pl-64'>
         <main className='min-h-screen pb-24 lg:pb-0'>
@@ -19,7 +17,7 @@ function Layout() {
         </main>
       </div>
 
-      <MobileNav />
+      <MobileNav onMenuClick={() => setSidebarOpen(true)} />
     </div>
   );
 }

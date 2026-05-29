@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, FolderOpen, ListTodo, Settings, Layers, LogOut, Menu, X, Video } from 'lucide-react';
+import { Home, FolderOpen, ListTodo, Settings, Layers, LogOut, Video } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 import clsx from 'clsx';
 
-function Sidebar() {
+function Sidebar({ isOpen, setIsOpen }) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -27,13 +26,6 @@ function Sidebar() {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className='lg:hidden fixed top-4 left-4 z-50 p-2 bg-dark-800 rounded-lg'
-      >
-        {isOpen ? <X className='w-6 h-6' /> : <Menu className='w-6 h-6' />}
-      </button>
-
       {isOpen && (
         <div
           className='lg:hidden fixed inset-0 bg-black/50 z-40'

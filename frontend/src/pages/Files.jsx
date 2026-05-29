@@ -258,13 +258,7 @@ function Files() {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className='text-center py-12'>
-              <Video className='w-16 h-16 text-gray-600 mx-auto mb-4' />
-              <p className='text-gray-400'>{t('files.noFiles')}</p>
-              <p className='text-sm text-gray-500 mt-1'>{t('files.dragDropHint')}</p>
-            </div>
-          )}
+          ) : null}
         </>
       )}
 
