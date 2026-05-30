@@ -47,6 +47,12 @@
 - [ ] 无重复代码（DRY）
 - [ ] 模块职责清晰
 
+### 8. UI 规范 ✅
+- [ ] 无原生 alert()、confirm()、prompt() 调用
+- [ ] 提示通知使用自定义 Toast 组件
+- [ ] 确认/危险操作使用 ConfirmDialog 组件
+- [ ] 用户输入使用 Modal 对话框组件
+
 ## Git 提交规范 ✅
 
 ### Commit Message 格式

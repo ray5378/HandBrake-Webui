@@ -875,6 +875,73 @@ useEffect(() => {
 }, []);
 ```
 
+#### 9.3.5 UI 提示规范
+```jsx
+// ✅ 正确: 使用自定义 ConfirmDialog 替代 confirm()
+import ConfirmDialog from '../components/common/ConfirmDialog';
+
+function DeleteButton({ file, onDelete }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleConfirm = () => {
+    onDelete(file.id);
+    setShowConfirm(false);
+  };
+
+  return (
+    <>
+      <button onClick={() => setShowConfirm(true)}>删除</button>
+      <ConfirmDialog
+        open={showConfirm}
+        title="确认删除"
+        message={`确定要删除 ${file.name} 吗？`}
+        onConfirm={handleConfirm}
+        onCancel={() => setShowConfirm(false)}
+        danger
+      />
+    </>
+  );
+}
+
+// ✅ 正确: 使用 Toast 通知替代 alert()
+// 通过 Zustand store 或 context 触发全局 Toast
+function useToast() {
+  const addToast = useToastStore(state => state.addToast);
+
+  const notify = (message, type = 'info') => {
+    addToast({ message, type });
+  };
+
+  return { notify };
+}
+
+// 使用示例
+function UploadButton() {
+  const { notify } = useToast();
+
+  const handleUpload = async () => {
+    try {
+      await uploadFile();
+      notify('上传成功', 'success');
+    } catch (error) {
+      notify(error.message, 'error');
+    }
+  };
+
+  return <button onClick={handleUpload}>上传</button>;
+}
+
+// ❌ 禁止: 使用浏览器原生弹窗
+// alert('上传成功');               // 禁止
+// confirm('确定删除吗？');          // 禁止
+// prompt('请输入名称：');          // 禁止
+```
+
+> **规则**: 禁止使用浏览器原生 `alert()`、`confirm()`、`prompt()`。用户提示必须使用自定义组件：
+> - 简单通知 → **Toast** 组件（自动消失）
+> - 确认/危险操作 → **ConfirmDialog** 组件（需用户明确操作）
+> - 需要用户输入 → **Modal** 对话框组件
+
 ### 9.4 API 设计规范
 
 #### 9.4.1 RESTful 规范
