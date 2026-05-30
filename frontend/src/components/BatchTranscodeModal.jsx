@@ -32,6 +32,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     '.' + (directory || '').split('.').pop()?.toLowerCase()
   );
   const [presets, setPresets] = useState([]);
+  const [lastUsedPresetId, setLastUsedPresetId] = useLocalStorage(
+    'handbrake_last_used_preset',
+    ''
+  );
   const [selectedPreset, setSelectedPreset] = useState('');
   const [lastOutputDir, setLastOutputDir] = useLocalStorage(
     'handbrake_last_output_dir',
@@ -46,12 +50,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [newDirName, setNewDirName] = useState('');
   const [copyNonVideoFiles, setCopyNonVideoFiles] = useState(false);
   const [moveNonVideoFiles, setMoveNonVideoFiles] = useState(false);
-  const [customSettings, setCustomSettings] = useState(false);
-  const [settings, setSettings] = useState({
-    crf: 23,
-    audioBitrate: 128,
-    audioChannels: 2
-  });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -89,7 +87,21 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     const signal = abortRef.current.signal;
     try {
       const presetsRes = await api.get('/presets', { signal });
-      setPresets(presetsRes.data.data.presets);
+      const allPresets = presetsRes.data.data.presets;
+      
+      // 将自定义预设排在最上面，内置预设按名称排序
+      const customPresets = allPresets.filter(p => !p.isBuiltIn).sort((a, b) => a.name.localeCompare(b.name));
+      const builtInPresets = allPresets.filter(p => p.isBuiltIn).sort((a, b) => a.name.localeCompare(b.name));
+      
+      const sortedPresets = [...customPresets, ...builtInPresets];
+      setPresets(sortedPresets);
+
+      // 自动选择上一次使用的预设，否则默认选择第一个预设
+      if (lastUsedPresetId && sortedPresets.some(p => p.id === lastUsedPresetId)) {
+        setSelectedPreset(lastUsedPresetId);
+      } else if (sortedPresets.length > 0) {
+        setSelectedPreset(sortedPresets[0].id);
+      }
 
       if (!isSingleFile) {
         const treeRes = await api.get('/files/tree', { params: { path: directory }, signal });
@@ -129,6 +141,11 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setError('请选择输出目录');
       return;
     }
+    
+    if (!selectedPreset) {
+      setError('请选择转码预设');
+      return;
+    }
 
     try {
       const cacheRes = await api.get('/system/cache-dir', { signal: abortRef.current?.signal });
@@ -155,19 +172,20 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
         await api.post('/jobs', {
           sourceFile: directory,
           outputFile,
-          presetId: selectedPreset || undefined,
-          customSettings: customSettings ? settings : undefined
+          presetId: selectedPreset
         });
       } else {
         await api.post('/jobs/batch', {
           sourceDirectory: directory,
           outputDirectory,
-          presetId: selectedPreset || undefined,
-          customSettings: customSettings ? settings : undefined,
+          presetId: selectedPreset,
           copyNonVideoFiles,
           moveNonVideoFiles
         });
       }
+
+      // 保存使用的预设到 localStorage
+      setLastUsedPresetId(selectedPreset);
 
       setSuccess(true);
       successTimeoutRef.current = setTimeout(() => {
@@ -419,10 +437,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       onChange={e => setSelectedPreset(e.target.value)}
                       className='input'
                     >
-                      <option value=''>不使用预设</option>
                       {presets.map(preset => (
                         <option key={preset.id} value={preset.id}>
                           {preset.name} - {preset.description}
+                          {!preset.isBuiltIn && ' (自定义)'}
                         </option>
                       ))}
                     </select>
@@ -458,73 +476,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                     <label htmlFor='moveNonVideoFiles' className='text-sm text-gray-300'>
                       把源目录不能转码的文件移动到目标目录
                     </label>
-                  </div>
-                )}
-
-                <div className='flex items-center space-x-2'>
-                  <input
-                    type='checkbox'
-                    id='customSettings'
-                    checked={customSettings}
-                    onChange={e => setCustomSettings(e.target.checked)}
-                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
-                  />
-                  <label htmlFor='customSettings' className='text-sm text-gray-300'>
-                    使用自定义设置
-                  </label>
-                </div>
-
-                {customSettings && (
-                  <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-dark-600 rounded-lg'>
-                    <div>
-                      <label className='label'>CRF (质量)</label>
-                      <input
-                        type='number'
-                        min='0'
-                        max='51'
-                        value={settings.crf}
-                        onChange={e =>
-                          setSettings({
-                            ...settings,
-                            crf: parseInt(e.target.value)
-                          })
-                        }
-                        className='input'
-                      />
-                      <p className='text-xs text-gray-400 mt-1'>0=最佳质量, 51=最小体积</p>
-                    </div>
-
-                    <div>
-                      <label className='label'>音频码率 (kbps)</label>
-                      <input
-                        type='number'
-                        value={settings.audioBitrate}
-                        onChange={e =>
-                          setSettings({
-                            ...settings,
-                            audioBitrate: parseInt(e.target.value)
-                          })
-                        }
-                        className='input'
-                      />
-                    </div>
-
-                    <div>
-                      <label className='label'>音频声道</label>
-                      <select
-                        value={settings.audioChannels}
-                        onChange={e =>
-                          setSettings({
-                            ...settings,
-                            audioChannels: parseInt(e.target.value)
-                          })
-                        }
-                        className='input'
-                      >
-                        <option value='2'>立体声</option>
-                        <option value='6'>5.1 环绕</option>
-                      </select>
-                    </div>
                   </div>
                 )}
               </div>
