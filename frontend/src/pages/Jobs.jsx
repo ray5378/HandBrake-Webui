@@ -23,6 +23,7 @@ function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('active');
+  const [page, setPage] = useState(1);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmJobAction, setConfirmJobAction] = useState(null);
   const abortRef = useRef(null);
@@ -32,7 +33,10 @@ function Jobs() {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
     try {
-      const response = await api.get('/jobs', { signal: abortRef.current.signal });
+      const response = await api.get('/jobs', {
+        params: { limit: 100 },
+        signal: abortRef.current.signal
+      });
       setJobs(response.data.data.jobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
@@ -56,6 +60,14 @@ function Jobs() {
       return jobs.filter(job => job.status === 'completed' || job.status === 'skipped');
     return jobs.filter(job => job.status === filter);
   }, [jobs, filter]);
+
+  const limit = 10;
+  const totalPages = Math.ceil(filteredJobs.length / limit);
+  const paginatedJobs = filteredJobs.slice((page - 1) * limit, page * limit);
+
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) setPage(1);
+  }, [page, totalPages]);
 
   // 各状态数量统计
   const statusCounts = useMemo(() => {
@@ -212,7 +224,10 @@ function Jobs() {
         {filters.map(f => (
           <button
             key={f.value}
-            onClick={() => setFilter(f.value)}
+            onClick={() => {
+              setFilter(f.value);
+              setPage(1);
+            }}
             className={clsx(
               'flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap',
               filter === f.value
@@ -237,130 +252,160 @@ function Jobs() {
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : filteredJobs.length > 0 ? (
-        <div className='space-y-3'>
-          {filteredJobs.map(job => (
-            <div
-              key={job.id}
-              className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-[#fbbf24]/15' : ''}`}
-            >
-              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-                <div className='flex-1 min-w-0'>
-                  <div className='space-y-1 mb-2'>
-                    <div className='text-gray-400 font-mono text-sm' title={job.source_file}>
-                      <span className='text-gray-400'>{t('jobs.sourceFile', '源文件')}: </span>
-                      <span className='text-white break-all'>{job.source_file}</span>
-                      {job.source_file_size != null && (
-                        <span className='text-gray-400 ml-3'>
-                          {t('jobs.originalSize', '原体积')}：{formatFileSize(job.source_file_size)}
-                        </span>
-                      )}
-                    </div>
-                    <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
-                      <span className='text-gray-400'>{t('jobs.outputFile', '输出文件')}: </span>
-                      <span className='text-white break-all'>{job.output_file}</span>
-                      {(job.status === 'completed' || job.status === 'skipped') &&
-                        job.output_file_size != null && (
+        <>
+          <div className='space-y-3'>
+            {paginatedJobs.map(job => (
+              <div
+                key={job.id}
+                className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-[#fbbf24]/15' : ''}`}
+              >
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+                  <div className='flex-1 min-w-0'>
+                    <div className='space-y-1 mb-2'>
+                      <div className='text-gray-400 font-mono text-sm' title={job.source_file}>
+                        <span className='text-gray-400'>{t('jobs.sourceFile', '源文件')}: </span>
+                        <span className='text-white break-all'>{job.source_file}</span>
+                        {job.source_file_size != null && (
                           <span className='text-gray-400 ml-3'>
-                            <span className='text-gray-400'>
-                              {t('jobs.outputSize', '转码后')}：
-                            </span>
-                            {formatFileSize(job.output_file_size)}
+                            {t('jobs.originalSize', '原体积')}：
+                            {formatFileSize(job.source_file_size)}
                           </span>
                         )}
-                    </div>
-                  </div>
-
-                  <div className='flex items-center space-x-3 mb-1'>
-                    {job.status !== 'processing' && (
-                      <span className={clsx('badge', `badge-${job.status}`)}>
-                        {getStatusLabel(job.status)}
-                      </span>
-                    )}
-                    {job.preset_name && (
-                      <span className='text-sm text-gray-400'>
-                        {t('jobs.preset')}: {job.preset_name}
-                      </span>
-                    )}
-                    <span className='text-sm text-gray-400'>
-                      {t('jobs.startTime')}: {new Date(job.created_at).toLocaleString()}
-                    </span>
-                  </div>
-
-                  {job.status === 'processing' && (
-                    <div className='mt-3'>
-                      <div className='flex items-center justify-between text-sm mb-1'>
-                        <span className='text-gray-400'>{t('jobs.progress')}</span>
-                        <span className='text-white font-mono'>
-                          {job.progress.toFixed(1)}%
-                          {formatETA(job.eta_seconds) && (
-                            <span className='text-success font-normal ml-2 text-xs'>
-                              {formatETA(job.eta_seconds)}
+                      </div>
+                      <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
+                        <span className='text-gray-400'>{t('jobs.outputFile', '输出文件')}: </span>
+                        <span className='text-white break-all'>{job.output_file}</span>
+                        {(job.status === 'completed' || job.status === 'skipped') &&
+                          job.output_file_size != null && (
+                            <span className='text-gray-400 ml-3'>
+                              <span className='text-gray-400'>
+                                {t('jobs.outputSize', '转码后')}：
+                              </span>
+                              {formatFileSize(job.output_file_size)}
                             </span>
                           )}
-                        </span>
-                      </div>
-                      <div className='w-full bg-dark-700 rounded-full h-2 overflow-hidden'>
-                        <div
-                          className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
-                          style={{ width: `${job.progress}%` }}
-                        />
                       </div>
                     </div>
-                  )}
-                </div>
 
-                <div className='flex flex-wrap items-center gap-2'>
-                  {job.status === 'processing' && (
-                    <button onClick={() => handleCancel(job.id)} className='btn btn-danger text-sm'>
-                      <XCircle className='w-4 h-4' />
-                    </button>
-                  )}
+                    <div className='flex items-center space-x-3 mb-1'>
+                      {job.status !== 'processing' && (
+                        <span className={clsx('badge', `badge-${job.status}`)}>
+                          {getStatusLabel(job.status)}
+                        </span>
+                      )}
+                      {job.preset_name && (
+                        <span className='text-sm text-gray-400'>
+                          {t('jobs.preset')}: {job.preset_name}
+                        </span>
+                      )}
+                      <span className='text-sm text-gray-400'>
+                        {t('jobs.startTime')}: {new Date(job.created_at).toLocaleString()}
+                      </span>
+                    </div>
 
-                  {(job.status === 'completed' ||
-                    job.status === 'failed' ||
-                    job.status === 'cancelled' ||
-                    job.status === 'skipped') && (
-                    <>
-                      <Link to={`/jobs/${job.id}`} className='btn btn-secondary text-sm'>
-                        <Eye className='w-4 h-4' />
-                      </Link>
+                    {job.status === 'processing' && (
+                      <div className='mt-3'>
+                        <div className='flex items-center justify-between text-sm mb-1'>
+                          <span className='text-gray-400'>{t('jobs.progress')}</span>
+                          <span className='text-white font-mono'>
+                            {job.progress.toFixed(1)}%
+                            {formatETA(job.eta_seconds) && (
+                              <span className='text-success font-normal ml-2 text-xs'>
+                                {formatETA(job.eta_seconds)}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className='w-full bg-dark-700 rounded-full h-2 overflow-hidden'>
+                          <div
+                            className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
+                            style={{ width: `${job.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className='flex flex-wrap items-center gap-2'>
+                    {job.status === 'processing' && (
+                      <button
+                        onClick={() => handleCancel(job.id)}
+                        className='btn btn-danger text-sm'
+                      >
+                        <XCircle className='w-4 h-4' />
+                      </button>
+                    )}
+
+                    {(job.status === 'completed' ||
+                      job.status === 'failed' ||
+                      job.status === 'cancelled' ||
+                      job.status === 'skipped') && (
+                      <>
+                        <Link to={`/jobs/${job.id}`} className='btn btn-secondary text-sm'>
+                          <Eye className='w-4 h-4' />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(job.id)}
+                          className='btn btn-danger text-sm'
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </button>
+                      </>
+                    )}
+
+                    {job.status === 'queued' && (
                       <button
                         onClick={() => handleDelete(job.id)}
                         className='btn btn-danger text-sm'
                       >
                         <Trash2 className='w-4 h-4' />
                       </button>
-                    </>
-                  )}
-
-                  {job.status === 'queued' && (
-                    <button onClick={() => handleDelete(job.id)} className='btn btn-danger text-sm'>
-                      <Trash2 className='w-4 h-4' />
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
+
+                {job.error_log && job.status === 'failed' && (
+                  <div className='mt-4 p-3 bg-error/10 border border-error/20 rounded-lg'>
+                    <p className='text-sm text-error font-medium mb-1'>{t('jobs.error')}:</p>
+                    <pre className='text-xs text-gray-300 font-mono overflow-x-auto'>
+                      {job.error_log}
+                    </pre>
+                  </div>
+                )}
+
+                {job.status === 'skipped' && (
+                  <div className='mt-4 p-3 bg-cyan-900/20 border border-cyan-700/30 rounded-lg'>
+                    <p className='text-sm text-cyan-400 font-medium'>
+                      <SkipForward className='w-4 h-4 inline mr-1' />
+                      {t('jobs.outputExists', '输出文件已存在，已自动跳过该任务')}
+                    </p>
+                  </div>
+                )}
               </div>
-
-              {job.error_log && job.status === 'failed' && (
-                <div className='mt-4 p-3 bg-error/10 border border-error/20 rounded-lg'>
-                  <p className='text-sm text-error font-medium mb-1'>{t('jobs.error')}:</p>
-                  <pre className='text-xs text-gray-300 font-mono overflow-x-auto'>
-                    {job.error_log}
-                  </pre>
-                </div>
-              )}
-
-              {job.status === 'skipped' && (
-                <div className='mt-4 p-3 bg-cyan-900/20 border border-cyan-700/30 rounded-lg'>
-                  <p className='text-sm text-cyan-400 font-medium'>
-                    <SkipForward className='w-4 h-4 inline mr-1' />
-                    {t('jobs.outputExists', '输出文件已存在，已自动跳过该任务')}
-                  </p>
-                </div>
-              )}
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <div className='flex items-center justify-center space-x-4 mt-6'>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className='btn btn-secondary text-sm'
+              >
+                ← {t('common.previous', '上一页')}
+              </button>
+              <span className='text-gray-400 text-sm'>
+                {t('jobs.page', '第')} {page} / {totalPages} {t('jobs.pageSuffix', '页')}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className='btn btn-secondary text-sm'
+              >
+                {t('common.next', '下一页')} →
+              </button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       ) : (
         <div className='card text-center py-12'>
           <ListTodo className='w-16 h-16 text-gray-600 mx-auto mb-4' />

@@ -1,40 +1,25 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Video,
-  FolderOpen,
-  Play,
-  CheckCircle,
-  XCircle,
-  ArrowRight,
-  X,
-  ListTodo,
-  Layers,
-  Settings
-} from 'lucide-react';
+import { Video, FolderOpen, ArrowRight, ListTodo, Layers, Settings } from 'lucide-react';
 import api from '../services/api';
 import { formatFileSize, formatETA } from '../utils/format';
 
 function Dashboard() {
   const { t } = useTranslation();
-  const [stats, setStats] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
-  const [modalStatus, setModalStatus] = useState(null);
   const [activeJobs, setActiveJobs] = useState([]);
-  const [modalJobs, setModalJobs] = useState([]);
-  const [modalLoading, setModalLoading] = useState(false);
   const abortRef = useRef(null);
   const intervalRef = useRef(null);
 
   // 根据是否有活动任务动态调整轮询频率
   const hasProcessingTasks = useMemo(() => {
-    return stats ? stats.processing > 0 : false;
-  }, [stats]);
+    return activeJobs.some(j => j.status === 'processing');
+  }, [activeJobs]);
 
   const hasQueuedTasks = useMemo(() => {
-    return stats ? stats.queued > 0 : false;
-  }, [stats]);
+    return activeJobs.some(j => j.status === 'queued');
+  }, [activeJobs]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -65,20 +50,9 @@ function Dashboard() {
         api.get('/jobs', { params: { limit: 100 }, signal })
       ]);
 
-      const jobsList = jobsRes.data.data.jobs || [];
-      const total = jobsRes.data.data.pagination?.total || jobsList.length;
-      const queued = jobsList.filter(j => j.status === 'queued').length;
-      const processing = jobsList.filter(j => j.status === 'processing').length;
-      const completed = jobsList.filter(
-        j => j.status === 'completed' || j.status === 'skipped'
-      ).length;
-      const failed = jobsList.filter(j => j.status === 'failed').length;
-      const cancelled = jobsList.filter(j => j.status === 'cancelled').length;
-      const skipped = jobsList.filter(j => j.status === 'skipped').length;
-      setStats({ total, queued, processing, completed, failed, cancelled, skipped });
       setSystemInfo(systemRes.data.data);
       setActiveJobs(
-        jobsList
+        (jobsRes.data.data.jobs || [])
           .filter(j => j.status === 'processing' || j.status === 'queued')
           .sort((a, b) => {
             if (a.status === 'processing' && b.status !== 'processing') return -1;
@@ -91,74 +65,8 @@ function Dashboard() {
     }
   };
 
-  const openJobModal = useCallback(async (status, label) => {
-    setModalStatus(label);
-    setModalLoading(true);
-    const controller = new AbortController();
-    try {
-      let jobs;
-      if (status === 'active') {
-        const res = await api.get('/jobs', { params: {}, signal: controller.signal });
-        jobs = res.data.data.jobs
-          .filter(j => j.status === 'queued' || j.status === 'processing')
-          .sort((a, b) => {
-            if (a.status === 'processing' && b.status !== 'processing') return -1;
-            if (a.status !== 'processing' && b.status === 'processing') return 1;
-            return 0;
-          });
-      } else if (status === 'completed') {
-        const [completedRes, skippedRes] = await Promise.all([
-          api.get('/jobs', { params: { status: 'completed' }, signal: controller.signal }),
-          api.get('/jobs', { params: { status: 'skipped' }, signal: controller.signal })
-        ]);
-        jobs = [...(completedRes.data.data.jobs || []), ...(skippedRes.data.data.jobs || [])];
-      } else {
-        const params = status ? { status } : {};
-        const res = await api.get('/jobs', { params, signal: controller.signal });
-        jobs = res.data.data.jobs;
-      }
-      setModalJobs(jobs);
-    } catch (error) {
-      console.error('Failed to fetch jobs:', error);
-      setModalJobs([]);
-    } finally {
-      setModalLoading(false);
-    }
-  }, []);
-
   // formatBytes 已弃用，请使用 formatFileSize
   const formatBytes = formatFileSize;
-
-  const statCards = [
-    {
-      label: t('dashboard.totalJobs'),
-      value: stats?.total || 0,
-      icon: Video,
-      color: 'text-primary',
-      status: ''
-    },
-    {
-      label: t('jobs.active'),
-      value: (stats?.queued || 0) + (stats?.processing || 0),
-      icon: Play,
-      color: 'text-secondary',
-      status: 'active'
-    },
-    {
-      label: t('dashboard.completedJobs'),
-      value: stats?.completed || 0,
-      icon: CheckCircle,
-      color: 'text-success',
-      status: 'completed'
-    },
-    {
-      label: t('dashboard.failedJobs'),
-      value: stats?.failed || 0,
-      icon: XCircle,
-      color: 'text-error',
-      status: 'failed'
-    }
-  ];
 
   const getJobStatusLabel = status => {
     const statusMap = {
@@ -184,22 +92,6 @@ function Dashboard() {
             <ListTodo className='w-4 h-4' />
             <span>{t('jobs.title')}</span>
           </Link>
-        </div>
-
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-          {statCards.map(stat => (
-            <button
-              key={stat.label}
-              onClick={() => openJobModal(stat.status, stat.label)}
-              className='card text-left hover:border-primary/50 transition-colors cursor-pointer'
-            >
-              <div className='flex items-center justify-between mb-4'>
-                <span className='text-gray-400 text-sm'>{stat.label}</span>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-              <div className='text-3xl font-bold text-white'>{stat.value}</div>
-            </button>
-          ))}
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
@@ -381,62 +273,6 @@ function Dashboard() {
           </div>
         </div>
       </div>
-
-      {modalStatus && (
-        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4'>
-          <div className='bg-dark-800 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col'>
-            <div className='flex items-center justify-between p-6 border-b border-dark-700'>
-              <h2 className='text-xl font-bold text-white'>{modalStatus}</h2>
-              <button
-                onClick={() => setModalStatus(null)}
-                className='p-2 hover:bg-dark-700 rounded-lg transition-colors'
-              >
-                <X className='w-5 h-5 text-gray-400' />
-              </button>
-            </div>
-            <div className='flex-1 overflow-y-auto p-6'>
-              {modalLoading ? (
-                <div className='text-center py-8 text-gray-400'>{t('common.loading')}</div>
-              ) : modalJobs.length > 0 ? (
-                <div className='space-y-3'>
-                  {modalJobs.map(job => (
-                    <Link
-                      key={job.id}
-                      to={`/jobs/${job.id}`}
-                      onClick={() => setModalStatus(null)}
-                      className='flex items-center justify-between p-3 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors block'
-                    >
-                      <div className='flex-1 min-w-0'>
-                        <p className='text-sm font-medium text-white truncate'>
-                          {job.source_file.split('/').pop()}
-                        </p>
-                        <p className='text-xs text-gray-400 truncate'>
-                          {new Date(job.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className='flex items-center space-x-2 shrink-0'>
-                        <span className={`badge badge-${job.status}`}>
-                          {getJobStatusLabel(job.status)}
-                        </span>
-                        {job.status === 'processing' && (
-                          <div className='text-secondary font-mono text-sm'>
-                            {job.progress.toFixed(0)}%
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className='text-center py-8 text-gray-400'>
-                  <ListTodo className='w-12 h-12 mx-auto mb-2 opacity-50' />
-                  <p>{t('dashboard.noJobs')}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
