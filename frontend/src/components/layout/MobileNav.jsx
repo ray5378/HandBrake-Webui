@@ -21,7 +21,7 @@ function MobileNav({ onMenuClick }) {
           className='flex flex-col items-center py-2 px-4 transition-colors text-gray-400'
         >
           <Menu className='w-5 h-5' />
-          <span className='text-xs mt-1'>更多</span>
+          <span className='text-xs mt-1'>{t('nav.more', '更多')}</span>
         </button>
 
         {navItems.map(item => (

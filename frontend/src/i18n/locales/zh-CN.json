@@ -76,8 +76,7 @@
     "presets": "预设",
     "transcode": "转码",
     "settings": "设置",
-    "logout": "退出登录",
-    "login": "登录"
+    "logout": "退出登录"
   },
   "auth": {
     "login": "登录",
@@ -178,7 +177,8 @@
     "noFiles": "暂无文件",
     "confirmDelete": "确定要删除此文件吗？",
     "deleteSuccess": "文件删除成功",
-    "dragDropHint": "拖拽文件到此处或点击上传"
+    "dragDropHint": "拖拽文件到此处或点击上传",
+    "noSearchResults": "未找到匹配的结果"
   },
   "presets": {
     "title": "转码预设",
@@ -208,7 +208,16 @@
     "placebo": "极致（最慢）",
     "speed": "速度优先",
     "balanced": "均衡",
-    "quality": "画质优先"
+    "quality": "画质优先",
+    "copySuffix": " - 副本",
+    "copyFailed": "复制预设失败",
+    "viewPreset": "查看预设",
+    "searchPreset": "搜索预设...",
+    "filterByTag": "按标签「{tag}」筛选...",
+    "categoryGroup": "类别",
+    "codecGroup": "编码",
+    "resolutionGroup": "分辨率",
+    "vendorGroup": "厂商"
   },
   "presetTabs": {
     "summary": "基本信息",

@@ -153,7 +153,7 @@ function Presets() {
   const handleCopy = async preset => {
     try {
       const res = await api.post('/presets', {
-        name: preset.name + ' - 副本',
+        name: preset.name + t('presets.copySuffix', ' - 副本'),
         description: preset.description,
         settings: preset.settings
       });
@@ -163,7 +163,7 @@ function Presets() {
         setEditingPreset({ ...preset, id: newId });
         setReadOnly(false);
         setFormData({
-          name: preset.name + ' - 副本',
+          name: preset.name + t('presets.copySuffix', ' - 副本'),
           description: preset.description,
           settings: {
             ...getDefaultPresetSettings(),
@@ -176,7 +176,7 @@ function Presets() {
     } catch (error) {
       console.error('Failed to copy preset:', error);
       addToast({
-        message: error.response?.data?.error || '复制预设失败',
+        message: error.response?.data?.error || t('presets.copyFailed', '复制预设失败'),
         type: 'error'
       });
     }
@@ -1499,11 +1499,11 @@ function Presets() {
 
   const presetTags = [
     {
-      group: '类别',
-      tags: [{ id: 'custom', label: '自定义' }]
+      group: t('presets.categoryGroup', '类别'),
+      tags: [{ id: 'custom', label: t('presets.custom', '自定义') }]
     },
     {
-      group: '编码',
+      group: t('presets.codecGroup', '编码'),
       tags: [
         { id: 'x264', label: 'H.264' },
         { id: 'x265', label: 'H.265' },
@@ -1514,7 +1514,7 @@ function Presets() {
       ]
     },
     {
-      group: '分辨率',
+      group: t('presets.resolutionGroup', '分辨率'),
       tags: [
         { id: '4k', label: '4K' },
         { id: '2160p', label: '2160p' },
@@ -1523,7 +1523,7 @@ function Presets() {
       ]
     },
     {
-      group: '厂商',
+      group: t('presets.vendorGroup', '厂商'),
       tags: [
         { id: 'intel', label: 'Intel' },
         { id: 'amd', label: 'AMD' },
@@ -1613,8 +1613,11 @@ function Presets() {
               className='input pl-9 py-2 text-sm w-48 sm:w-56'
               placeholder={
                 activeTag
-                  ? `按标签「${presetTags.flatMap(g => g.tags).find(t => t.id === activeTag)?.label || ''}」筛选...`
-                  : '搜索预设...'
+                  ? t('presets.filterByTag', '按标签筛选').replace(
+                      '{tag}',
+                      presetTags.flatMap(g => g.tags).find(t => t.id === activeTag)?.label || ''
+                    )
+                  : t('presets.searchPreset', '搜索预设...')
               }
             />
             {activeTag && (
@@ -1754,7 +1757,7 @@ function Presets() {
               <div className='flex items-center justify-between'>
                 <h2 className='text-2xl font-bold text-white'>
                   {readOnly
-                    ? '查看预设'
+                    ? t('presets.viewPreset', '查看预设')
                     : editingPreset
                       ? t('presets.editPreset')
                       : t('presets.createPreset')}

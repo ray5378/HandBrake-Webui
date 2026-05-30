@@ -199,7 +199,9 @@ function Files() {
                 {searchLoading ? (
                   <div className='p-4 text-center text-gray-400 text-sm'>{t('common.loading')}</div>
                 ) : searchResults.directories.length === 0 && searchResults.files.length === 0 ? (
-                  <div className='p-4 text-center text-gray-500 text-sm'>未找到匹配的结果</div>
+                  <div className='p-4 text-center text-gray-500 text-sm'>
+                    {t('files.noSearchResults', '未找到匹配的结果')}
+                  </div>
                 ) : (
                   <>
                     {searchResults.directories.length > 0 && (
