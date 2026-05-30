@@ -189,13 +189,41 @@ function Jobs() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-        <div>
-          <h1 className='text-3xl font-bold text-white'>{t('jobs.title')}</h1>
-          <p className='text-gray-400 mt-1'>{t('jobs.subtitle')}</p>
-        </div>
+      <div>
+        <h1 className='text-3xl font-bold text-white'>{t('jobs.title')}</h1>
+        <p className='text-gray-400 mt-1'>{t('jobs.subtitle')}</p>
+      </div>
 
-        <div className='flex flex-wrap items-center gap-2'>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+        <div className='flex flex-wrap gap-2 order-2 sm:order-1'>
+          {filters.map(f => (
+            <button
+              key={f.value}
+              onClick={() => {
+                setFilter(f.value);
+                setPage(1);
+              }}
+              className={clsx(
+                'flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap',
+                filter === f.value
+                  ? 'bg-primary text-white'
+                  : 'bg-dark-700 text-gray-300 hover:bg-dark-600'
+              )}
+            >
+              <f.icon className='w-4 h-4' />
+              <span>{f.label}</span>
+              <span
+                className={clsx(
+                  'ml-1 text-xs font-mono rounded-full px-1.5 py-0.5 min-w-[20px] text-center',
+                  filter === f.value ? 'bg-white/20 text-white' : 'bg-dark-600 text-gray-400'
+                )}
+              >
+                {statusCounts[f.value] ?? 0}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className='flex flex-wrap items-center gap-2 order-1 sm:order-2'>
           <button
             onClick={() => setConfirmAction('clearAll')}
             className='btn btn-danger inline-flex items-center space-x-2'
@@ -218,35 +246,6 @@ function Jobs() {
             <span>{t('jobs.clearCache') || '清空转码缓存'}</span>
           </button>
         </div>
-      </div>
-
-      <div className='flex flex-wrap gap-2'>
-        {filters.map(f => (
-          <button
-            key={f.value}
-            onClick={() => {
-              setFilter(f.value);
-              setPage(1);
-            }}
-            className={clsx(
-              'flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap',
-              filter === f.value
-                ? 'bg-primary text-white'
-                : 'bg-dark-700 text-gray-300 hover:bg-dark-600'
-            )}
-          >
-            <f.icon className='w-4 h-4' />
-            <span>{f.label}</span>
-            <span
-              className={clsx(
-                'ml-1 text-xs font-mono rounded-full px-1.5 py-0.5 min-w-[20px] text-center',
-                filter === f.value ? 'bg-white/20 text-white' : 'bg-dark-600 text-gray-400'
-              )}
-            >
-              {statusCounts[f.value] ?? 0}
-            </span>
-          </button>
-        ))}
       </div>
 
       {loading ? (
