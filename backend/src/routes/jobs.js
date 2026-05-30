@@ -381,51 +381,6 @@ router.post('/:id/resume', authenticateToken, async (req, res, next) => {
   }
 });
 
-router.get('/stats/summary', authenticateToken, (req, res, next) => {
-  try {
-    const db = getDatabase();
-
-    const stats = db
-      .prepare(
-        `
-        SELECT
-          COUNT(*) as total,
-          SUM(CASE WHEN status = 'queued' THEN 1 ELSE 0 END) as queued,
-          SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
-          SUM(CASE WHEN status IN ('completed', 'skipped') THEN 1 ELSE 0 END) as completed,
-          SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
-          SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
-          SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) as skipped
-        FROM jobs
-        WHERE user_id = ?
-      `
-      )
-      .get(req.user.userId);
-
-    const recentJobs = db
-      .prepare(
-        `
-        SELECT id, source_file, output_file, status, progress, created_at
-        FROM jobs
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT 5
-      `
-      )
-      .all(req.user.userId);
-
-    res.json({
-      success: true,
-      data: {
-        ...stats,
-        recentJobs
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 // 批量转码 - 递归处理文件夹
 router.post(
   '/batch',

@@ -60,16 +60,25 @@ function Dashboard() {
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
     try {
-      const [jobsRes, systemRes, activeRes] = await Promise.all([
-        api.get('/jobs/stats/summary', { signal }),
+      const [systemRes, jobsRes] = await Promise.all([
         api.get('/system/info', { signal }),
-        api.get('/jobs', { params: { limit: 50 }, signal })
+        api.get('/jobs', { params: { limit: 100 }, signal })
       ]);
 
-      setStats(jobsRes.data.data);
+      const jobsList = jobsRes.data.data.jobs || [];
+      const total = jobsRes.data.data.pagination?.total || jobsList.length;
+      const queued = jobsList.filter(j => j.status === 'queued').length;
+      const processing = jobsList.filter(j => j.status === 'processing').length;
+      const completed = jobsList.filter(
+        j => j.status === 'completed' || j.status === 'skipped'
+      ).length;
+      const failed = jobsList.filter(j => j.status === 'failed').length;
+      const cancelled = jobsList.filter(j => j.status === 'cancelled').length;
+      const skipped = jobsList.filter(j => j.status === 'skipped').length;
+      setStats({ total, queued, processing, completed, failed, cancelled, skipped });
       setSystemInfo(systemRes.data.data);
       setActiveJobs(
-        (activeRes.data.data.jobs || [])
+        jobsList
           .filter(j => j.status === 'processing' || j.status === 'queued')
           .sort((a, b) => {
             if (a.status === 'processing' && b.status !== 'processing') return -1;
