@@ -29,7 +29,6 @@ services:
       - ./drive:/drive
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri
@@ -87,7 +86,6 @@ docker run -d \
   -p 52389:52389 \
   -v $(pwd)/config:/config \
   -v $(pwd)/drive:/drive \
-  -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
   --restart unless-stopped \
   ray5378/handbrake-webui:latest
 ```

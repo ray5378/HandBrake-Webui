@@ -9,7 +9,6 @@ services:
       - ./drive:/drive
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri

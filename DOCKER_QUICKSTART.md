@@ -35,7 +35,6 @@ docker run -d \
   -p 52389:52389 \
   -v $(pwd)/config:/config \
   -v $(pwd)/drive:/drive \
-  -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
   --restart unless-stopped \
   your-username/handbrake-webui:latest
 ```
@@ -77,9 +76,6 @@ docker stop handbrake-test && docker rm handbrake-test
 ```bash
 # 服务配置
 NODE_ENV=production
-
-# JWT 密钥（生产环境必须修改！）
-JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
 # 日志级别: ERROR, WARN, INFO, DEBUG
 LOG_LEVEL=INFO
