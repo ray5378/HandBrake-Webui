@@ -32,6 +32,14 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const isSingleFile = VIDEO_EXTENSIONS.includes(
     '.' + (directory || '').split('.').pop()?.toLowerCase()
   );
+
+  // 提取源目录最后部分（如果不是单文件）
+  const sourceDirBasename = useMemo(() => {
+    if (isSingleFile) return '';
+    const parts = (directory || '').split('/').filter(Boolean);
+    return parts.length > 0 ? parts.pop() : '';
+  }, [directory, isSingleFile]);
+
   const [presets, setPresets] = useState([]);
   const [lastUsedPresetId, setLastUsedPresetId] = useLocalStorage('handbrake_last_used_preset', '');
   const [selectedPreset, setSelectedPreset] = useState('');
@@ -39,7 +47,11 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     'handbrake_last_output_dir',
     '/drive/转码/转码后'
   );
-  const [outputDirectory, setOutputDirectory] = useState(lastOutputDir);
+
+  // 输出目录默认加上源目录最后部分
+  const [outputDirectory, setOutputDirectory] = useState(
+    sourceDirBasename ? `${lastOutputDir}/${sourceDirBasename}` : lastOutputDir
+  );
   const [browsePath, setBrowsePath] = useState(lastOutputDir);
   const [browseDirs, setBrowseDirs] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(false);
@@ -123,7 +135,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   const handleBrowse = path => {
     setBrowsePath(path);
-    setOutputDirectory(path);
+    // 用户选择目录时，如果是批量转码，自动追加源目录最后部分
+    const newOutputDir = sourceDirBasename ? `${path}/${sourceDirBasename}` : path;
+    setOutputDirectory(newOutputDir);
     setLastOutputDir(path);
     fetchBrowseDirs(path);
   };
@@ -268,31 +282,29 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showPresetDropdown]);
 
-  const renderTree = (node, prefix = '', depth = 0) => {
-    const entries = Object.entries(node).sort(([a], [b]) => a.localeCompare(b));
-    return entries.map(([name, children], idx) => {
-      const isLast = idx === entries.length - 1;
-      const connector = isLast ? '└── ' : '├── ';
-      const hasChildren = Object.keys(children).length > 0;
-      return (
-        <React.Fragment key={name}>
-          <div className='text-xs text-gray-400 font-mono mb-1' style={{ paddingLeft: depth * 16 }}>
-            <div className='flex items-baseline space-x-1'>
-              <span className='text-gray-600 shrink-0'>{connector}</span>
-              <FolderOpen className='w-3 h-3 text-warning shrink-0 relative top-0.5' />
-              <span className='text-gray-400'>{name}</span>
-              <ChevronRight className='w-3 h-3 text-gray-600 shrink-0 relative top-0.5' />
-              <span className='text-primary truncate max-w-[200px]'>
-                {outputDirectory}/{prefix}
-                {name}
-              </span>
-            </div>
-          </div>
-          {hasChildren && renderTree(children, prefix + name + '/', depth + 1)}
-        </React.Fragment>
-      );
-    });
-  };
+  const getTreeLines = useMemo(() => {
+    const lines = [];
+    const collect = (node, prefix = '', depth = 0) => {
+      const entries = Object.entries(node).sort(([a], [b]) => a.localeCompare(b));
+      entries.forEach(([name, children], idx) => {
+        const isLast = idx === entries.length - 1;
+        const connector = isLast ? '└── ' : '├── ';
+        const hasChildren = Object.keys(children).length > 0;
+        lines.push({
+          name,
+          prefix,
+          depth,
+          connector,
+          hasChildren
+        });
+        if (hasChildren) {
+          collect(children, prefix + name + '/', depth + 1);
+        }
+      });
+    };
+    collect(treeData);
+    return lines;
+  }, [treeData]);
 
   return (
     <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4'>
@@ -455,20 +467,58 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       <GitBranch className='w-4 h-4 text-primary' />
                       <span>目录结构预览</span>
                     </h4>
-                    <div className='max-h-48 overflow-y-auto overflow-x-auto space-y-0.5'>
-                      <div className='text-xs font-mono space-y-1 min-w-0'>
-                        <div className='flex items-center space-x-1'>
-                          <FolderOpen className='w-3 h-3 text-warning shrink-0' />
-                          <span className='text-gray-400'>源:</span>
-                          <span className='text-gray-400 break-all truncate'>{directory}</span>
+                    <div className='max-h-48 overflow-y-auto overflow-x-auto'>
+                      {/* 左右两列表格 */}
+                      <div className='grid grid-cols-2 gap-3 min-w-[400px]'>
+                        {/* 左侧 - 源目录 */}
+                        <div>
+                          <div className='text-xs text-gray-400 mb-1 font-semibold'>源</div>
+                          <div className='bg-dark-700 rounded px-2 py-1'>
+                            <div className='text-xs font-mono mb-2 border-b border-dark-600 pb-1'>
+                              <span className='text-gray-400 break-all'>{directory}</span>
+                            </div>
+                            <div className='space-y-0.5'>
+                              {getTreeLines.map((line, i) => (
+                                <div
+                                  key={i}
+                                  className='text-xs text-gray-400 font-mono'
+                                  style={{ paddingLeft: line.depth * 16 }}
+                                >
+                                  <div className='flex items-baseline space-x-1'>
+                                    <span className='text-gray-600 shrink-0'>{line.connector}</span>
+                                    <FolderOpen className='w-3 h-3 text-warning shrink-0 relative top-0.5' />
+                                    <span className='text-gray-400'>{line.name}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                        <div className='flex items-center space-x-1'>
-                          <ChevronRight className='w-3 h-3 text-gray-600 shrink-0' />
-                          <span className='text-primary'>输出:</span>
-                          <span className='text-primary truncate'>{outputDirectory}</span>
+                        {/* 右侧 - 输出目录 */}
+                        <div>
+                          <div className='text-xs text-primary mb-1 font-semibold'>输出</div>
+                          <div className='bg-dark-700 rounded px-2 py-1'>
+                            <div className='text-xs font-mono mb-2 border-b border-dark-600 pb-1'>
+                              <span className='text-primary break-all'>{outputDirectory}</span>
+                            </div>
+                            <div className='space-y-0.5'>
+                              {getTreeLines.map((line, i) => (
+                                <div
+                                  key={i}
+                                  className='text-xs text-gray-400 font-mono'
+                                  style={{ paddingLeft: line.depth * 16 }}
+                                >
+                                  <div className='flex items-baseline space-x-1'>
+                                    <span className='text-gray-600 shrink-0'>{line.connector}</span>
+                                    <FolderOpen className='w-3 h-3 text-primary shrink-0 relative top-0.5' />
+                                    <span className='text-primary'>{line.name}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      {renderTree(treeData, '', 1)}
                     </div>
                   </div>
                 )}
