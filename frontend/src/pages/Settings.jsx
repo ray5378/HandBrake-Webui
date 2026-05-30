@@ -19,7 +19,6 @@ function Settings() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [systemInfo, setSystemInfo] = useState(null);
-  const [directories, setDirectories] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -94,13 +93,9 @@ function Settings() {
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
     try {
-      const [infoRes, dirsRes] = await Promise.all([
-        api.get('/system/info', { signal }),
-        api.get('/system/directories', { signal })
-      ]);
+      const infoRes = await api.get('/system/info', { signal });
 
       setSystemInfo(infoRes.data.data);
-      setDirectories(dirsRes.data.data);
     } catch (error) {
       console.error('Failed to fetch system info:', error);
     }
@@ -398,51 +393,8 @@ function Settings() {
             <div className='card'>
               <h2 className='text-xl font-semibold text-white mb-4'>{t('settings.storage')}</h2>
 
-              {directories && systemInfo ? (
+              {systemInfo ? (
                 <div className='space-y-6'>
-                  <div>
-                    <h3 className='text-sm font-medium text-gray-400 mb-3'>
-                      {t('settings.directoryMapping') || 'Directory Mapping'}
-                    </h3>
-                    <div className='space-y-2'>
-                      <div className='flex items-center justify-between p-3 bg-dark-700 rounded-lg'>
-                        <div className='flex items-center space-x-3'>
-                          <FolderOpen className='w-5 h-5 text-primary' />
-                          <div>
-                            <p className='text-white'>{t('files.sourceFiles')}</p>
-                            <p className='text-xs text-gray-400 font-mono truncate'>
-                              {directories.source}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className='flex items-center justify-between p-3 bg-dark-700 rounded-lg'>
-                        <div className='flex items-center space-x-3'>
-                          <FolderOpen className='w-5 h-5 text-success' />
-                          <div>
-                            <p className='text-white'>{t('files.outputFiles')}</p>
-                            <p className='text-xs text-gray-400 font-mono truncate'>
-                              {directories.output}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className='flex items-center justify-between p-3 bg-dark-700 rounded-lg'>
-                        <div className='flex items-center space-x-3'>
-                          <FolderOpen className='w-5 h-5 text-warning' />
-                          <div>
-                            <p className='text-white'>{t('settings.configDir')}</p>
-                            <p className='text-xs text-gray-400 font-mono truncate'>
-                              {directories.config}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <div>
                     <h3 className='text-sm font-medium text-gray-400 mb-3'>
                       {t('dashboard.diskUsage')}
