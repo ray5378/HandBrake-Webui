@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 function generateSecret() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -68,9 +69,9 @@ const config = {
     config.databasePath = path.join(config.configDir, 'database.sqlite');
     config.initialized = true;
 
-    console.log('Configuration initialized');
-    console.log(`Database path: ${config.databasePath}`);
-    console.log(`Max concurrent jobs: ${config.maxConcurrentJobs}`);
+    logger.info('Configuration initialized');
+    logger.info('Database path: ' + config.databasePath);
+    logger.info('Max concurrent jobs: ' + config.maxConcurrentJobs);
   },
 
   saveConfig() {

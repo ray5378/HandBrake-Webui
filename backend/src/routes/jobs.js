@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const config = require('../config');
+const logger = require('../utils/logger');
 const {
   startTranscode,
   cancelTranscode,
@@ -524,7 +525,7 @@ router.post(
             await startTranscode(job);
           }
         } catch (startError) {
-          console.error(`Failed to start job ${jobId}:`, startError);
+          logger.error('Failed to start job', { jobId, error: startError.message });
         }
       }
 

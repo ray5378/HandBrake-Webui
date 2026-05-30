@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { getDatabase } = require('../models/database');
 const config = require('../config');
+const logger = require('../utils/logger');
 
 const activeJobs = new Map();
 let processingCount = 0;
@@ -325,7 +326,7 @@ function buildHandBrakeArgs(job, settings) {
 
 async function startTranscode(job) {
   if (processingCount >= config.maxConcurrentJobs) {
-    console.log('Max concurrent jobs reached, job queued');
+    logger.info('Max concurrent jobs reached, job queued');
     return;
   }
 
@@ -345,7 +346,7 @@ async function startTranscode(job) {
       const customSettings = JSON.parse(job.settings);
       settings = { ...settings, ...customSettings };
     } catch (e) {
-      console.error('Error parsing job settings:', e);
+      logger.error('Error parsing job settings', { error: e.message });
     }
   }
 
@@ -403,10 +404,10 @@ async function startTranscode(job) {
           fs.copyFileSync(tempOutputFile, job.output_file);
           fs.unlinkSync(tempOutputFile);
         } catch (copyErr) {
-          console.error(`Failed to copy temp file for job ${job.id}:`, copyErr);
+          logger.error('Failed to copy temp file', { jobId: job.id, error: copyErr.message });
         }
       } else {
-        console.error(`Failed to move temp file for job ${job.id}:`, e);
+        logger.error('Failed to move temp file', { jobId: job.id, error: e.message });
       }
     }
     try {
@@ -447,10 +448,10 @@ async function startTranscode(job) {
         WHERE id = ?
         `
       ).run(job.id);
-      console.log(`Job ${job.id} completed successfully`);
+      logger.info('Job completed successfully', { jobId: job.id });
     } else if (code === null) {
       cleanupJob();
-      console.log(`Job ${job.id} was cancelled`);
+      logger.info('Job was cancelled', { jobId: job.id });
     } else {
       cleanupJob();
       db.prepare(
@@ -460,7 +461,7 @@ async function startTranscode(job) {
         WHERE id = ?
         `
       ).run(errorData, job.id);
-      console.error(`Job ${job.id} failed with code ${code}:`, errorData);
+      logger.error('Job failed', { jobId: job.id, code, error: errorData });
     }
 
     processNextJob();
@@ -490,7 +491,7 @@ async function startTranscode(job) {
       `
     ).run(error.message, job.id);
 
-    console.error(`Job ${job.id} error:`, error);
+    logger.error('Job error', { jobId: job.id, error: error.message });
 
     processNextJob();
   };

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const config = require('../config');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ router.get('/info', authenticateToken, (req, res, next) => {
         };
       }
     } catch (error) {
-      console.error('Error getting disk usage:', error);
+      logger.error('Error getting disk usage', { error: error.message });
     }
 
     res.json({
