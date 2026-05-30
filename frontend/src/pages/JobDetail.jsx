@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 
 function JobDetail() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ function JobDetail() {
   const [loading, setLoading] = useState(true);
   const statusRef = useRef(null);
   const abortRef = useRef(null);
+  const [confirmJobAction, setConfirmJobAction] = useState(null);
 
   const fetchJobDetail = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -51,25 +53,27 @@ function JobDetail() {
   }, [fetchJobDetail]);
 
   const handleCancel = async () => {
-    if (!confirm('确定要取消这个任务吗？')) return;
-
-    try {
-      await api.post(`/jobs/${id}/cancel`);
-      fetchJobDetail();
-    } catch (error) {
-      console.error('Failed to cancel job:', error);
-    }
+    setConfirmJobAction({ type: 'cancel' });
   };
 
   const handleDelete = async () => {
-    if (!confirm('确定要删除这个任务记录吗？')) return;
+    setConfirmJobAction({ type: 'delete' });
+  };
 
+  const handleConfirmJobAction = async () => {
+    if (!confirmJobAction) return;
     try {
-      await api.delete(`/jobs/${id}`);
-      window.location.href = '/jobs';
+      if (confirmJobAction.type === 'cancel') {
+        await api.post(`/jobs/${id}/cancel`);
+        fetchJobDetail();
+      } else {
+        await api.delete(`/jobs/${id}`);
+        window.location.href = '/jobs';
+      }
     } catch (error) {
-      console.error('Failed to delete job:', error);
+      console.error('Failed to perform job action:', error);
     }
+    setConfirmJobAction(null);
   };
 
   const handleDownload = async () => {
@@ -239,6 +243,24 @@ function JobDetail() {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={confirmJobAction !== null}
+        title={
+          confirmJobAction?.type === 'cancel'
+            ? '取消任务'
+            : '删除任务'
+        }
+        message={
+          confirmJobAction?.type === 'cancel'
+            ? '确定要取消这个任务吗？'
+            : '确定要删除这个任务记录吗？'
+        }
+        confirmText='确认'
+        cancelText='取消'
+        onConfirm={handleConfirmJobAction}
+        onCancel={() => setConfirmJobAction(null)}
+        danger
+      />
     </div>
   );
 }

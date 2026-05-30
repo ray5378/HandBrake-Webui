@@ -23,6 +23,7 @@ function Jobs() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmJobAction, setConfirmJobAction] = useState(null);
   const abortRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -74,25 +75,26 @@ function Jobs() {
   }, [fetchJobs, hasActiveTasks]);
 
   const handleCancel = async jobId => {
-    if (!confirm(t('jobs.confirmDelete'))) return;
-
-    try {
-      await api.post(`/jobs/${jobId}/cancel`);
-      fetchJobs();
-    } catch (error) {
-      console.error('Failed to cancel job:', error);
-    }
+    setConfirmJobAction({ type: 'cancel', jobId });
   };
 
   const handleDelete = async jobId => {
-    if (!confirm(t('jobs.confirmDelete'))) return;
+    setConfirmJobAction({ type: 'delete', jobId });
+  };
 
+  const handleConfirmJobAction = async () => {
+    if (!confirmJobAction) return;
     try {
-      await api.delete(`/jobs/${jobId}`);
+      if (confirmJobAction.type === 'cancel') {
+        await api.post(`/jobs/${confirmJobAction.jobId}/cancel`);
+      } else {
+        await api.delete(`/jobs/${confirmJobAction.jobId}`);
+      }
       fetchJobs();
     } catch (error) {
-      console.error('Failed to delete job:', error);
+      console.error('Failed to perform job action:', error);
     }
+    setConfirmJobAction(null);
   };
 
   const handleClearHistory = async () => {
@@ -353,6 +355,24 @@ function Jobs() {
         cancelText={t('common.cancel') || '取消'}
         onConfirm={handleClearCache}
         onCancel={() => setConfirmAction(null)}
+        danger
+      />
+      <ConfirmDialog
+        open={confirmJobAction !== null}
+        title={
+          confirmJobAction?.type === 'cancel'
+            ? t('jobs.confirmCancelTitle', '取消任务')
+            : t('jobs.confirmDeleteTitle', '删除任务')
+        }
+        message={
+          confirmJobAction?.type === 'cancel'
+            ? t('jobs.confirmCancel', '确定要取消这个任务吗？')
+            : t('jobs.confirmDelete', '确定要删除这个任务吗？')
+        }
+        confirmText={t('common.confirm', '确认')}
+        cancelText={t('common.cancel', '取消')}
+        onConfirm={handleConfirmJobAction}
+        onCancel={() => setConfirmJobAction(null)}
         danger
       />
     </div>

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import {
   FORMATS,
   VIDEO_CODECS,
@@ -57,6 +58,7 @@ function Presets() {
     settings: getDefaultPresetSettings()
   });
   const [presetFilter, setPresetFilter] = useState('');
+  const [confirmDeletePresetId, setConfirmDeletePresetId] = useState(null);
 
   useEffect(() => {
     fetchPresets();
@@ -107,15 +109,19 @@ function Presets() {
   };
 
   const handleDelete = async presetId => {
-    if (!confirm(t('presets.confirmDelete'))) return;
+    setConfirmDeletePresetId(presetId);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!confirmDeletePresetId) return;
     try {
-      await api.delete(`/presets/${presetId}`);
+      await api.delete(`/presets/${confirmDeletePresetId}`);
       fetchPresets();
     } catch (error) {
       console.error('Failed to delete preset:', error);
       alert(error.response?.data?.error || t('errors.deleteFailed'));
     }
+    setConfirmDeletePresetId(null);
   };
 
   const handleView = preset => {
@@ -1720,6 +1726,16 @@ function Presets() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={confirmDeletePresetId !== null}
+        title={t('presets.confirmDeleteTitle', '删除预设')}
+        message={t('presets.confirmDelete', '确定要删除这个预设吗？此操作不可撤销。')}
+        confirmText={t('common.confirm', '确认')}
+        cancelText={t('common.cancel', '取消')}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeletePresetId(null)}
+        danger
+      />
     </div>
   );
 }
