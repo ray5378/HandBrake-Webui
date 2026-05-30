@@ -95,11 +95,13 @@ function Login() {
             <div className='w-20 h-20 mx-auto mb-4'>
               <img
                 src='/logo.png'
-                alt='HandBrake Web UI'
+                alt={t('app.fullName', 'HandBrake Web UI')}
                 className='w-full h-full object-contain'
               />
             </div>
-            <h1 className='text-3xl font-bold text-white mb-2'>HandBrake Web UI</h1>
+            <h1 className='text-3xl font-bold text-white mb-2'>
+              {t('app.fullName', 'HandBrake Web UI')}
+            </h1>
             <p className='text-gray-400'>{t('auth.setupTitle')}</p>
           </div>
 
@@ -171,9 +173,15 @@ function Login() {
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <div className='w-20 h-20 mx-auto mb-4'>
-            <img src='/logo.png' alt='HandBrake Web UI' className='w-full h-full object-contain' />
+            <img
+              src='/logo.png'
+              alt={t('app.fullName', 'HandBrake Web UI')}
+              className='w-full h-full object-contain'
+            />
           </div>
-          <h1 className='text-3xl font-bold text-white mb-2'>HandBrake Web UI</h1>
+          <h1 className='text-3xl font-bold text-white mb-2'>
+            {t('app.fullName', 'HandBrake Web UI')}
+          </h1>
           <p className='text-gray-400'>{t('auth.subtitle')}</p>
         </div>
 

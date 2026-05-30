@@ -62,8 +62,8 @@ function Sidebar({ isOpen, setIsOpen }) {
                 />
               </div>
               <div>
-                <h1 className='text-xl font-bold text-white'>HandBrake</h1>
-                <p className='text-xs text-gray-400'>Web UI</p>
+                <h1 className='text-xl font-bold text-white'>{t('app.name', 'HandBrake')}</h1>
+                <p className='text-xs text-gray-400'>{t('app.webUI', 'Web UI')}</p>
               </div>
             </div>
           </div>

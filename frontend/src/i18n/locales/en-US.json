@@ -80,6 +80,14 @@
     "logout": "Logout",
     "more": "More"
   },
+  "app": {
+    "name": "HandBrake",
+    "webUI": "Web UI",
+    "fullName": "HandBrake Web UI"
+  },
+  "unit": {
+    "kbps": "(kbps)"
+  },
   "auth": {
     "login": "Login",
     "username": "Username",

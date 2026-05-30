@@ -79,6 +79,14 @@
     "settings": "设置",
     "logout": "退出登录"
   },
+  "app": {
+    "name": "HandBrake",
+    "webUI": "Web UI",
+    "fullName": "HandBrake Web UI"
+  },
+  "unit": {
+    "kbps": "(kbps)"
+  },
   "auth": {
     "login": "登录",
     "username": "用户名",

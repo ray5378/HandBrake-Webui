@@ -390,7 +390,9 @@ function Presets() {
             {(formData.settings.video?.rateControl === 'cbr' ||
               formData.settings.video?.rateControl === 'vbr') && (
               <div>
-                <label className='label'>{t('video.bitrate')} (kbps)</label>
+                <label className='label'>
+                  {t('video.bitrate')} {t('unit.kbps', '(kbps)')}
+                </label>
                 <input
                   type='number'
                   min='8'
@@ -1136,8 +1138,8 @@ function Presets() {
                     <option value='none'>{t('common.none')}</option>
                     <option value='film'>{t('filters.film')}</option>
                     <option value='grain'>{t('filters.grain')}</option>
-                    <option value='psnr'>PSNR</option>
-                    <option value='ssim'>SSIM</option>
+                    <option value='psnr'>{t('tunes.psnr', 'PSNR')}</option>
+                    <option value='ssim'>{t('tunes.ssim', 'SSIM')}</option>
                   </select>
                 </div>
               )}
@@ -1745,7 +1747,9 @@ function Presets() {
             </div>
           ))}
           {filteredPresets.length === 0 && (
-            <div className='col-span-full text-center py-12 text-gray-500'>{t('presets.noMatchPreset', '无匹配预设')}</div>
+            <div className='col-span-full text-center py-12 text-gray-500'>
+              {t('presets.noMatchPreset', '无匹配预设')}
+            </div>
           )}
         </div>
       )}

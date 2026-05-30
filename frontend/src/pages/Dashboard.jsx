@@ -165,11 +165,15 @@ function Dashboard() {
               <div className='space-y-4'>
                 <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <p className='text-sm text-gray-400'>HandBrake {t('settings.version')}</p>
+                    <p className='text-sm text-gray-400'>
+                      {t('app.name', 'HandBrake')} {t('settings.version')}
+                    </p>
                     <p className='text-white font-mono'>{systemInfo.handbrakeVersion}</p>
                   </div>
                   <div>
-                    <p className='text-sm text-gray-400'>Web UI {t('settings.version')}</p>
+                    <p className='text-sm text-gray-400'>
+                      {t('app.webUI', 'Web UI')} {t('settings.version')}
+                    </p>
                     <p className='text-white font-mono'>
                       {import.meta.env.VITE_GIT_COMMIT || 'unknown'}
                     </p>
