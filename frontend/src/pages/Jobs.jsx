@@ -9,7 +9,6 @@ import {
   Clock,
   Trash2,
   Eye,
-  RefreshCw,
   AlertTriangle,
   Trash
 } from 'lucide-react';
@@ -23,7 +22,6 @@ function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [refreshing, setRefreshing] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const abortRef = useRef(null);
   const intervalRef = useRef(null);
@@ -38,7 +36,6 @@ function Jobs() {
       console.error('Failed to fetch jobs:', error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, []);
 
@@ -75,11 +72,6 @@ function Jobs() {
       if (abortRef.current) abortRef.current.abort();
     };
   }, [fetchJobs, hasActiveTasks]);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchJobs();
-  };
 
   const handleCancel = async jobId => {
     if (!confirm(t('jobs.confirmDelete'))) return;
@@ -181,14 +173,6 @@ function Jobs() {
           >
             <Trash className='w-4 h-4' />
             <span>{t('jobs.clearCache') || '清空转码缓存'}</span>
-          </button>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className='btn btn-secondary inline-flex items-center space-x-2'
-          >
-            <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
-            <span>{t('common.refresh')}</span>
           </button>
         </div>
       </div>
