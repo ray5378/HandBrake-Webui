@@ -440,9 +440,7 @@ function Jobs() {
                 <X className='w-5 h-5 text-gray-400' />
               </button>
             </div>
-            <p className='text-gray-400 mb-5'>
-              {t('jobs.confirmClearAll', '请选择清空方式：')}
-            </p>
+            <p className='text-gray-400 mb-5'>{t('jobs.confirmClearAll', '请选择清空方式：')}</p>
             <div className='space-y-3'>
               <button onClick={handleClearAllForce} className='w-full btn btn-danger'>
                 {t('jobs.clearAllWithProcessing', '清空所有任务（含正在转码）')}
@@ -450,10 +448,7 @@ function Jobs() {
               <button onClick={handleClearAll} className='w-full btn btn-danger'>
                 {t('jobs.clearAllQueuedOnly', '只清空队列任务')}
               </button>
-              <button
-                onClick={() => setConfirmAction(null)}
-                className='w-full btn btn-secondary'
-              >
+              <button onClick={() => setConfirmAction(null)} className='w-full btn btn-secondary'>
                 {t('common.cancel', '取消')}
               </button>
             </div>
