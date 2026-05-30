@@ -232,7 +232,7 @@ function Jobs() {
           {filteredJobs.map(job => (
             <div
               key={job.id}
-              className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-[#f5e4c8]/20' : ''}`}
+              className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-[#fbbf24]/25' : ''}`}
             >
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>

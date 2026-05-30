@@ -207,7 +207,7 @@ function Dashboard() {
                     to={`/jobs/${job.id}`}
                     className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
                       job.status === 'processing'
-                        ? 'bg-[#f5e4c8]/20'
+                        ? 'bg-[#fbbf24]/25'
                         : 'bg-dark-700 hover:bg-dark-600'
                     }`}
                   >
