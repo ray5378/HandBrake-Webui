@@ -195,7 +195,7 @@ function Files() {
               </button>
             )}
             {showSearchResults && (
-              <div className='absolute top-full left-0 mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] overflow-y-auto min-w-[480px]'>
+              <div className='absolute top-full left-0 sm:right-0 sm:left-auto mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] overflow-y-auto min-w-[260px] sm:min-w-[480px] max-w-[90vw]'>
                 {searchLoading ? (
                   <div className='p-4 text-center text-gray-400 text-sm'>{t('common.loading')}</div>
                 ) : searchResults.directories.length === 0 && searchResults.files.length === 0 ? (
@@ -216,8 +216,8 @@ function Files() {
                           >
                             <FolderOpen className='w-5 h-5 text-warning shrink-0' />
                             <div className='flex-1 min-w-0'>
-                              <p className='text-white text-sm truncate'>{dir.name}</p>
-                              <p className='text-gray-500 text-xs truncate'>{dir.path}</p>
+                              <p className='text-white text-sm break-all whitespace-normal'>{dir.name}</p>
+                              <p className='text-gray-500 text-xs break-all whitespace-normal'>{dir.path}</p>
                             </div>
                           </button>
                         ))}
@@ -237,8 +237,8 @@ function Files() {
                           >
                             <Video className='w-5 h-5 text-primary shrink-0' />
                             <div className='flex-1 min-w-0'>
-                              <p className='text-white text-sm truncate'>{file.name}</p>
-                              <p className='text-gray-500 text-xs truncate'>
+                              <p className='text-white text-sm break-all whitespace-normal'>{file.name}</p>
+                              <p className='text-gray-500 text-xs break-all whitespace-normal'>
                                 {file.path}
                                 <span className='ml-2'>{formatFileSize(file.size)}</span>
                               </p>
