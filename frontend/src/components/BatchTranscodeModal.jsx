@@ -32,10 +32,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     '.' + (directory || '').split('.').pop()?.toLowerCase()
   );
   const [presets, setPresets] = useState([]);
-  const [lastUsedPresetId, setLastUsedPresetId] = useLocalStorage(
-    'handbrake_last_used_preset',
-    ''
-  );
+  const [lastUsedPresetId, setLastUsedPresetId] = useLocalStorage('handbrake_last_used_preset', '');
   const [selectedPreset, setSelectedPreset] = useState('');
   const [lastOutputDir, setLastOutputDir] = useLocalStorage(
     'handbrake_last_output_dir',
@@ -88,11 +85,15 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     try {
       const presetsRes = await api.get('/presets', { signal });
       const allPresets = presetsRes.data.data.presets;
-      
+
       // 将自定义预设排在最上面，内置预设按名称排序
-      const customPresets = allPresets.filter(p => !p.isBuiltIn).sort((a, b) => a.name.localeCompare(b.name));
-      const builtInPresets = allPresets.filter(p => p.isBuiltIn).sort((a, b) => a.name.localeCompare(b.name));
-      
+      const customPresets = allPresets
+        .filter(p => !p.isBuiltIn)
+        .sort((a, b) => a.name.localeCompare(b.name));
+      const builtInPresets = allPresets
+        .filter(p => p.isBuiltIn)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
       const sortedPresets = [...customPresets, ...builtInPresets];
       setPresets(sortedPresets);
 
@@ -141,7 +142,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setError('请选择输出目录');
       return;
     }
-    
+
     if (!selectedPreset) {
       setError('请选择转码预设');
       return;
