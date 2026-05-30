@@ -239,7 +239,7 @@ function Jobs() {
             className='btn btn-danger inline-flex items-center space-x-2'
           >
             <AlertTriangle className='w-4 h-4' />
-            <span>{t('jobs.clearAll') || '清空任务队列'}</span>
+            <span>{t('jobs.clearAll') || '清理任务'}</span>
           </button>
           <button
             onClick={() => setConfirmAction('clearHistory')}
