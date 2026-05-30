@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, FolderOpen, ListTodo, Settings, Layers, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -10,6 +10,18 @@ function Sidebar({ isOpen, setIsOpen }) {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClick = e => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const navItems = [
     { path: '/', icon: Home, label: t('nav.dashboard') },
@@ -77,30 +89,39 @@ function Sidebar({ isOpen, setIsOpen }) {
             ))}
           </nav>
 
-          <div className='p-4 border-t border-dark-700'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='flex items-center space-x-2'>
+          <div className='p-4 border-t border-dark-700 space-y-3'>
+            <div className='relative' ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className='flex items-center space-x-2 w-full'
+              >
                 <div className='w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center'>
                   <span className='text-primary text-sm font-medium'>
                     {user?.username?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <div className='min-w-0'>
+                <div className='min-w-0 text-left'>
                   <p className='text-sm font-medium text-white truncate'>{user?.username}</p>
                   <p className='text-xs text-gray-400 truncate'>{user?.role}</p>
                 </div>
-              </div>
+              </button>
+
+              {showUserMenu && (
+                <div className='absolute bottom-full left-0 right-0 mb-2 bg-dark-700 rounded-lg border border-dark-600 shadow-lg overflow-hidden'>
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      handleLogout();
+                    }}
+                    className='flex items-center space-x-2 w-full px-4 py-3 text-gray-300 hover:bg-dark-600 hover:text-white transition-colors'
+                  >
+                    <LogOut className='w-4 h-4' />
+                    <span className='text-sm'>{t('nav.logout')}</span>
+                  </button>
+                </div>
+              )}
             </div>
-            <div className='mb-3'>
-              <LanguageSwitcher />
-            </div>
-            <button
-              onClick={handleLogout}
-              className='flex items-center space-x-2 text-gray-400 hover:text-white transition-colors'
-            >
-              <LogOut className='w-4 h-4' />
-              <span>{t('nav.logout')}</span>
-            </button>
+            <LanguageSwitcher />
           </div>
         </div>
       </aside>
