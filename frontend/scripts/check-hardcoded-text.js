@@ -2,6 +2,8 @@ import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 const CJK_RE = /[\u4e00-\u9fff]/;
+const UI_TEXT_RE = />([^<]{4,})</;
+
 const IGNORE_DIRS = ['node_modules', 'dist', 'i18n'];
 const IGNORE_FILES = [
   'src/utils/format.js',
@@ -42,11 +44,8 @@ for (const file of files) {
     const lineNum = i + 1;
     const prevLine = i > 0 ? lines[i - 1] : '';
 
-    // Track multi-line t() calls regardless of CJK content
     if (inTCall) {
       if (/\)/.test(line)) inTCall = false;
-      if (!CJK_RE.test(line)) continue;
-      // Line has CJK but we're inTCall, skip it
       continue;
     }
 
@@ -55,50 +54,49 @@ for (const file of files) {
       continue;
     }
 
-    if (!CJK_RE.test(line)) continue;
-
     const trimmed = line.trimStart();
     if (trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
     if (/^\s*(import|export)\s/.test(line)) continue;
 
-    // Check if previous line ends with `||` (fallback continuation)
     if (/\|\|\s*$/.test(prevLine)) continue;
 
-    // Single-line t('key', 'chinese') calls
-    if (/t\s*\(\s*['"][^'"]*['"]\s*,\s*['"][^'"]*[\u4e00-\u9fff][^'"]*['"]\s*\)/.test(line)) continue;
+    if (/\w+\s*(>=|<=)\s*\w+/.test(line)) continue;
 
-    // Single-line t('key') || 'chinese' calls
-    if (/t\s*\(\s*['"][^'"]*['"]\s*\)\s*\|\|\s*['"][^'"]*[\u4e00-\u9fff][^'"]*['"]/.test(line)) continue;
+    // Check for hardcoded English UI text between JSX tags
+    if (UI_TEXT_RE.test(line)) {
+      const text = line.match(UI_TEXT_RE)[1].trim();
+      if (/^\{/.test(text) && /\}$/.test(text)) continue;
+      if (/^\{[\s\S]*\}\s*[a-zA-Z%\/]+\s*$/.test(text)) continue;
 
-    // Skip filesystem paths containing Chinese (e.g. '/drive/转码/转码后')
-    if (/['"`][^'"`]*\/[^'"`]*[\u4e00-\u9fff][^'"`]*['"`]/.test(line)) continue;
+      const withoutT = text.replace(/t\s*\(\s*['"][\s\S]*?['"]\s*(,\s*['"][\s\S]*?['"]\s*)?\)/g, '').trim();
+      if (!withoutT || withoutT.length < 4) continue;
+      if (!/[A-Za-z]{3,}/.test(withoutT)) continue;
+      if (/^[\d%\-+.\s:]+$/.test(withoutT)) continue;
 
-    // Check for remaining Chinese in backtick strings
-    if (/`[^`]*[\u4e00-\u9fff][^`]*`/.test(line)) {
       console.log(`${relPath}:${lineNum}: ${line.trim()}`);
       exitCode = 1;
       continue;
     }
 
-    // Check for remaining Chinese in quoted strings
-    if (/['"][^'"]*[\u4e00-\u9fff][^'"]*['"]/.test(line)) {
-      console.log(`${relPath}:${lineNum}: ${line.trim()}`);
-      exitCode = 1;
-      continue;
-    }
+    // Check for hardcoded Chinese text
+    if (CJK_RE.test(line)) {
+      if (/['"`][^'"`]*\/[^'"`]*[\u4e00-\u9fff][^'"`]*['"`]/.test(line)) continue;
+      if (/t\s*\(\s*['"][^'"]*['"]\s*,\s*['"][^'"]*[\u4e00-\u9fff][^'"]*['"]\s*\)/.test(line)) continue;
+      if (/t\s*\(\s*['"][^'"]*['"]\s*\)\s*\|\|\s*['"][^'"]*[\u4e00-\u9fff][^'"]*['"]/.test(line)) continue;
 
-    // Check for Chinese in JSX text
-    if (/>([^<]*[\u4e00-\u9fff][^<]*)</.test(line)) {
-      console.log(`${relPath}:${lineNum}: ${line.trim()}`);
-      exitCode = 1;
+      if (/['"][^'"]*[\u4e00-\u9fff][^'"]*['"]/.test(line) ||
+          />([^<]*[\u4e00-\u9fff][^<]*)</.test(line)) {
+        console.log(`${relPath}:${lineNum}: ${line.trim()}`);
+        exitCode = 1;
+      }
     }
   }
 }
 
 if (exitCode === 0) {
-  console.log('No hardcoded Chinese text found');
+  console.log('No hardcoded UI text found');
 } else {
-  console.log('\nHardcoded Chinese text detected. Use t() for i18n instead.');
+  console.log('\nHardcoded UI text detected. Use t() for i18n instead.');
 }
 
 process.exit(exitCode);
