@@ -14,7 +14,7 @@ import {
   Settings
 } from 'lucide-react';
 import api from '../services/api';
-import { formatFileSize } from '../utils/format';
+import { formatFileSize, formatETA } from '../utils/format';
 
 function Dashboard() {
   const { t } = useTranslation();
@@ -220,8 +220,15 @@ function Dashboard() {
                         {getJobStatusLabel(job.status)}
                       </span>
                       {job.status === 'processing' && (
-                        <div className='text-secondary font-mono text-sm'>
-                          {job.progress.toFixed(0)}%
+                        <div className='text-right'>
+                          <div className='text-secondary font-mono text-sm'>
+                            {job.progress.toFixed(0)}%
+                          </div>
+                          {formatETA(job.eta_seconds) && (
+                            <div className='text-gray-500 text-xs'>
+                              {formatETA(job.eta_seconds)}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
