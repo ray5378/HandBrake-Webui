@@ -43,7 +43,11 @@ function Sidebar({ isOpen, setIsOpen }) {
           <div className='p-6 border-b border-dark-700'>
             <div className='flex items-center space-x-3'>
               <div className='w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden'>
-                <img src='/logo.png' alt='HandBrake Web UI' className='w-full h-full object-contain' />
+                <img
+                  src='/logo.png'
+                  alt='HandBrake Web UI'
+                  className='w-full h-full object-contain'
+                />
               </div>
               <div>
                 <h1 className='text-xl font-bold text-white'>HandBrake</h1>
