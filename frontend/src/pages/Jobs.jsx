@@ -229,18 +229,24 @@ function Jobs() {
                 <div className='flex-1 min-w-0'>
                   <div className='space-y-1 mb-2'>
                     <div className='text-gray-400 font-mono text-sm' title={job.source_file}>
-                      <span className='text-gray-500'>{t('jobs.sourceFile') || '源文件'}: </span>
+                      <span className='text-gray-500'>{t('jobs.sourceFile', '源文件')}: </span>
                       <span className='break-all'>{job.source_file}</span>
                       {job.source_file_size != null && (
                         <span className='text-gray-500 ml-3'>
-                          {t('jobs.originalSize') || '原体积'}：
+                          {t('jobs.originalSize', '原体积')}：
                           {formatFileSize(job.source_file_size)}
                         </span>
                       )}
                     </div>
                     <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
-                      <span className='text-gray-500'>{t('jobs.outputFile')}: </span>
+                      <span className='text-gray-500'>{t('jobs.outputFile', '输出文件')}: </span>
                       <span className='break-all'>{job.output_file}</span>
+                      {job.status === 'completed' && job.output_file_size != null && (
+                        <span className='text-gray-500 ml-3'>
+                          {t('jobs.outputSize', '转码后')}：
+                          {formatFileSize(job.output_file_size)}
+                        </span>
+                      )}
                     </div>
                   </div>
 
