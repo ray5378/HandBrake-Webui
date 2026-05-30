@@ -255,7 +255,7 @@ function Jobs() {
             {paginatedJobs.map(job => (
               <div
                 key={job.id}
-                className={`p-4 rounded-lg transition-colors ${job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700 hover:bg-dark-600'}`}
+                className={`p-4 rounded-lg transition-colors font-mono ${job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700 hover:bg-dark-600'}`}
               >
                 <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                   <div className='flex-1 min-w-0'>
