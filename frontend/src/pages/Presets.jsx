@@ -1521,6 +1521,14 @@ function Presets() {
         { id: '1080p', label: '1080p' },
         { id: '720p', label: '720p' }
       ]
+    },
+    {
+      group: '厂商',
+      tags: [
+        { id: 'intel', label: 'Intel' },
+        { id: 'amd', label: 'AMD' },
+        { id: 'nvidia', label: 'NVIDIA' }
+      ]
     }
   ];
 
@@ -1553,6 +1561,12 @@ function Presets() {
       case '720p':
         if (width == null && height == null) return false;
         return maxDim >= 600 && maxDim < 900;
+      case 'intel':
+        return codec?.includes('qsv') || false;
+      case 'nvidia':
+        return codec?.includes('nvenc') || false;
+      case 'amd':
+        return codec?.includes('vce') || false;
       default:
         return false;
     }
