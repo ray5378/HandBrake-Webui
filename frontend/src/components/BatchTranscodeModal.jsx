@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   X,
   Video,
@@ -8,7 +8,8 @@ import {
   FolderOpen,
   ChevronRight,
   GitBranch,
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -50,6 +51,11 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [presetSearch, setPresetSearch] = useState('');
+  const [showPresetDropdown, setShowPresetDropdown] = useState(false);
+  const [presetHighlightIdx, setPresetHighlightIdx] = useState(-1);
+  const presetInputRef = useRef(null);
+  const presetDropdownRef = useRef(null);
   const abortRef = useRef(null);
   const successTimeoutRef = useRef(null);
 
@@ -224,6 +230,43 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   );
 
   const treeData = useMemo(() => buildTree(sourceTree), [buildTree, sourceTree]);
+
+  const filteredPresets = useMemo(() => {
+    if (!presetSearch.trim()) return presets;
+    const q = presetSearch.toLowerCase();
+    return presets.filter(
+      p =>
+        p.name.toLowerCase().includes(q) ||
+        (p.description && p.description.toLowerCase().includes(q))
+    );
+  }, [presets, presetSearch]);
+
+  const selectedPresetName = useMemo(() => {
+    const p = presets.find(pre => pre.id === selectedPreset);
+    return p ? p.name : '';
+  }, [presets, selectedPreset]);
+
+  const handleSelectPreset = id => {
+    setSelectedPreset(id);
+    setPresetSearch('');
+    setShowPresetDropdown(false);
+  };
+
+  useEffect(() => {
+    if (!showPresetDropdown) return;
+    const handleClick = e => {
+      if (
+        presetInputRef.current &&
+        !presetInputRef.current.contains(e.target) &&
+        presetDropdownRef.current &&
+        !presetDropdownRef.current.contains(e.target)
+      ) {
+        setShowPresetDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showPresetDropdown]);
 
   const renderTree = (node, prefix = '', depth = 0) => {
     const entries = Object.entries(node).sort(([a], [b]) => a.localeCompare(b));
@@ -433,18 +476,86 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                 <div>
                   <label className='label mb-2'>选择预设</label>
                   {presets.length > 0 ? (
-                    <select
-                      value={selectedPreset}
-                      onChange={e => setSelectedPreset(e.target.value)}
-                      className='input'
-                    >
-                      {presets.map(preset => (
-                        <option key={preset.id} value={preset.id}>
-                          {preset.name} - {preset.description}
-                          {!preset.isBuiltIn && ' (自定义)'}
-                        </option>
-                      ))}
-                    </select>
+                    <div className='relative'>
+                      <div
+                        ref={presetInputRef}
+                        className='input flex items-center cursor-text'
+                        onClick={() => {
+                          setShowPresetDropdown(true);
+                          presetInputRef.current?.querySelector('input')?.focus();
+                        }}
+                      >
+                        <input
+                          type='text'
+                          value={showPresetDropdown ? presetSearch : selectedPresetName}
+                          onChange={e => {
+                            setPresetSearch(e.target.value);
+                            setShowPresetDropdown(true);
+                            setPresetHighlightIdx(-1);
+                          }}
+                          onFocus={() => {
+                            setPresetSearch('');
+                            setShowPresetDropdown(true);
+                          }}
+                          onKeyDown={e => {
+                            const filtered = filteredPresets;
+                            if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              setPresetHighlightIdx(prev =>
+                                prev < filtered.length - 1 ? prev + 1 : 0
+                              );
+                            } else if (e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              setPresetHighlightIdx(prev =>
+                                prev > 0 ? prev - 1 : filtered.length - 1
+                              );
+                            } else if (e.key === 'Enter' && presetHighlightIdx >= 0) {
+                              e.preventDefault();
+                              handleSelectPreset(filtered[presetHighlightIdx].id);
+                            } else if (e.key === 'Escape') {
+                              setShowPresetDropdown(false);
+                            }
+                          }}
+                          className='bg-transparent border-none outline-none text-white flex-1 min-w-0'
+                          placeholder='输入搜索预设...'
+                        />
+                        <ChevronDown className='w-4 h-4 text-gray-400 shrink-0' />
+                      </div>
+                      {showPresetDropdown && (
+                        <div
+                          ref={presetDropdownRef}
+                          className='absolute z-50 left-0 right-0 mt-1 bg-dark-700 border border-dark-600 rounded-lg max-h-60 overflow-y-auto shadow-xl'
+                        >
+                          {filteredPresets.length > 0 ? (
+                            filteredPresets.map((preset, idx) => (
+                              <button
+                                key={preset.id}
+                                type='button'
+                                onMouseDown={() => handleSelectPreset(preset.id)}
+                                onMouseEnter={() => setPresetHighlightIdx(idx)}
+                                className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between ${
+                                  idx === presetHighlightIdx
+                                    ? 'bg-primary/20 text-primary'
+                                    : 'text-gray-300 hover:bg-dark-600'
+                                }`}
+                              >
+                                <span className='truncate'>
+                                  {preset.name}
+                                  {!preset.isBuiltIn && (
+                                    <span className='text-xs text-gray-500 ml-1'>(自定义)</span>
+                                  )}
+                                </span>
+                                <span className='text-xs text-gray-500 shrink-0 ml-2'>
+                                  {preset.description}
+                                </span>
+                              </button>
+                            ))
+                          ) : (
+                            <div className='px-3 py-2 text-sm text-gray-500'>无匹配预设</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <p className='text-gray-400'>暂无预设可用</p>
                   )}

@@ -11,7 +11,8 @@ import {
   Headphones,
   Subtitles,
   BookOpen,
-  Tag
+  Tag,
+  Search
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -52,6 +53,7 @@ function Presets() {
     description: '',
     settings: getDefaultPresetSettings()
   });
+  const [presetFilter, setPresetFilter] = useState('');
 
   useEffect(() => {
     fetchPresets();
@@ -1427,6 +1429,16 @@ function Presets() {
     }
   }, [activeTab, formData, t]);
 
+  const filteredPresets = useMemo(() => {
+    if (!presetFilter.trim()) return presets;
+    const q = presetFilter.toLowerCase();
+    return presets.filter(
+      p =>
+        p.name.toLowerCase().includes(q) ||
+        (p.description && p.description.toLowerCase().includes(q))
+    );
+  }, [presets, presetFilter]);
+
   return (
     <div className='space-y-6'>
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
@@ -1435,23 +1447,36 @@ function Presets() {
           <p className='text-gray-400 mt-1'>{t('presets.subtitle')}</p>
         </div>
 
-        <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className='btn btn-primary inline-flex items-center space-x-2'
-        >
-          <Plus className='w-4 h-4' />
-          <span>{t('presets.createPreset')}</span>
-        </button>
+        <div className='flex items-center gap-3'>
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500' />
+            <input
+              type='text'
+              value={presetFilter}
+              onChange={e => setPresetFilter(e.target.value)}
+              className='input pl-9 py-2 text-sm w-48 sm:w-56'
+              placeholder='搜索预设...'
+            />
+          </div>
+
+          <button
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            className='btn btn-primary inline-flex items-center space-x-2 shrink-0'
+          >
+            <Plus className='w-4 h-4' />
+            <span>{t('presets.createPreset')}</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {presets.map(preset => (
+          {filteredPresets.map(preset => (
             <div key={preset.id} className='card hover:border-primary/50 transition-colors'>
               <div className='flex items-start justify-between mb-3'>
                 <div className='flex items-center space-x-2'>
@@ -1509,6 +1534,9 @@ function Presets() {
               )}
             </div>
           ))}
+          {filteredPresets.length === 0 && (
+            <div className='col-span-full text-center py-12 text-gray-500'>无匹配预设</div>
+          )}
         </div>
       )}
 
