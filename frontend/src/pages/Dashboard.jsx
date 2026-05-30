@@ -205,10 +205,8 @@ function Dashboard() {
                   <Link
                     key={job.id}
                     to={`/jobs/${job.id}`}
-                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                      job.status === 'processing'
-                        ? 'bg-[#fbbf24]/25'
-                        : 'bg-dark-700 hover:bg-dark-600'
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors bg-dark-700 hover:bg-dark-600 ${
+                      job.status === 'processing' ? 'ring-1 ring-[#fbbf24]/60' : ''
                     }`}
                   >
                     <div className='flex-1 min-w-0'>
