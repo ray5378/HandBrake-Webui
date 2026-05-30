@@ -75,15 +75,24 @@ function Jobs() {
   }, [jobs]);
 
   // 根据是否有活动任务动态调整轮询频率
-  const hasActiveTasks = useMemo(() => {
-    return jobs.some(job => job.status === 'processing' || job.status === 'queued');
+  const hasProcessing = useMemo(() => {
+    return jobs.some(job => job.status === 'processing');
+  }, [jobs]);
+
+  const hasQueued = useMemo(() => {
+    return jobs.some(job => job.status === 'queued');
   }, [jobs]);
 
   useEffect(() => {
     fetchJobs();
 
-    // 有活动任务时每10秒轮询，无活动任务时每60秒轮询
-    const intervalTime = hasActiveTasks ? 10000 : 60000;
+    // processing 时每2秒轮询，仅有队列时每10秒，无活动时每60秒
+    let intervalTime = 60000;
+    if (hasProcessing) {
+      intervalTime = 2000;
+    } else if (hasQueued) {
+      intervalTime = 10000;
+    }
 
     intervalRef.current = setInterval(fetchJobs, intervalTime);
 
@@ -91,7 +100,7 @@ function Jobs() {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [fetchJobs, hasActiveTasks]);
+  }, [fetchJobs, hasProcessing, hasQueued]);
 
   const handleCancel = async jobId => {
     setConfirmJobAction({ type: 'cancel', jobId });
@@ -292,7 +301,7 @@ function Jobs() {
                       </div>
                       <div className='w-full bg-dark-700 rounded-full h-2 overflow-hidden'>
                         <div
-                          className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all'
+                          className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
                           style={{ width: `${job.progress}%` }}
                         />
                       </div>

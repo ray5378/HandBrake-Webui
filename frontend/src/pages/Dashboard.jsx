@@ -28,15 +28,24 @@ function Dashboard() {
   const intervalRef = useRef(null);
 
   // 根据是否有活动任务动态调整轮询频率
-  const hasActiveTasks = useMemo(() => {
-    return stats ? stats.queued > 0 || stats.processing > 0 : false;
+  const hasProcessingTasks = useMemo(() => {
+    return stats ? stats.processing > 0 : false;
+  }, [stats]);
+
+  const hasQueuedTasks = useMemo(() => {
+    return stats ? stats.queued > 0 : false;
   }, [stats]);
 
   useEffect(() => {
     fetchDashboardData();
 
-    // 有活动任务时每30秒轮询，无活动任务时每120秒轮询
-    const intervalTime = hasActiveTasks ? 30000 : 120000;
+    // processing 时每2秒轮询，仅有队列时每30秒，无活动时每120秒
+    let intervalTime = 120000;
+    if (hasProcessingTasks) {
+      intervalTime = 2000;
+    } else if (hasQueuedTasks) {
+      intervalTime = 30000;
+    }
 
     intervalRef.current = setInterval(fetchDashboardData, intervalTime);
 
@@ -44,7 +53,7 @@ function Dashboard() {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [hasActiveTasks]);
+  }, [hasProcessingTasks, hasQueuedTasks]);
 
   const fetchDashboardData = async () => {
     if (abortRef.current) abortRef.current.abort();
