@@ -147,6 +147,8 @@
     "clearCache": "清空转码缓存",
     "confirmClearCache": "确定要清空转码缓存目录吗？正在进行的转码任务可能会受到影响。",
     "confirmClearAllTitle": "清空队列",
+    "clearAllWithProcessing": "清空所有任务（含正在转码）",
+    "clearAllQueuedOnly": "只清空队列任务",
     "confirmClearHistoryTitle": "清理任务历史",
     "confirmClearCacheTitle": "清空转码缓存",
     "skipped": "已跳过",

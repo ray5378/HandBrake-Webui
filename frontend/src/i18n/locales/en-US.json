@@ -147,6 +147,8 @@
     "clearCache": "Clear Transcode Cache",
     "confirmClearCache": "Are you sure you want to clear the transcode cache directory? Active transcoding jobs may be affected.",
     "confirmClearAllTitle": "Clear Queue",
+    "clearAllWithProcessing": "Clear All (Including Running)",
+    "clearAllQueuedOnly": "Clear Queued Only",
     "confirmClearHistoryTitle": "Clear Job History",
     "confirmClearCacheTitle": "Clear Transcode Cache",
     "skipped": "Skipped",
