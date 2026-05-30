@@ -151,7 +151,7 @@ function Jobs() {
             className='btn btn-danger inline-flex items-center space-x-2'
           >
             <AlertTriangle className='w-4 h-4' />
-            <span>{t('jobs.clearAll') || '清理所有任务'}</span>
+            <span>{t('jobs.clearAll') || '清空任务队列'}</span>
           </button>
           <button
             onClick={() => setConfirmAction('clearHistory')}
@@ -304,10 +304,10 @@ function Jobs() {
 
       <ConfirmDialog
         open={confirmAction === 'clearAll'}
-        title={t('jobs.confirmClearAllTitle') || '清理所有任务'}
+        title={t('jobs.confirmClearAllTitle') || '清空任务队列'}
         message={
           t('jobs.confirmClearAll') ||
-          '确定要清理所有任务吗？包括正在处理中的任务将被取消。此操作不可撤销。'
+          '确定要清空任务队列吗？包括正在处理中的任务将被取消。此操作不可撤销。'
         }
         confirmText={t('common.confirm') || '确认清理'}
         cancelText={t('common.cancel') || '取消'}
