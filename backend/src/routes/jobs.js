@@ -392,7 +392,7 @@ router.get('/stats/summary', authenticateToken, (req, res, next) => {
           COUNT(*) as total,
           SUM(CASE WHEN status = 'queued' THEN 1 ELSE 0 END) as queued,
           SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
-          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+          SUM(CASE WHEN status IN ('completed', 'skipped') THEN 1 ELSE 0 END) as completed,
           SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
           SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
           SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) as skipped

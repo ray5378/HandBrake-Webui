@@ -44,6 +44,8 @@ function Jobs() {
   // 客户端筛选
   const filteredJobs = useMemo(() => {
     if (filter === 'all') return jobs;
+    if (filter === 'completed')
+      return jobs.filter(job => job.status === 'completed' || job.status === 'skipped');
     return jobs.filter(job => job.status === filter);
   }, [jobs, filter]);
 
@@ -59,6 +61,7 @@ function Jobs() {
     };
     for (const job of jobs) {
       if (Object.hasOwn(counts, job.status)) counts[job.status]++;
+      if (job.status === 'skipped') counts.completed++;
     }
     return counts;
   }, [jobs]);
