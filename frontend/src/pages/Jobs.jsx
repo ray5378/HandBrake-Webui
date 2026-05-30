@@ -16,6 +16,7 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import { formatFileSize } from '../utils/format';
 
 function Jobs() {
   const { t } = useTranslation();
@@ -205,18 +206,20 @@ function Jobs() {
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>
                   <div className='space-y-1 mb-2'>
-                    <p className='text-white font-mono text-sm truncate' title={job.source_file}>
+                    <p className='text-gray-400 font-mono text-sm truncate' title={job.source_file}>
+                      <span className='text-gray-500'>{t('jobs.sourceFile') || '源文件'}: </span>
                       {job.source_file}
+                      {job.source_file_size != null && (
+                        <span className='text-gray-500 ml-3'>
+                          {t('jobs.originalSize') || '原体积'}：
+                          {formatFileSize(job.source_file_size)}
+                        </span>
+                      )}
                     </p>
-                    <div className='flex items-center space-x-2'>
-                      <span className='text-xs text-gray-500'>{t('jobs.outputFile')}:</span>
-                      <span
-                        className='text-primary font-mono text-xs truncate'
-                        title={job.output_file}
-                      >
-                        {job.output_file}
-                      </span>
-                    </div>
+                    <p className='text-gray-400 font-mono text-sm truncate' title={job.output_file}>
+                      <span className='text-gray-500'>{t('jobs.outputFile')}: </span>
+                      {job.output_file}
+                    </p>
                   </div>
 
                   <div className='flex items-center space-x-3 mb-1'>

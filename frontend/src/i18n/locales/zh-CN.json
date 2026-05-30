@@ -135,6 +135,7 @@
     "noJobs": "暂无任务",
     "queue": "队列",
     "history": "历史",
+    "sourceFile": "源文件",
     "clearAll": "清空任务队列",
     "confirmClearAll": "确定要清空任务队列吗？\n\n正在处理中的任务也会被取消。",
     "clearHistory": "清空历史",
