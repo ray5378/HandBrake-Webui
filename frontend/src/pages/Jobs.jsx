@@ -50,7 +50,7 @@ function Jobs() {
   const statusCounts = useMemo(() => {
     const counts = { all: jobs.length, queued: 0, processing: 0, completed: 0, failed: 0 };
     for (const job of jobs) {
-      if (counts.hasOwnProperty(job.status)) counts[job.status]++;
+      if (Object.hasOwn(counts, job.status)) counts[job.status]++;
     }
     return counts;
   }, [jobs]);
@@ -227,8 +227,11 @@ function Jobs() {
                       <span className='text-primary/60'>{t('jobs.outputFile', '输出文件')}: </span>
                       <span className='break-all'>{job.output_file}</span>
                       {job.status === 'completed' && job.output_file_size != null && (
-                        <span className='text-primary/60 ml-3'>
-                          {t('jobs.outputSize', '转码后')}：{formatFileSize(job.output_file_size)}
+                        <span className='text-primary ml-3'>
+                          <span className='text-primary/60'>
+                            {t('jobs.outputSize', '转码后')}：
+                          </span>
+                          {formatFileSize(job.output_file_size)}
                         </span>
                       )}
                     </div>
