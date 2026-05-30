@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FolderOpen,
-  Upload,
-  Download,
   Trash2,
   Video,
   RefreshCw,
@@ -22,7 +20,6 @@ function Files() {
   const [currentPath, setCurrentPath] = useState('/source');
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchFiles();
@@ -43,32 +40,6 @@ function Files() {
     }
   };
 
-  const handleUpload = async e => {
-    const uploadedFiles = e.target.files;
-    if (!uploadedFiles.length) return;
-
-    setUploading(true);
-
-    try {
-      for (const file of uploadedFiles) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('directory', currentPath);
-
-        await api.post('/files/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      }
-
-      fetchFiles();
-    } catch (error) {
-      console.error('Upload failed:', error);
-    } finally {
-      setUploading(false);
-      e.target.value = '';
-    }
-  };
-
   const handleDelete = async filePath => {
     if (!confirm('确定要删除这个文件吗？')) return;
 
@@ -77,25 +48,6 @@ function Files() {
       fetchFiles();
     } catch (error) {
       console.error('Delete failed:', error);
-    }
-  };
-
-  const handleDownload = async (filePath, fileName) => {
-    try {
-      const response = await api.get('/files/download', {
-        params: { path: filePath },
-        responseType: 'blob'
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error('Download failed:', error);
     }
   };
 
@@ -171,18 +123,9 @@ function Files() {
             </button>
           </div>
 
-          <label className="btn btn-primary cursor-pointer inline-flex items-center space-x-2">
-            <Upload className="w-4 h-4" />
-            <span>上传</span>
-            <input
-              type="file"
-              accept="video/*"
-              multiple
-              onChange={handleUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
+          <button onClick={fetchFiles} className="btn btn-secondary">
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -249,12 +192,6 @@ function Files() {
                           转码
                         </button>
                         <button
-                          onClick={() => handleDownload(file.path, file.name)}
-                          className="btn btn-secondary text-xs py-1 px-3"
-                        >
-                          <Download className="w-3 h-3" />
-                        </button>
-                        <button
                           onClick={() => handleDelete(file.path)}
                           className="btn btn-danger text-xs py-1 px-3"
                         >
@@ -283,12 +220,6 @@ function Files() {
                           转码
                         </button>
                         <button
-                          onClick={() => handleDownload(file.path, file.name)}
-                          className="btn btn-secondary text-xs"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                        <button
                           onClick={() => handleDelete(file.path)}
                           className="btn btn-danger text-xs"
                         >
@@ -304,19 +235,10 @@ function Files() {
             <div className="text-center py-12">
               <Video className="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400">暂无文件</p>
-              <p className="text-sm text-gray-500 mt-1">上传视频文件开始转码</p>
+              <p className="text-sm text-gray-500 mt-1">请将视频文件放入源目录</p>
             </div>
           )}
         </>
-      )}
-
-      {uploading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-dark-800 rounded-lg p-6 text-center">
-            <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-white">上传中...</p>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -6,7 +6,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Download,
   Trash2,
   AlertCircle
 } from 'lucide-react';
@@ -60,28 +59,6 @@ function JobDetail() {
       window.location.href = '/jobs';
     } catch (error) {
       console.error('Failed to delete job:', error);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!job?.output_file) return;
-
-    try {
-      const response = await api.get('/files/download', {
-        params: { path: job.output_file },
-        responseType: 'blob'
-      });
-
-      const fileName = job.output_file.split('/').pop();
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error('Download failed:', error);
     }
   };
 
@@ -146,13 +123,6 @@ function JobDetail() {
               <button onClick={handleCancel} className="btn btn-danger">
                 <XCircle className="w-4 h-4" />
                 <span className="hidden sm:inline ml-2">取消</span>
-              </button>
-            )}
-
-            {job.status === 'completed' && (
-              <button onClick={handleDownload} className="btn btn-primary">
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">下载</span>
               </button>
             )}
 

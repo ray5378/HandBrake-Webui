@@ -21,25 +21,6 @@ const PASSWORD_CONFIG = {
 };
 
 /**
- * 上传配置
- */
-const UPLOAD_CONFIG = {
-  MAX_FILE_SIZE: 10 * 1024 * 1024 * 1024, // 10GB
-  ALLOWED_EXTENSIONS: [
-    '.mp4',
-    '.mkv',
-    '.avi',
-    '.mov',
-    '.wmv',
-    '.flv',
-    '.webm',
-    '.m4v',
-    '.mpg',
-    '.mpeg'
-  ]
-};
-
-/**
  * 任务状态枚举
  */
 const JOB_STATUS = {
@@ -93,7 +74,6 @@ const RESPONSE_MESSAGES = {
     NOT_FOUND: '任务不存在'
   },
   FILE: {
-    UPLOAD_SUCCESS: '文件上传成功',
     DELETE_SUCCESS: '文件删除成功',
     NOT_FOUND: '文件不存在'
   }
@@ -102,7 +82,6 @@ const RESPONSE_MESSAGES = {
 module.exports = {
   JWT_CONFIG,
   PASSWORD_CONFIG,
-  UPLOAD_CONFIG,
   JOB_STATUS,
   USER_ROLE,
   HTTP_STATUS,

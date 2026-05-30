@@ -1,55 +1,12 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
 const { body, query } = require('express-validator');
 const config = require('../config');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
 
 const router = express.Router();
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = config.uploadDir;
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 * 1024
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedExtensions = [
-      '.mp4',
-      '.mkv',
-      '.avi',
-      '.mov',
-      '.wmv',
-      '.flv',
-      '.webm',
-      '.m4v',
-      '.mpg',
-      '.mpeg'
-    ];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowedExtensions.includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only video files are allowed.'));
-    }
-  }
-});
 
 router.get(
   '/',
@@ -60,7 +17,7 @@ router.get(
   validate,
   (req, res, next) => {
     try {
-      const directory = req.query.directory || '/source';
+      const directory = req.query.directory || config.uploadDir;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
       const offset = (page - 1) * limit;
@@ -163,24 +120,39 @@ router.get(
       }
 
       const stats = fs.statSync(filePath);
-      const ffprobe = require('child_process').execFile;
+      const { execFile } = require('child_process');
 
-      ffprobe(
+      let ffprobeProcess = null;
+      let timeoutId = null;
+      let hasResponded = false;
+
+      const fallbackResponse = () => {
+        if (!hasResponded) {
+          hasResponded = true;
+          res.json({
+            success: true,
+            data: {
+              name: path.basename(filePath),
+              path: filePath,
+              size: stats.size,
+              extension: path.extname(filePath),
+              createdAt: stats.birthtime.toISOString(),
+              modifiedAt: stats.mtime.toISOString()
+            }
+          });
+        }
+      };
+
+      ffprobeProcess = execFile(
         'ffprobe',
         ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', filePath],
+        { timeout: 10000 },
         (error, stdout) => {
+          clearTimeout(timeoutId);
+          
           if (error) {
-            return res.json({
-              success: true,
-              data: {
-                name: path.basename(filePath),
-                path: filePath,
-                size: stats.size,
-                extension: path.extname(filePath),
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString()
-              }
-            });
+            fallbackResponse();
+            return;
           }
 
           try {
@@ -188,73 +160,56 @@ router.get(
             const videoStream = info.streams.find(s => s.codec_type === 'video');
             const audioStreams = info.streams.filter(s => s.codec_type === 'audio');
 
-            res.json({
-              success: true,
-              data: {
-                name: path.basename(filePath),
-                path: filePath,
-                size: stats.size,
-                extension: path.extname(filePath),
-                duration: parseFloat(info.format.duration) || 0,
-                format: info.format.format_name,
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString(),
-                video: videoStream
-                  ? {
-                      codec: videoStream.codec_name,
-                      width: videoStream.width,
-                      height: videoStream.height,
-                      fps: eval(videoStream.r_frame_rate) || 0,
-                      bitrate: parseInt(videoStream.bit_rate) || 0
-                    }
-                  : null,
-                audio: audioStreams.map(a => ({
-                  codec: a.codec_name,
-                  channels: a.channels,
-                  language: a.tags?.language || 'unknown',
-                  bitrate: parseInt(a.bit_rate) || 0
-                }))
-              }
-            });
+            if (!hasResponded) {
+              hasResponded = true;
+              res.json({
+                success: true,
+                data: {
+                  name: path.basename(filePath),
+                  path: filePath,
+                  size: stats.size,
+                  extension: path.extname(filePath),
+                  duration: parseFloat(info.format.duration) || 0,
+                  format: info.format.format_name,
+                  createdAt: stats.birthtime.toISOString(),
+                  modifiedAt: stats.mtime.toISOString(),
+                  video: videoStream
+                    ? {
+                        codec: videoStream.codec_name,
+                        width: videoStream.width,
+                        height: videoStream.height,
+                        fps: videoStream.r_frame_rate
+                          ? videoStream.r_frame_rate.split('/').reduce((a, b) => a / b, 0)
+                          : 0,
+                        bitrate: parseInt(videoStream.bit_rate) || 0
+                      }
+                    : null,
+                  audio: audioStreams.map(a => ({
+                    codec: a.codec_name,
+                    channels: a.channels,
+                    language: a.tags?.language || 'unknown',
+                    bitrate: parseInt(a.bit_rate) || 0
+                  }))
+                }
+              });
+            }
           } catch (parseError) {
-            res.json({
-              success: true,
-              data: {
-                name: path.basename(filePath),
-                path: filePath,
-                size: stats.size,
-                extension: path.extname(filePath),
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString()
-              }
-            });
+            fallbackResponse();
           }
         }
       );
+
+      timeoutId = setTimeout(() => {
+        if (ffprobeProcess && !hasResponded) {
+          ffprobeProcess.kill('SIGTERM');
+          fallbackResponse();
+        }
+      }, 12000);
     } catch (error) {
       next(error);
     }
   }
 );
-
-router.post('/upload', authenticateToken, upload.single('file'), (req, res, next) => {
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      error: 'No file uploaded'
-    });
-  }
-
-  res.status(201).json({
-    success: true,
-    data: {
-      name: req.file.filename,
-      path: req.file.path,
-      size: req.file.size,
-      destination: req.file.destination
-    }
-  });
-});
 
 router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, res, next) => {
   try {
@@ -268,12 +223,10 @@ router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, 
     }
 
     const outputDir = path.resolve(config.outputDir);
+    const sourceDir = path.resolve(config.uploadDir);
     const fileToDelete = path.resolve(filePath);
 
-    if (
-      !fileToDelete.startsWith(outputDir) &&
-      !fileToDelete.startsWith(path.resolve(config.uploadDir))
-    ) {
+    if (!fileToDelete.startsWith(outputDir) && !fileToDelete.startsWith(sourceDir)) {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
@@ -291,18 +244,56 @@ router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, 
   }
 });
 
-router.get('/download', authenticateToken, query('path').notEmpty(), validate, (req, res, next) => {
-  try {
-    const { path: filePath } = req.query;
+router.get(
+  '/tree',
+  authenticateToken,
+  query('path').notEmpty(),
+  validate,
+  async (req, res, next) => {
+    try {
+      const dir = req.query.path;
+      if (!fs.existsSync(dir)) {
+        return res.json({ success: true, data: { directories: [] } });
+      }
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        success: false,
-        error: 'File not found'
-      });
+      const scanTree = async (base, relative = '', depth = 0) => {
+        if (depth > 20) {
+          return [];
+        }
+        const results = [];
+        let items;
+        try {
+          items = await fs.promises.readdir(base, { withFileTypes: true });
+        } catch (e) {
+          return [];
+        }
+        for (const item of items) {
+          if (item.isDirectory()) {
+            const relPath = relative ? `${relative}/${item.name}` : item.name;
+            results.push(relPath);
+            const sub = await scanTree(path.join(base, item.name), relPath, depth + 1);
+            results.push(...sub);
+          }
+        }
+        return results;
+      };
+
+      const directories = await scanTree(dir);
+      res.json({ success: true, data: { directories } });
+    } catch (error) {
+      next(error);
     }
+  }
+);
 
-    res.download(filePath);
+router.post('/mkdir', authenticateToken, body('path').notEmpty(), validate, (req, res, next) => {
+  try {
+    const dir = req.body.path;
+    if (fs.existsSync(dir)) {
+      return res.status(400).json({ success: false, error: '目录已存在' });
+    }
+    fs.mkdirSync(dir, { recursive: true });
+    res.json({ success: true, data: { path: dir } });
   } catch (error) {
     next(error);
   }
