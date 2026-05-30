@@ -30,8 +30,6 @@ services:
     environment:
       - NODE_ENV=production
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - PORT=52389
-      - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri
@@ -87,8 +85,6 @@ docker run -d \
   -v $(pwd)/config:/config \
   -v $(pwd)/drive:/drive \
   -e JWT_SECRET=your-super-secret-jwt-key-change-in-production \
-  -e PORT=52389 \
-  -e MAX_CONCURRENT_JOBS=2 \
   --restart unless-stopped \
   ray5378/handbrake-webui:latest
 ```
