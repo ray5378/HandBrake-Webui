@@ -19,7 +19,7 @@ function Settings() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [systemInfo, setSystemInfo] = useState(null);
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('cache');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -177,10 +177,10 @@ function Settings() {
   };
 
   const tabs = [
-    { id: 'general', label: t('settings.general'), icon: SettingsIcon },
+    { id: 'cache', label: t('settings.transcodeConfig') || '转码配置', icon: Database },
     { id: 'account', label: t('settings.account') || 'Account', icon: User },
     { id: 'storage', label: t('settings.storage'), icon: HardDrive },
-    { id: 'cache', label: t('settings.transcodeConfig') || '转码配置', icon: Database }
+    { id: 'general', label: t('settings.general'), icon: SettingsIcon }
   ];
 
   const pathParts = (browsePath || '/drive').split('/').filter(Boolean);
