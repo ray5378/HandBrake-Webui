@@ -9,6 +9,78 @@ const { validate } = require('../middleware/validator');
 const router = express.Router();
 
 router.get(
+  '/search',
+  authenticateToken,
+  query('q').notEmpty(),
+  validate,
+  async (req, res, next) => {
+    try {
+      const searchQuery = req.query.q.toLowerCase();
+      const baseDir = '/drive';
+      const results = { files: [], directories: [] };
+      const maxResults = 50;
+
+      const videoExtensions = [
+        '.mp4', '.mkv', '.avi', '.mov', '.wmv',
+        '.flv', '.webm', '.m4v', '.mpg', '.mpeg'
+      ];
+
+      const searchDir = async (dirPath, depth = 0) => {
+        if (depth > 5) return;
+        if (results.files.length + results.directories.length >= maxResults) return;
+
+        let items;
+        try {
+          items = await fsPromises.readdir(dirPath, { withFileTypes: true });
+        } catch {
+          return;
+        }
+
+        for (const item of items) {
+          if (results.files.length + results.directories.length >= maxResults) break;
+
+          const itemPath = path.join(dirPath, item.name);
+
+          if (item.isDirectory()) {
+            if (item.name.toLowerCase().includes(searchQuery)) {
+              results.directories.push({
+                name: item.name,
+                path: itemPath,
+                type: 'directory'
+              });
+            }
+            await searchDir(itemPath, depth + 1);
+          } else {
+            const ext = path.extname(item.name).toLowerCase();
+            if (videoExtensions.includes(ext) && item.name.toLowerCase().includes(searchQuery)) {
+              let stats;
+              try {
+                stats = fs.statSync(itemPath);
+              } catch {
+                continue;
+              }
+              results.files.push({
+                name: item.name,
+                path: itemPath,
+                size: stats.size,
+                type: 'video',
+                extension: ext
+              });
+            }
+          }
+        }
+      };
+
+      await searchDir(baseDir);
+
+      res.json({ success: true, data: results });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
   '/',
   authenticateToken,
   query('directory').optional(),

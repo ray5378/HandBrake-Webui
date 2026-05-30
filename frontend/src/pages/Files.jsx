@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,7 +9,8 @@ import {
   Search,
   ChevronRight,
   PlayCircle,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -28,6 +29,10 @@ function Files() {
   const [contextMenu, setContextMenu] = useState(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState(null);
+  const [searchResults, setSearchResults] = useState({ files: [], directories: [] });
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimerRef = useRef(null);
   const contextMenuRef = useRef(null);
   const abortRef = useRef(null);
 
@@ -85,6 +90,33 @@ function Files() {
     closeContextMenu();
   };
 
+  const doSearch = useCallback(async query => {
+    if (!query.trim()) {
+      setSearchResults({ files: [], directories: [] });
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const res = await api.get('/files/search', { params: { q: query } });
+      setSearchResults(res.data.data);
+      setShowSearchResults(true);
+    } catch (error) {
+      console.error('Search failed:', error);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  const handleSearchResultClick = result => {
+    setShowSearchResults(false);
+    setSearchTerm('');
+    if (result.type === 'directory') {
+      navigateToPath(result.path);
+    } else {
+      navigateToPath(result.path.substring(0, result.path.lastIndexOf('/')) || '/drive');
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = e => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target)) {
@@ -96,10 +128,7 @@ function Files() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const filteredFiles = useMemo(
-    () => files.filter(file => file.name.toLowerCase().includes(searchTerm.toLowerCase())),
-    [files, searchTerm]
-  );
+  const filteredFiles = useMemo(() => files, [files]);
 
   const pathParts = currentPath.split('/').filter(Boolean);
 
@@ -130,9 +159,99 @@ function Files() {
               type='text'
               placeholder={t('common.search') + '...'}
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className='input pl-10 w-full'
+              onChange={e => {
+                const value = e.target.value;
+                setSearchTerm(value);
+                if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                if (!value.trim()) {
+                  setSearchResults({ files: [], directories: [] });
+                  setShowSearchResults(false);
+                  return;
+                }
+                searchTimerRef.current = setTimeout(() => doSearch(value), 300);
+              }}
+              onFocus={() => {
+                if (searchTerm.trim() && (searchResults.files.length > 0 || searchResults.directories.length > 0)) {
+                  setShowSearchResults(true);
+                }
+              }}
+              onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+              className='input pl-10 w-full pr-8'
             />
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSearchResults({ files: [], directories: [] });
+                  setShowSearchResults(false);
+                  if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                }}
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-gray-500 hover:text-white transition-colors'
+              >
+                <X className='w-3.5 h-3.5' />
+              </button>
+            )}
+            {showSearchResults && (
+              <div className='absolute top-full left-0 right-0 mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] overflow-y-auto'>
+                {searchLoading ? (
+                  <div className='p-4 text-center text-gray-400 text-sm'>
+                    {t('common.loading')}
+                  </div>
+                ) : searchResults.directories.length === 0 && searchResults.files.length === 0 ? (
+                  <div className='p-4 text-center text-gray-500 text-sm'>
+                    未找到匹配的结果
+                  </div>
+                ) : (
+                  <>
+                    {searchResults.directories.length > 0 && (
+                      <div className='p-2'>
+                        <p className='text-xs text-gray-500 px-2 py-1'>
+                          {t('common.directories') || '文件夹'}
+                        </p>
+                        {searchResults.directories.map(dir => (
+                          <button
+                            key={dir.path}
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={() => handleSearchResultClick(dir)}
+                            className='w-full flex items-center space-x-3 px-2 py-2 hover:bg-dark-700 rounded transition-colors text-left'
+                          >
+                            <FolderOpen className='w-5 h-5 text-warning shrink-0' />
+                            <div className='flex-1 min-w-0'>
+                              <p className='text-white text-sm truncate'>{dir.name}</p>
+                              <p className='text-gray-500 text-xs truncate'>{dir.path}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.files.length > 0 && (
+                      <div className='p-2 pt-0'>
+                        <p className='text-xs text-gray-500 px-2 py-1'>
+                          {t('files.title') || '文件'}
+                        </p>
+                        {searchResults.files.map(file => (
+                          <button
+                            key={file.path}
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={() => handleSearchResultClick(file)}
+                            className='w-full flex items-center space-x-3 px-2 py-2 hover:bg-dark-700 rounded transition-colors text-left'
+                          >
+                            <Video className='w-5 h-5 text-primary shrink-0' />
+                            <div className='flex-1 min-w-0'>
+                              <p className='text-white text-sm truncate'>{file.name}</p>
+                              <p className='text-gray-500 text-xs truncate'>
+                                {file.path}
+                                <span className='ml-2'>{formatFileSize(file.size)}</span>
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className='flex items-center space-x-1 bg-dark-700 rounded-lg p-1 shrink-0'>
