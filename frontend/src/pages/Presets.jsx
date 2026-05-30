@@ -19,6 +19,7 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import { useToastStore } from '../stores/toastStore';
 import {
   FORMATS,
   VIDEO_CODECS,
@@ -46,6 +47,7 @@ import {
 
 function Presets() {
   const { t } = useTranslation();
+  const addToast = useToastStore(state => state.addToast);
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -90,7 +92,10 @@ function Presets() {
       fetchPresets();
     } catch (error) {
       console.error('Failed to save preset:', error);
-      alert(error.response?.data?.error || t('errors.saveFailed'));
+      addToast({
+        message: error.response?.data?.error || t('errors.saveFailed'),
+        type: 'error'
+      });
     }
   };
 
@@ -119,7 +124,10 @@ function Presets() {
       fetchPresets();
     } catch (error) {
       console.error('Failed to delete preset:', error);
-      alert(error.response?.data?.error || t('errors.deleteFailed'));
+      addToast({
+        message: error.response?.data?.error || t('errors.deleteFailed'),
+        type: 'error'
+      });
     }
     setConfirmDeletePresetId(null);
   };
@@ -164,7 +172,10 @@ function Presets() {
       }
     } catch (error) {
       console.error('Failed to copy preset:', error);
-      alert(error.response?.data?.error || '复制预设失败');
+      addToast({
+        message: error.response?.data?.error || '复制预设失败',
+        type: 'error'
+      });
     }
   };
 

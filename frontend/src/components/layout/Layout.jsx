@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
+import Toast from '../common/Toast';
+
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className='min-h-screen bg-dark-900'>
+      <Toast />
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       <div className='lg:pl-64'>
