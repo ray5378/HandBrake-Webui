@@ -8,6 +8,9 @@ const logger = require('../utils/logger');
 const activeJobs = new Map();
 let processingCount = 0;
 const lastProgressWrite = new Map();
+const jobStaleness = new Map();
+const STALE_CHECK_INTERVAL = 60 * 1000;
+const MAX_STALE_COUNT = 5;
 
 function buildHandBrakeArgs(job, settings) {
   const args = ['-i', job.source_file, '-o', job.output_file, '--json'];
@@ -612,6 +615,15 @@ async function cancelTranscode(jobId) {
     activeJobs.delete(jobId);
     processingCount = Math.max(0, processingCount - 1);
   }
+  if (config.cacheDir) {
+    const tempDir = path.join(config.cacheDir, 'handbrake-temp', jobId);
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch (e) {
+      // ignore
+    }
+  }
+  jobStaleness.delete(jobId);
   processNextJob();
 }
 
@@ -671,6 +683,87 @@ function killAllJobs() {
   }
   processingCount = 0;
 }
+
+function checkStaleJobs() {
+  if (!config.cacheDir) {
+    return;
+  }
+
+  const db = getDatabase();
+  const processingJobs = db
+    .prepare("SELECT id, started_at, progress FROM jobs WHERE status = 'processing'")
+    .all();
+
+  for (const job of processingJobs) {
+    const tempDir = path.join(config.cacheDir, 'handbrake-temp', job.id);
+    const entry = jobStaleness.get(job.id) || { lastMtime: 0, staleCount: 0 };
+
+    try {
+      if (!fs.existsSync(tempDir)) {
+        entry.staleCount++;
+      } else {
+        const items = fs.readdirSync(tempDir);
+        const tempFile = items.find(f => f !== '.' && f !== '..');
+        if (tempFile) {
+          const stats = fs.statSync(path.join(tempDir, tempFile));
+          if (stats.mtimeMs === entry.lastMtime) {
+            entry.staleCount++;
+          } else {
+            entry.staleCount = 0;
+          }
+          entry.lastMtime = stats.mtimeMs;
+        } else {
+          entry.staleCount++;
+        }
+      }
+    } catch (e) {
+      entry.staleCount++;
+    }
+
+    jobStaleness.set(job.id, entry);
+
+    if (entry.staleCount >= MAX_STALE_COUNT) {
+      try {
+        const proc = activeJobs.get(job.id);
+        if (proc) {
+          proc.kill('SIGKILL');
+          activeJobs.delete(job.id);
+          processingCount = Math.max(0, processingCount - 1);
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      } catch (e) {
+        // ignore
+      }
+
+      db.prepare(
+        "UPDATE jobs SET status = 'failed', error_log = ?, completed_at = datetime('now') WHERE id = ?"
+      ).run('转码进程已无响应 - 临时文件超过5分钟未更新', job.id);
+      jobStaleness.delete(job.id);
+      logger.warn('Job marked as failed due to staleness', { jobId: job.id });
+
+      processNextJob();
+    }
+  }
+
+  for (const [jobId] of jobStaleness) {
+    if (!processingJobs.find(j => j.id === jobId)) {
+      jobStaleness.delete(jobId);
+    }
+  }
+}
+
+function startStalenessDetector() {
+  checkStaleJobs();
+  setInterval(checkStaleJobs, STALE_CHECK_INTERVAL);
+  logger.info('Staleness detector started', { interval: '60s', maxStaleCount: MAX_STALE_COUNT });
+}
+
+startStalenessDetector();
 
 module.exports = {
   startTranscode,
