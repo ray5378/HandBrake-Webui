@@ -12,7 +12,9 @@ import {
   Subtitles,
   BookOpen,
   Tag,
-  Search
+  Search,
+  Eye,
+  Copy
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -47,6 +49,7 @@ function Presets() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPreset, setEditingPreset] = useState(null);
+  const [readOnly, setReadOnly] = useState(false);
   const [activeTab, setActiveTab] = useState('summary');
   const [formData, setFormData] = useState({
     name: '',
@@ -115,8 +118,53 @@ function Presets() {
     }
   };
 
+  const handleView = preset => {
+    setEditingPreset(preset);
+    setReadOnly(true);
+    setFormData({
+      name: preset.name,
+      description: preset.description,
+      settings: {
+        ...getDefaultPresetSettings(),
+        ...preset.settings
+      }
+    });
+    setActiveTab('summary');
+    setShowModal(true);
+  };
+
+  const handleCopy = async preset => {
+    try {
+      const res = await api.post('/presets', {
+        name: preset.name + ' - 副本',
+        description: preset.description,
+        settings: preset.settings
+      });
+      fetchPresets();
+      const newId = res.data.data?.preset?.id;
+      if (newId) {
+        setEditingPreset({ ...preset, id: newId });
+        setReadOnly(false);
+        setFormData({
+          name: preset.name + ' - 副本',
+          description: preset.description,
+          settings: {
+            ...getDefaultPresetSettings(),
+            ...preset.settings
+          }
+        });
+        setActiveTab('summary');
+        setShowModal(true);
+      }
+    } catch (error) {
+      console.error('Failed to copy preset:', error);
+      alert(error.response?.data?.error || '复制预设失败');
+    }
+  };
+
   const resetForm = () => {
     setEditingPreset(null);
+    setReadOnly(false);
     setFormData({
       name: '',
       description: '',
@@ -1515,23 +1563,37 @@ function Presets() {
                 )}
               </div>
 
-              {!preset.isBuiltIn && (
-                <div className='flex items-center space-x-2 mt-4 pt-4 border-t border-dark-700'>
-                  <button
-                    onClick={() => handleEdit(preset)}
-                    className='btn btn-secondary flex-1 text-sm flex items-center justify-center'
-                  >
-                    <Edit className='w-4 h-4' />
-                    <span className='ml-2'>{t('common.edit')}</span>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(preset.id)}
-                    className='btn btn-danger text-sm'
-                  >
-                    <Trash2 className='w-4 h-4' />
-                  </button>
-                </div>
-              )}
+              <div className='flex items-center space-x-2 mt-4 pt-4 border-t border-dark-700'>
+                <button
+                  onClick={() => handleView(preset)}
+                  className='btn btn-secondary flex-1 text-sm flex items-center justify-center'
+                >
+                  <Eye className='w-4 h-4' />
+                  <span className='ml-2'>查看</span>
+                </button>
+                <button
+                  onClick={() => handleCopy(preset)}
+                  className='btn btn-secondary text-sm flex items-center justify-center'
+                >
+                  <Copy className='w-4 h-4' />
+                </button>
+                {!preset.isBuiltIn && (
+                  <>
+                    <button
+                      onClick={() => handleEdit(preset)}
+                      className='btn btn-secondary text-sm flex items-center justify-center'
+                    >
+                      <Edit className='w-4 h-4' />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(preset.id)}
+                      className='btn btn-danger text-sm'
+                    >
+                      <Trash2 className='w-4 h-4' />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           ))}
           {filteredPresets.length === 0 && (
@@ -1546,7 +1608,11 @@ function Presets() {
             <div className='p-6 border-b border-dark-700'>
               <div className='flex items-center justify-between'>
                 <h2 className='text-2xl font-bold text-white'>
-                  {editingPreset ? t('presets.editPreset') : t('presets.createPreset')}
+                  {readOnly
+                    ? '查看预设'
+                    : editingPreset
+                      ? t('presets.editPreset')
+                      : t('presets.createPreset')}
                 </h2>
               </div>
             </div>
@@ -1576,61 +1642,78 @@ function Presets() {
               </div>
 
               <form onSubmit={handleSubmit} className='flex-1 overflow-y-auto overflow-x-auto'>
-                <div className='p-6 space-y-6'>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    <div>
-                      <label className='label'>{t('presets.presetName')}</label>
-                      <input
-                        type='text'
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className='input'
-                        placeholder={t('common.placeholder.enterPresetName')}
-                        required
-                      />
+                <fieldset disabled={readOnly} className='contents'>
+                  <div className='p-6 space-y-6'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                      <div>
+                        <label className='label'>{t('presets.presetName')}</label>
+                        <input
+                          type='text'
+                          value={formData.name}
+                          onChange={e => setFormData({ ...formData, name: e.target.value })}
+                          className='input'
+                          placeholder={t('common.placeholder.enterPresetName')}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className='label'>{t('presets.presetDescription')}</label>
+                        <input
+                          type='text'
+                          value={formData.description}
+                          onChange={e => setFormData({ ...formData, description: e.target.value })}
+                          className='input'
+                          placeholder={t('common.placeholder.enterPresetDescription')}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className='label'>{t('presets.presetDescription')}</label>
-                      <input
-                        type='text'
-                        value={formData.description}
-                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        className='input'
-                        placeholder={t('common.placeholder.enterPresetDescription')}
-                      />
-                    </div>
-                  </div>
 
-                  <div className='border-t border-dark-700 pt-6'>{tabContent}</div>
-                </div>
+                    <div className='border-t border-dark-700 pt-6'>{tabContent}</div>
+                  </div>
+                </fieldset>
 
                 <div className='p-6 border-t border-dark-700 flex flex-wrap items-center justify-end gap-3'>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setShowModal(false);
-                      resetForm();
-                    }}
-                    className='btn btn-secondary'
-                  >
-                    {t('common.cancel')}
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setFormData({
-                        name: editingPreset?.name || '',
-                        description: editingPreset?.description || '',
-                        settings: getDefaultPresetSettings()
-                      });
-                    }}
-                    className='btn btn-warning'
-                  >
-                    {t('common.reset')}
-                  </button>
-                  <button type='submit' className='btn btn-primary'>
-                    {editingPreset ? t('common.save') : t('common.create')}
-                  </button>
+                  {readOnly ? (
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setShowModal(false);
+                        resetForm();
+                      }}
+                      className='btn btn-primary'
+                    >
+                      关闭
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setShowModal(false);
+                          resetForm();
+                        }}
+                        className='btn btn-secondary'
+                      >
+                        {t('common.cancel')}
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setFormData({
+                            name: editingPreset?.name || '',
+                            description: editingPreset?.description || '',
+                            settings: getDefaultPresetSettings()
+                          });
+                        }}
+                        className='btn btn-warning'
+                      >
+                        {t('common.reset')}
+                      </button>
+                      <button type='submit' className='btn btn-primary'>
+                        {editingPreset ? t('common.save') : t('common.create')}
+                      </button>
+                    </>
+                  )}
                 </div>
               </form>
             </div>
