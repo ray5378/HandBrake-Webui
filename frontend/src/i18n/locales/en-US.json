@@ -370,8 +370,6 @@
     "darkTheme": "Dark",
     "systemTheme": "System",
     "storage": "Storage",
-    "uploadDir": "Upload Directory",
-    "outputDir": "Output Directory",
     "configDir": "Config Directory",
     "about": "About",
     "version": "Version",

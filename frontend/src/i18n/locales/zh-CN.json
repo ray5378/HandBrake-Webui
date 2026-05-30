@@ -370,8 +370,6 @@
     "darkTheme": "深色",
     "systemTheme": "跟随系统",
     "storage": "存储",
-    "uploadDir": "上传目录",
-    "outputDir": "输出目录",
     "configDir": "配置目录",
     "about": "关于",
     "version": "版本",

@@ -16,15 +16,12 @@ router.get('/info', authenticateToken, (req, res, next) => {
 
     let diskUsage = { total: 0, used: 0, free: 0 };
     try {
-      const outputDir = config.outputDir;
-      if (fs.existsSync(outputDir)) {
-        const stats = fs.statfsSync(outputDir);
-        diskUsage = {
-          total: stats.bsize * stats.blocks,
-          free: stats.bsize * stats.bfree,
-          used: stats.bsize * (stats.blocks - stats.bfree)
-        };
-      }
+      const stats = fs.statfsSync(process.cwd());
+      diskUsage = {
+        total: stats.bsize * stats.blocks,
+        free: stats.bsize * stats.bfree,
+        used: stats.bsize * (stats.blocks - stats.bfree)
+      };
     } catch (error) {
       logger.error('Error getting disk usage', { error: error.message });
     }
@@ -48,18 +45,6 @@ router.get('/info', authenticateToken, (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
-
-router.get('/directories', authenticateToken, (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      source: config.uploadDir,
-      output: config.outputDir,
-      config: config.configDir,
-      cache: config.cacheDir
-    }
-  });
 });
 
 router.get('/cache-dir', authenticateToken, (req, res) => {

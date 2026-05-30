@@ -17,8 +17,6 @@ const config = {
   jwtExpiresIn: '24h',
   refreshTokenExpiresIn: '90d',
   maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS) || 2,
-  uploadDir: process.env.UPLOAD_DIR || '/drive',
-  outputDir: process.env.OUTPUT_DIR || '/drive/转码/转码后',
   configDir: process.env.CONFIG_DIR || '/config',
   cacheDir: process.env.CACHE_DIR || null,
   databasePath: null,
@@ -42,12 +40,6 @@ const config = {
     }
     if (process.env.JWT_SECRET) {
       config.jwtSecret = process.env.JWT_SECRET;
-    }
-    if (process.env.UPLOAD_DIR) {
-      config.uploadDir = process.env.UPLOAD_DIR;
-    }
-    if (process.env.OUTPUT_DIR) {
-      config.outputDir = process.env.OUTPUT_DIR;
     }
     if (process.env.CACHE_DIR) {
       config.cacheDir = process.env.CACHE_DIR;
@@ -79,9 +71,7 @@ const config = {
     const configToSave = {
       jwtSecret: config.jwtSecret,
       maxConcurrentJobs: config.maxConcurrentJobs,
-      cacheDir: config.cacheDir,
-      uploadDir: config.uploadDir,
-      outputDir: config.outputDir
+      cacheDir: config.cacheDir
     };
     fs.writeFileSync(configPath, JSON.stringify(configToSave, null, 2));
   }

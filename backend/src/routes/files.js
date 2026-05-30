@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const { body, query } = require('express-validator');
-const config = require('../config');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
 
@@ -224,15 +223,7 @@ router.delete('/', authenticateToken, query('path').notEmpty(), validate, (req, 
       });
     }
 
-    const outputDir = path.resolve(config.outputDir);
     const fileToDelete = path.resolve(filePath);
-
-    if (!fileToDelete.startsWith(outputDir)) {
-      return res.status(403).json({
-        success: false,
-        error: 'Access denied'
-      });
-    }
 
     fs.unlinkSync(fileToDelete);
 
