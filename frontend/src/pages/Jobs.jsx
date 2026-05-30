@@ -23,7 +23,7 @@ function Jobs() {
   const { t } = useTranslation();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('active');
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmJobAction, setConfirmJobAction] = useState(null);
   const abortRef = useRef(null);
@@ -45,6 +45,14 @@ function Jobs() {
   // 客户端筛选
   const filteredJobs = useMemo(() => {
     if (filter === 'all') return jobs;
+    if (filter === 'active')
+      return jobs
+        .filter(job => job.status === 'processing' || job.status === 'queued')
+        .sort((a, b) => {
+          if (a.status === 'processing' && b.status !== 'processing') return -1;
+          if (a.status !== 'processing' && b.status === 'processing') return 1;
+          return 0;
+        });
     if (filter === 'completed')
       return jobs.filter(job => job.status === 'completed' || job.status === 'skipped');
     return jobs.filter(job => job.status === filter);
@@ -54,6 +62,7 @@ function Jobs() {
   const statusCounts = useMemo(() => {
     const counts = {
       all: jobs.length,
+      active: 0,
       queued: 0,
       processing: 0,
       completed: 0,
@@ -62,6 +71,7 @@ function Jobs() {
     };
     for (const job of jobs) {
       if (Object.hasOwn(counts, job.status)) counts[job.status]++;
+      if (job.status === 'queued' || job.status === 'processing') counts.active++;
       if (job.status === 'skipped') counts.completed++;
     }
     return counts;
@@ -153,6 +163,7 @@ function Jobs() {
 
   const filters = [
     { value: 'all', label: t('common.all') || '全部', icon: ListTodo },
+    { value: 'active', label: t('jobs.active', '进行中'), icon: Play },
     { value: 'queued', label: t('jobs.queue'), icon: Clock },
     { value: 'processing', label: t('transcode.transcoding'), icon: Play },
     { value: 'completed', label: t('dashboard.completedJobs'), icon: CheckCircle },

@@ -134,6 +134,7 @@
     "deleteSuccess": "Job deleted successfully",
     "noJobs": "No jobs found",
     "queue": "Queue",
+    "active": "Active",
     "history": "History",
     "sourceFile": "Source File",
     "clearAll": "Clear Queue",
