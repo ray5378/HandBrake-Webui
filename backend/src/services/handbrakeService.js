@@ -342,7 +342,10 @@ async function startTranscode(job) {
     db.prepare(
       "UPDATE jobs SET status = 'skipped', completed_at = datetime('now') WHERE id = ?"
     ).run(job.id);
-    logger.info('Job skipped - output file already exists', { jobId: job.id, output: job.output_file });
+    logger.info('Job skipped - output file already exists', {
+      jobId: job.id,
+      output: job.output_file
+    });
     processNextJob();
     return;
   }
