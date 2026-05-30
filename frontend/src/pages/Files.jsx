@@ -195,7 +195,7 @@ function Files() {
               </button>
             )}
             {showSearchResults && (
-              <div className='absolute top-full left-0 sm:right-0 sm:left-auto mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] sm:max-h-[600px] overflow-y-auto min-w-[260px] sm:min-w-[480px] max-w-[90vw]'>
+              <div className='absolute top-full left-0 sm:right-0 sm:left-auto mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] sm:max-h-[800px] overflow-y-auto min-w-[260px] sm:min-w-[600px] max-w-[90vw]'>
                 {searchLoading ? (
                   <div className='p-4 text-center text-gray-400 text-sm'>{t('common.loading')}</div>
                 ) : searchResults.directories.length === 0 && searchResults.files.length === 0 ? (
