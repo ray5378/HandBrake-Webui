@@ -32,8 +32,7 @@ function Jobs() {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
     try {
-      const params = filter !== 'all' ? { status: filter } : {};
-      const response = await api.get('/jobs', { params, signal: abortRef.current.signal });
+      const response = await api.get('/jobs', { signal: abortRef.current.signal });
       setJobs(response.data.data.jobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
@@ -41,7 +40,22 @@ function Jobs() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filter]);
+  }, []);
+
+  // 客户端筛选
+  const filteredJobs = useMemo(() => {
+    if (filter === 'all') return jobs;
+    return jobs.filter(job => job.status === filter);
+  }, [jobs, filter]);
+
+  // 各状态数量统计
+  const statusCounts = useMemo(() => {
+    const counts = { all: jobs.length, queued: 0, processing: 0, completed: 0, failed: 0 };
+    for (const job of jobs) {
+      if (counts.hasOwnProperty(job.status)) counts[job.status]++;
+    }
+    return counts;
+  }, [jobs]);
 
   // 根据是否有活动任务动态调整轮询频率
   const hasActiveTasks = useMemo(() => {
@@ -131,7 +145,7 @@ function Jobs() {
   };
 
   const filters = [
-    { value: 'all', label: t('common.all') || 'All', icon: ListTodo },
+    { value: 'all', label: t('common.all') || '全部', icon: ListTodo },
     { value: 'queued', label: t('jobs.queue'), icon: Clock },
     { value: 'processing', label: t('transcode.transcoding'), icon: Play },
     { value: 'completed', label: t('dashboard.completedJobs'), icon: CheckCircle },
@@ -193,15 +207,23 @@ function Jobs() {
           >
             <f.icon className='w-4 h-4' />
             <span>{f.label}</span>
+            <span
+              className={clsx(
+                'ml-1 text-xs font-mono rounded-full px-1.5 py-0.5 min-w-[20px] text-center',
+                filter === f.value ? 'bg-white/20 text-white' : 'bg-dark-600 text-gray-400'
+              )}
+            >
+              {statusCounts[f.value] ?? 0}
+            </span>
           </button>
         ))}
       </div>
 
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
-      ) : jobs.length > 0 ? (
+      ) : filteredJobs.length > 0 ? (
         <div className='space-y-3'>
-          {jobs.map(job => (
+          {filteredJobs.map(job => (
             <div key={job.id} className='card hover:border-primary/50 transition-colors'>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>
