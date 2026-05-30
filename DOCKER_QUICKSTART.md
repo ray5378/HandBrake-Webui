@@ -74,9 +74,6 @@ docker stop handbrake-test && docker rm handbrake-test
 在 `.env` 文件中配置：
 
 ```bash
-# 服务配置
-NODE_ENV=production
-
 # 日志级别: ERROR, WARN, INFO, DEBUG
 LOG_LEVEL=INFO
 ```

@@ -27,8 +27,6 @@ services:
     volumes:
       - ./config:/config
       - ./drive:/drive
-    environment:
-      - NODE_ENV=production
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri
