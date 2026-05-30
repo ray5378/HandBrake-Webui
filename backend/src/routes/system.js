@@ -16,12 +16,14 @@ router.get('/info', authenticateToken, (req, res, next) => {
 
     let diskUsage = { total: 0, used: 0, free: 0 };
     try {
-      const stats = fs.statfsSync(process.cwd());
-      diskUsage = {
-        total: stats.bsize * stats.blocks,
-        free: stats.bsize * stats.bfree,
-        used: stats.bsize * (stats.blocks - stats.bfree)
-      };
+      if (fs.existsSync('/drive')) {
+        const stats = fs.statfsSync('/drive');
+        diskUsage = {
+          total: stats.bsize * stats.blocks,
+          free: stats.bsize * stats.bfree,
+          used: stats.bsize * (stats.blocks - stats.bfree)
+        };
+      }
     } catch (error) {
       logger.error('Error getting disk usage', { error: error.message });
     }
