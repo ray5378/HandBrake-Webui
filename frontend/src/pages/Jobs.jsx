@@ -115,10 +115,10 @@ function Jobs() {
 
   const handleClearAll = async () => {
     try {
-      await api.delete('/jobs/all-force');
+      await api.delete('/jobs/queue');
       fetchJobs();
     } catch (error) {
-      console.error('Failed to clear all jobs:', error);
+      console.error('Failed to clear queued jobs:', error);
     }
     setConfirmAction(null);
   };
@@ -335,13 +335,12 @@ function Jobs() {
 
       <ConfirmDialog
         open={confirmAction === 'clearAll'}
-        title={t('jobs.confirmClearAllTitle') || '清空任务队列'}
+        title={t('jobs.confirmClearAllTitle', '清空队列')}
         message={
-          t('jobs.confirmClearAll') ||
-          '确定要清空任务队列吗？包括正在处理中的任务将被取消。此操作不可撤销。'
+          t('jobs.confirmClearAll', '确定要清空所有等待中的任务吗？正在转码和已完成的任务不受影响。此操作不可撤销。')
         }
-        confirmText={t('common.confirm') || '确认清理'}
-        cancelText={t('common.cancel') || '取消'}
+        confirmText={t('common.confirm', '确认清理')}
+        cancelText={t('common.cancel', '取消')}
         onConfirm={handleClearAll}
         onCancel={() => setConfirmAction(null)}
         danger

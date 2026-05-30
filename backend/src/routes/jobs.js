@@ -223,6 +223,24 @@ router.delete('/all-force', authenticateToken, async (req, res, next) => {
   }
 });
 
+router.delete('/queue', authenticateToken, async (req, res, next) => {
+  try {
+    const db = getDatabase();
+
+    const result = db
+      .prepare("DELETE FROM jobs WHERE status = 'queued' AND user_id = ?")
+      .run(req.user.userId);
+
+    res.json({
+      success: true,
+      message: '队列任务已清空',
+      deleted: result.changes
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete('/:id', authenticateToken, async (req, res, next) => {
   try {
     const db = getDatabase();
