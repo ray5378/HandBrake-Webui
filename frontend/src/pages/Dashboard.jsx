@@ -314,7 +314,9 @@ function Dashboard() {
               <XCircle className='w-8 h-8 text-warning' />
               <div>
                 <p className='text-white font-medium'>{t('settings.title')}</p>
-                <p className='text-sm text-gray-400'>{t('settings.subtitle')}</p>
+                <p className='text-sm text-gray-400'>
+                  {t('dashboard.settingsDesc', '缓存目录、线程数、通用设置')}
+                </p>
               </div>
             </Link>
           </div>

@@ -107,7 +107,8 @@
     "diskUsage": "Disk Usage",
     "recentJobs": "Recent Jobs",
     "systemStatus": "System Status",
-    "noJobs": "No jobs yet"
+    "noJobs": "No jobs yet",
+    "settingsDesc": "Cache, Threads, General"
   },
   "jobs": {
     "title": "Jobs",

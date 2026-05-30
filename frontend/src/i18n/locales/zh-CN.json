@@ -107,7 +107,8 @@
     "diskUsage": "磁盘使用",
     "recentJobs": "最近任务",
     "systemStatus": "系统状态",
-    "noJobs": "暂无任务"
+    "noJobs": "暂无任务",
+    "settingsDesc": "缓存目录、线程数、通用设置"
   },
   "jobs": {
     "title": "任务",
