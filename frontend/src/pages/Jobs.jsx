@@ -219,8 +219,7 @@ function Jobs() {
                       <span className='break-all'>{job.source_file}</span>
                       {job.source_file_size != null && (
                         <span className='text-gray-500 ml-3'>
-                          {t('jobs.originalSize', '原体积')}：
-                          {formatFileSize(job.source_file_size)}
+                          {t('jobs.originalSize', '原体积')}：{formatFileSize(job.source_file_size)}
                         </span>
                       )}
                     </div>
@@ -229,8 +228,7 @@ function Jobs() {
                       <span className='break-all'>{job.output_file}</span>
                       {job.status === 'completed' && job.output_file_size != null && (
                         <span className='text-gray-500 ml-3'>
-                          {t('jobs.outputSize', '转码后')}：
-                          {formatFileSize(job.output_file_size)}
+                          {t('jobs.outputSize', '转码后')}：{formatFileSize(job.output_file_size)}
                         </span>
                       )}
                     </div>
@@ -322,9 +320,10 @@ function Jobs() {
       <ConfirmDialog
         open={confirmAction === 'clearAll'}
         title={t('jobs.confirmClearAllTitle', '清空队列')}
-        message={
-          t('jobs.confirmClearAll', '确定要清空所有等待中的任务吗？正在转码和已完成的任务不受影响。此操作不可撤销。')
-        }
+        message={t(
+          'jobs.confirmClearAll',
+          '确定要清空所有等待中的任务吗？正在转码和已完成的任务不受影响。此操作不可撤销。'
+        )}
         confirmText={t('common.confirm', '确认清理')}
         cancelText={t('common.cancel', '取消')}
         onConfirm={handleClearAll}

@@ -245,11 +245,7 @@ function JobDetail() {
       </div>
       <ConfirmDialog
         open={confirmJobAction !== null}
-        title={
-          confirmJobAction?.type === 'cancel'
-            ? '取消任务'
-            : '删除任务'
-        }
+        title={confirmJobAction?.type === 'cancel' ? '取消任务' : '删除任务'}
         message={
           confirmJobAction?.type === 'cancel'
             ? '确定要取消这个任务吗？'

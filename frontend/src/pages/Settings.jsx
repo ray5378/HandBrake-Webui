@@ -224,7 +224,9 @@ function Settings() {
                     </div>
                     <div>
                       <p className='text-sm text-gray-400'>Web UI {t('settings.version')}</p>
-                      <p className='text-white font-mono'>{import.meta.env.VITE_GIT_COMMIT || 'unknown'}</p>
+                      <p className='text-white font-mono'>
+                        {import.meta.env.VITE_GIT_COMMIT || 'unknown'}
+                      </p>
                     </div>
                     <div>
                       <p className='text-sm text-gray-400'>
