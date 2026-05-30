@@ -253,11 +253,11 @@ function Jobs() {
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : filteredJobs.length > 0 ? (
         <>
-          <div className='space-y-3'>
+          <div className='card space-y-3'>
             {paginatedJobs.map(job => (
               <div
                 key={job.id}
-                className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-[#fbbf24]/20' : ''}`}
+                className={`p-4 rounded-lg transition-colors ${job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700 hover:bg-dark-600'}`}
               >
                 <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                   <div className='flex-1 min-w-0'>
