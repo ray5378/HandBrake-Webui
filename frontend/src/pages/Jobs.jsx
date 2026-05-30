@@ -252,7 +252,7 @@ function Jobs() {
 
           {/* 分页组件 */}
           {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-center space-y-3">
               <div className="text-sm text-gray-400">
                 共 {pagination.total} 条，第 {pagination.page}/{pagination.totalPages} 页
               </div>
