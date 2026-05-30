@@ -367,8 +367,6 @@ async function startTranscode(job) {
     args[oIdx + 1] = tempOutputFile;
   }
 
-  console.log('Starting HandBrake with args:', args);
-
   const handbrake = spawn('HandBrakeCLI', args);
   activeJobs.set(job.id, handbrake);
 
