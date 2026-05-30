@@ -222,7 +222,7 @@ function Files() {
                           className='btn btn-primary text-xs py-2 px-3'
                         >
                           <Settings className='w-3 h-3' />
-                          <span className='ml-1'>{t('common.transcode')}</span>
+                          <span className='ml-1'>{t('nav.transcode')}</span>
                         </button>
                       </div>
                     </>
@@ -247,7 +247,7 @@ function Files() {
                         className='btn btn-primary text-xs min-h-[44px]'
                       >
                         <Settings className='w-4 h-4' />
-                        <span className='ml-1 hidden sm:inline'>{t('common.transcode')}</span>
+                        <span className='ml-1 hidden sm:inline'>{t('nav.transcode')}</span>
                       </button>
                     </div>
                   )}
@@ -272,7 +272,7 @@ function Files() {
             className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
           >
             <PlayCircle className='w-4 h-4 text-primary' />
-            <span>{t('common.transcode')}</span>
+            <span>{t('nav.transcode')}</span>
           </button>
         </div>
       )}
