@@ -26,8 +26,12 @@ router.get(
       ];
 
       const searchDir = async (dirPath, depth = 0) => {
-        if (depth > 5) return;
-        if (results.files.length + results.directories.length >= maxResults) return;
+        if (depth > 5) {
+ return; 
+}
+        if (results.files.length + results.directories.length >= maxResults) {
+ return; 
+}
 
         let items;
         try {
@@ -37,7 +41,9 @@ router.get(
         }
 
         for (const item of items) {
-          if (results.files.length + results.directories.length >= maxResults) break;
+          if (results.files.length + results.directories.length >= maxResults) {
+ break; 
+}
 
           const itemPath = path.join(dirPath, item.name);
 
