@@ -23,7 +23,7 @@ router.get(
   authenticateToken,
   query('status').optional(),
   query('page').optional().isInt({ min: 1 }),
-  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('limit').optional().isInt({ min: 1, max: 9999 }),
   validate,
   (req, res, next) => {
     try {

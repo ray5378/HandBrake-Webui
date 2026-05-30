@@ -34,7 +34,7 @@ function Jobs() {
     abortRef.current = new AbortController();
     try {
       const response = await api.get('/jobs', {
-        params: { limit: 100 },
+        params: { limit: 9999 },
         signal: abortRef.current.signal
       });
       setJobs(response.data.data.jobs);

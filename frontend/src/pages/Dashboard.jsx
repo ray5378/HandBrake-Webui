@@ -47,7 +47,7 @@ function Dashboard() {
     try {
       const [systemRes, jobsRes] = await Promise.all([
         api.get('/system/info', { signal }),
-        api.get('/jobs', { params: { limit: 100 }, signal })
+        api.get('/jobs', { params: { limit: 9999 }, signal })
       ]);
 
       setSystemInfo(systemRes.data.data);
