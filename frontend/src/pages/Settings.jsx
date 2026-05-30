@@ -63,7 +63,7 @@ function Settings() {
 
   const handleSaveCacheDir = async () => {
     if (!cacheDir) {
-      setError('请选择缓存目录');
+      setError(t('settings.selectCacheDir', '请选择缓存目录'));
       return;
     }
 
@@ -73,9 +73,9 @@ function Settings() {
 
     try {
       await api.post('/system/cache-dir', { path: cacheDir, maxConcurrentJobs });
-      setSuccess('转码配置保存成功');
+      setSuccess(t('settings.saveSuccess', '转码配置保存成功'));
     } catch (err) {
-      setError(err.response?.data?.error || '保存配置失败');
+      setError(err.response?.data?.error || t('settings.saveFailed', '保存配置失败'));
     } finally {
       setSavingCacheDir(false);
     }
