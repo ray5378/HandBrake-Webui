@@ -7,7 +7,6 @@ import {
   Play,
   CheckCircle,
   XCircle,
-  Clock,
   TrendingUp,
   ArrowRight,
   X,
@@ -67,9 +66,22 @@ function Dashboard() {
     setModalLoading(true);
     const controller = new AbortController();
     try {
-      const params = status ? { status } : {};
-      const res = await api.get('/jobs', { params, signal: controller.signal });
-      setModalJobs(res.data.data.jobs);
+      let jobs;
+      if (status === 'active') {
+        const res = await api.get('/jobs', { params: {}, signal: controller.signal });
+        jobs = res.data.data.jobs
+          .filter(j => j.status === 'queued' || j.status === 'processing')
+          .sort((a, b) => {
+            if (a.status === 'processing' && b.status !== 'processing') return -1;
+            if (a.status !== 'processing' && b.status === 'processing') return 1;
+            return 0;
+          });
+      } else {
+        const params = status ? { status } : {};
+        const res = await api.get('/jobs', { params, signal: controller.signal });
+        jobs = res.data.data.jobs;
+      }
+      setModalJobs(jobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
       setModalJobs([]);
@@ -90,18 +102,11 @@ function Dashboard() {
       status: ''
     },
     {
-      label: t('jobs.queue'),
-      value: stats?.queued || 0,
-      icon: Clock,
-      color: 'text-warning',
-      status: 'queued'
-    },
-    {
-      label: t('transcode.transcoding'),
-      value: stats?.processing || 0,
+      label: t('jobs.active'),
+      value: (stats?.queued || 0) + (stats?.processing || 0),
       icon: Play,
       color: 'text-secondary',
-      status: 'processing'
+      status: 'active'
     },
     {
       label: t('dashboard.completedJobs'),
@@ -138,7 +143,7 @@ function Dashboard() {
           </Link>
         </div>
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
           {statCards.map(stat => (
             <button
               key={stat.label}
