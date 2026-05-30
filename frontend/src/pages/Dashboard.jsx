@@ -205,7 +205,11 @@ function Dashboard() {
                   <Link
                     key={job.id}
                     to={`/jobs/${job.id}`}
-                    className='flex items-center justify-between p-3 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors'
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      job.status === 'processing'
+                        ? 'bg-green-900/30 hover:bg-green-900/40'
+                        : 'bg-dark-700 hover:bg-dark-600'
+                    }`}
                   >
                     <div className='flex-1 min-w-0'>
                       <p className='text-sm font-medium text-white truncate'>
@@ -216,9 +220,11 @@ function Dashboard() {
                       </p>
                     </div>
                     <div className='flex items-center space-x-2 shrink-0'>
-                      <span className={`badge badge-${job.status}`}>
-                        {getJobStatusLabel(job.status)}
-                      </span>
+                      {job.status !== 'processing' && (
+                        <span className={`badge badge-${job.status}`}>
+                          {getJobStatusLabel(job.status)}
+                        </span>
+                      )}
                       {job.status === 'processing' && (
                         <div className='text-right'>
                           <div className='text-secondary font-mono text-sm'>

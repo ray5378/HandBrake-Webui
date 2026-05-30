@@ -230,7 +230,7 @@ function Jobs() {
       ) : filteredJobs.length > 0 ? (
         <div className='space-y-3'>
           {filteredJobs.map(job => (
-            <div key={job.id} className='card hover:border-primary/50 transition-colors'>
+            <div key={job.id} className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-green-900/20 border-green-700/40' : ''}`}>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>
                   <div className='space-y-1 mb-2'>
@@ -259,9 +259,11 @@ function Jobs() {
                   </div>
 
                   <div className='flex items-center space-x-3 mb-1'>
-                    <span className={clsx('badge', `badge-${job.status}`)}>
-                      {getStatusLabel(job.status)}
-                    </span>
+                    {job.status !== 'processing' && (
+                      <span className={clsx('badge', `badge-${job.status}`)}>
+                        {getStatusLabel(job.status)}
+                      </span>
+                    )}
                     {job.preset_name && (
                       <span className='text-sm text-gray-400'>
                         {t('jobs.preset')}: {job.preset_name}
