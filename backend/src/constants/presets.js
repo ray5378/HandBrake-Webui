@@ -450,536 +450,1820 @@ function getDefaultPresetSettings() {
   };
 }
 
-// 获取标准 HandBrake 预设列表
-function getFullDefaultPresets() {
-  const uuidv4 = require('uuid').v4;
-
-  return [
-    {
-      id: uuidv4(),
-      name: 'Very Fast 1080p30',
-      description: '快速转码，适合分享和流媒体',
-      isBuiltIn: true,
-      category: 'General',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 22,
-          preset: 'veryfast',
-          tune: 'fastdecode',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'Fast 1080p30',
-      description: '快速转码 1080p 视频',
-      isBuiltIn: true,
-      category: 'General',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 22,
-          preset: 'fast',
-          tune: 'film',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'HQ 1080p30 Surround',
-      description: '高质量 1080p 转码，带环绕声',
-      isBuiltIn: true,
-      category: 'General',
-      settings: JSON.stringify({
-        format: 'mkv',
-        optimize: 'none',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 20,
-          preset: 'slow',
-          tune: 'film',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: '5.1',
-            bitrate: 384
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'Fast 720p30',
-      description: '快速 720p 转码，适合移动设备',
-      isBuiltIn: true,
-      category: 'General',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 23,
-          preset: 'veryfast',
-          tune: 'fastdecode',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1280,
-          height: 720,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 128
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'HQ 480p30',
-      description: '高质量 SD 转码',
-      isBuiltIn: true,
-      category: 'General',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 20,
-          preset: 'medium',
-          tune: 'film',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 720,
-          height: 480,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'YouTube 1080p30',
-      description: '优化用于 YouTube 的 1080p 视频',
-      isBuiltIn: true,
-      category: 'Web',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 18,
-          preset: 'slow',
-          tune: 'film',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 256
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'Vimeo 1080p30',
-      description: '优化用于 Vimeo 的 1080p 视频',
-      isBuiltIn: true,
-      category: 'Web',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 16,
-          preset: 'veryslow',
-          tune: 'film',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 320
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'H.265 MKV 1080p30',
-      description: 'H.265 编码，更高压缩率',
-      isBuiltIn: true,
-      category: 'Matroska',
-      settings: JSON.stringify({
-        format: 'mkv',
-        optimize: 'none',
-        video: {
-          codec: 'x265',
-          rateControl: 'crf',
-          crf: 22,
-          preset: 'medium',
-          tune: 'film',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'H.265 MKV 2160p60',
-      description: '4K H.265 编码，高质量',
-      isBuiltIn: true,
-      category: 'Matroska',
-      settings: JSON.stringify({
-        format: 'mkv',
-        optimize: 'none',
-        video: {
-          codec: 'x265_10bit',
-          rateControl: 'crf',
-          crf: 22,
-          preset: 'slow',
-          tune: 'film',
-          framerate: 60,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 3840,
-          height: 2160,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'flac16',
-            mixdown: '5.1'
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'VP9 MKV 1080p30',
-      description: 'VP9 编码，适合开源媒体',
-      isBuiltIn: true,
-      category: 'Matroska',
-      settings: JSON.stringify({
-        format: 'webm',
-        optimize: 'none',
-        video: {
-          codec: 'vp9',
-          rateControl: 'crf',
-          crf: 30,
-          preset: 'medium',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'opus',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'AV1 MKV 1080p30',
-      description: 'AV1 编码，最高压缩率',
-      isBuiltIn: true,
-      category: 'Matroska',
-      settings: JSON.stringify({
-        format: 'mkv',
-        optimize: 'none',
-        video: {
-          codec: 'svt-av1',
-          rateControl: 'cq',
-          cq: 30,
-          preset: 'medium',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'opus',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'Production Max',
-      description: '最高质量，最慢编码，适合存档',
-      isBuiltIn: true,
-      category: 'Production',
-      settings: JSON.stringify({
-        format: 'mkv',
-        optimize: 'none',
-        video: {
-          codec: 'x264',
-          rateControl: 'crf',
-          crf: 18,
-          preset: 'veryslow',
-          tune: 'film',
-          framerateMode: 'cfr'
-        },
-        audio: {
-          default: {
-            codec: 'flac16',
-            mixdown: 'none'
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'H.265 Intel QSV 1080p30',
-      description: 'Intel QSV 硬件加速 H.265 转码',
-      isBuiltIn: true,
-      category: 'Hardware',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'qsv_h265',
-          rateControl: 'icq',
-          icq: 22,
-          preset: 'balanced',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'H.264 Intel QSV 1080p30',
-      description: 'Intel QSV 硬件加速 H.264 转码',
-      isBuiltIn: true,
-      category: 'Hardware',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'qsv_h264',
-          rateControl: 'icq',
-          icq: 22,
-          preset: 'balanced',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
-    },
-    {
-      id: uuidv4(),
-      name: 'H.265 NVENC 1080p30',
-      description: 'NVIDIA NVENC 硬件加速 H.265 转码',
-      isBuiltIn: true,
-      category: 'Hardware',
-      settings: JSON.stringify({
-        format: 'mp4',
-        optimize: 'fast-start',
-        video: {
-          codec: 'nvenc_h265',
-          rateControl: 'cqp',
-          cqp: 22,
-          preset: 'medium',
-          framerate: 30,
-          framerateMode: 'cfr'
-        },
-        dimensions: {
-          width: 1920,
-          height: 1080,
-          scaling: {
-            keepDisplayAspect: true,
-            modulus: 16
-          }
-        },
-        audio: {
-          default: {
-            codec: 'av_aac',
-            mixdown: 'stereo',
-            bitrate: 160
-          }
-        },
-        chapters: { enabled: true }
-      })
+// HandBrake 官方预设定义（数据驱动）
+const PRESET_DEFINITIONS = [
+  // ============ General（24 个）============
+  {
+    name: 'Very Fast 2160p60 4K AV1',
+    category: 'General',
+    description: '极速 4K AV1 转码预设，适合快速处理超高清视频',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 43,
+        preset: '7',
+        tune: 'psnr',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
     }
-  ];
+  },
+  {
+    name: 'Very Fast 2160p60 4K HEVC',
+    category: 'General',
+    description: '极速 4K H.265 转码预设，适合快速处理超高清视频',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 26,
+        preset: 'superfast',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Very Fast 1080p30',
+    category: 'General',
+    description: '极速 1080p 转码预设，适合快速处理高清视频',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'veryfast',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Very Fast 720p30',
+    category: 'General',
+    description: '极速 720p 转码预设，适合快速处理标清视频',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'veryfast',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Very Fast 576p25',
+    category: 'General',
+    description: '极速 576p 转码预设，适合快速处理 PAL 制式视频',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'veryfast',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Very Fast 480p30',
+    category: 'General',
+    description: '极速 480p 转码预设，适合快速处理 NTSC 制式视频',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'veryfast',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Fast 2160p60 4K AV1',
+    category: 'General',
+    description: '快速 4K AV1 转码预设，兼顾速度与画质',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 35,
+        preset: '5',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Fast 2160p60 4K HEVC',
+    category: 'General',
+    description: '快速 4K H.265 转码预设，兼顾速度与画质',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 24,
+        preset: 'medium',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Fast 1080p30',
+    category: 'General',
+    description: '快速 1080p 转码预设，兼顾速度与画质',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'fast',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Fast 720p30',
+    category: 'General',
+    description: '快速 720p 转码预设，兼顾速度与画质',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'fast',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Fast 576p25',
+    category: 'General',
+    description: '快速 576p 转码预设，兼顾速度与画质',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'fast',
+        tune: 'film',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Fast 480p30',
+    category: 'General',
+    description: '快速 480p 转码预设，兼顾速度与画质',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'fast',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'HQ 2160p60 4K AV1 Surround',
+    category: 'General',
+    description: '高质量 4K AV1 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 25,
+        preset: '2',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'HQ 2160p60 4K HEVC Surround',
+    category: 'General',
+    description: '高质量 4K H.265 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'slow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'HQ 1080p30 Surround',
+    category: 'General',
+    description: '高质量 1080p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'slow',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'HQ 720p30 Surround',
+    category: 'General',
+    description: '高质量 720p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'slow',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'HQ 576p25 Surround',
+    category: 'General',
+    description: '高质量 576p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'slow',
+        tune: 'film',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'HQ 480p30 Surround',
+    category: 'General',
+    description: '高质量 480p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'slow',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Super HQ 2160p60 4K AV1 Surround',
+    category: 'General',
+    description: '超高质量 4K AV1 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 18,
+        preset: '0',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Super HQ 2160p60 4K HEVC Surround',
+    category: 'General',
+    description: '超高质量 4K H.265 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'veryslow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Super HQ 1080p30 Surround',
+    category: 'General',
+    description: '超高质量 1080p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 16,
+        preset: 'veryslow',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Super HQ 720p30 Surround',
+    category: 'General',
+    description: '超高质量 720p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 16,
+        preset: 'veryslow',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Super HQ 576p25 Surround',
+    category: 'General',
+    description: '超高质量 576p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 16,
+        preset: 'veryslow',
+        tune: 'film',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Super HQ 480p30 Surround',
+    category: 'General',
+    description: '超高质量 480p 转码预设，带 5.1 环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 16,
+        preset: 'veryslow',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+
+  // ============ Web（8 个）============
+  {
+    name: 'Creator 2160p60 4K',
+    category: 'Web',
+    description: '创作者预设，适合视频制作平台的高质量 4K 输出',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Creator 1440p60 2.5K',
+    category: 'Web',
+    description: '创作者预设，适合视频制作平台的 2.5K 输出',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 2560, height: 1440, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Creator 1080p60',
+    category: 'Web',
+    description: '创作者预设，适合视频制作平台的 1080p 输出',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Creator 720p60',
+    category: 'Web',
+    description: '创作者预设，适合视频制作平台的 720p 输出',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Social 25 MB 30 Seconds 1080p60',
+    category: 'Web',
+    description: '社交媒体预设，30 秒 1080p 视频控制在 25 MB 内',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'cbr',
+        bitrate: 5400,
+        preset: 'medium',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Social 25 MB 1 Minute 720p60',
+    category: 'Web',
+    description: '社交媒体预设，1 分钟 720p 视频控制在 25 MB 内',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'cbr',
+        bitrate: 3200,
+        preset: 'medium',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Social 25 MB 2 Minutes 540p60',
+    category: 'Web',
+    description: '社交媒体预设，2 分钟 540p 视频控制在 25 MB 内',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'cbr',
+        bitrate: 1600,
+        preset: 'medium',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 960, height: 540, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Social 25 MB 5 Minutes 360p60',
+    category: 'Web',
+    description: '社交媒体预设，5 分钟 360p 视频控制在 25 MB 内',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'cbr',
+        bitrate: 640,
+        preset: 'medium',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 640, height: 360, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+
+  // ============ Devices（25 个）============
+  {
+    name: 'Amazon Fire 2160p60 4K HEVC Surround',
+    category: 'Devices',
+    description: '为 Amazon Fire 设备优化的 4K H.265 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 24,
+        preset: 'slow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Amazon Fire 1080p30 Surround',
+    category: 'Devices',
+    description: '为 Amazon Fire 设备优化的 1080p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Amazon Fire 720p30 Surround',
+    category: 'Devices',
+    description: '为 Amazon Fire 设备优化的 720p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Android 1080p30',
+    category: 'Devices',
+    description: '为 Android 设备优化的 1080p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Android 720p30',
+    category: 'Devices',
+    description: '为 Android 设备优化的 720p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Android 576p25',
+    category: 'Devices',
+    description: '为 Android 设备优化的 576p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Android 480p30',
+    category: 'Devices',
+    description: '为 Android 设备优化的 480p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Apple 2160p60 4K HEVC Surround',
+    category: 'Devices',
+    description: '为 Apple 设备优化的 4K H.265 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 24,
+        preset: 'slow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Apple 1080p60 Surround',
+    category: 'Devices',
+    description: '为 Apple 设备优化的 1080p60 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Apple 1080p30 Surround',
+    category: 'Devices',
+    description: '为 Apple 设备优化的 1080p30 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Apple 720p30 Surround',
+    category: 'Devices',
+    description: '为 Apple 设备优化的 720p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Apple 540p30 Surround',
+    category: 'Devices',
+    description: '为 Apple 设备优化的 540p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 960, height: 540, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Chromecast 2160p60 4K HEVC Surround',
+    category: 'Devices',
+    description: '为 Chromecast 优化的 4K H.265 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 24,
+        preset: 'slow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Chromecast 1080p60 Surround',
+    category: 'Devices',
+    description: '为 Chromecast 优化的 1080p60 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Chromecast 1080p30 Surround',
+    category: 'Devices',
+    description: '为 Chromecast 优化的 1080p30 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Playstation 2160p60 4K Surround',
+    category: 'Devices',
+    description: '为 PlayStation 优化的 4K 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'slow',
+        tune: 'film',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Playstation 1080p30 Surround',
+    category: 'Devices',
+    description: '为 PlayStation 优化的 1080p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Playstation 720p30',
+    category: 'Devices',
+    description: '为 PlayStation 优化的 720p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Playstation 540p30',
+    category: 'Devices',
+    description: '为 PlayStation 优化的 540p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 960, height: 540, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Roku 2160p60 4K HEVC Surround',
+    category: 'Devices',
+    description: '为 Roku 优化的 4K H.265 转码预设，带环绕声',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 24,
+        preset: 'slow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Roku 1080p30 Surround',
+    category: 'Devices',
+    description: '为 Roku 优化的 1080p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Roku 720p30 Surround',
+    category: 'Devices',
+    description: '为 Roku 优化的 720p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Roku 576p25',
+    category: 'Devices',
+    description: '为 Roku 优化的 576p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Roku 480p30',
+    category: 'Devices',
+    description: '为 Roku 优化的 480p 转码预设',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Xbox 1080p30 Surround',
+    category: 'Devices',
+    description: '为 Xbox 优化的 1080p 转码预设，带环绕声',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 20,
+        preset: 'medium',
+        tune: 'film',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'ac3', mixdown: '5.1', bitrate: 384 } },
+      chapters: { enabled: true }
+    }
+  },
+
+  // ============ Matroska（16 个）============
+  {
+    name: 'AV1 MKV 2160p60 4K',
+    category: 'Matroska',
+    description: 'AV1 MKV 封装预设，4K 超高清最高压缩率',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 25,
+        preset: '4',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 MKV 2160p60 4K',
+    category: 'Matroska',
+    description: 'H.265 MKV 封装预设，4K 超高清高压缩率',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'slow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 MKV 1080p30',
+    category: 'Matroska',
+    description: 'H.265 MKV 封装预设，1080p 全高清',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'slow',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 MKV 720p30',
+    category: 'Matroska',
+    description: 'H.265 MKV 封装预设，720p 高清',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'slow',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 MKV 576p25',
+    category: 'Matroska',
+    description: 'H.265 MKV 封装预设，576p PAL',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'slow',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 MKV 480p30',
+    category: 'Matroska',
+    description: 'H.265 MKV 封装预设，480p NTSC',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x265_10bit',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'slow',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 MKV 2160p60 4K',
+    category: 'Matroska',
+    description: 'H.264 MKV 封装预设，4K 超高清',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 MKV 1080p30',
+    category: 'Matroska',
+    description: 'H.264 MKV 封装预设，1080p 全高清',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 MKV 720p30',
+    category: 'Matroska',
+    description: 'H.264 MKV 封装预设，720p 高清',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 MKV 576p25',
+    category: 'Matroska',
+    description: 'H.264 MKV 封装预设，576p PAL',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 MKV 480p30',
+    category: 'Matroska',
+    description: 'H.264 MKV 封装预设，480p NTSC',
+    settings: {
+      format: 'mkv',
+      optimize: 'none',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 22,
+        preset: 'medium',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'VP9 MKV 2160p60 4K',
+    category: 'Matroska',
+    description: 'VP9 WebM 封装预设，4K 超高清开源编码',
+    settings: {
+      format: 'webm',
+      optimize: 'none',
+      video: {
+        codec: 'vp9',
+        rateControl: 'crf',
+        crf: 25,
+        preset: 'veryslow',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'opus', mixdown: 'stereo', bitrate: 128 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'VP9 MKV 1080p30',
+    category: 'Matroska',
+    description: 'VP9 WebM 封装预设，1080p 全高清开源编码',
+    settings: {
+      format: 'webm',
+      optimize: 'none',
+      video: {
+        codec: 'vp9',
+        rateControl: 'crf',
+        crf: 25,
+        preset: 'veryslow',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'opus', mixdown: 'stereo', bitrate: 128 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'VP9 MKV 720p30',
+    category: 'Matroska',
+    description: 'VP9 WebM 封装预设，720p 高清开源编码',
+    settings: {
+      format: 'webm',
+      optimize: 'none',
+      video: {
+        codec: 'vp9',
+        rateControl: 'crf',
+        crf: 25,
+        preset: 'veryslow',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1280, height: 720, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'opus', mixdown: 'stereo', bitrate: 128 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'VP9 MKV 576p25',
+    category: 'Matroska',
+    description: 'VP9 WebM 封装预设，576p PAL 开源编码',
+    settings: {
+      format: 'webm',
+      optimize: 'none',
+      video: {
+        codec: 'vp9',
+        rateControl: 'crf',
+        crf: 25,
+        preset: 'veryslow',
+        framerate: 25,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 576, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'opus', mixdown: 'stereo', bitrate: 128 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'VP9 MKV 480p30',
+    category: 'Matroska',
+    description: 'VP9 WebM 封装预设，480p NTSC 开源编码',
+    settings: {
+      format: 'webm',
+      optimize: 'none',
+      video: {
+        codec: 'vp9',
+        rateControl: 'crf',
+        crf: 25,
+        preset: 'veryslow',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 720, height: 480, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'opus', mixdown: 'stereo', bitrate: 128 } },
+      chapters: { enabled: true }
+    }
+  },
+
+  // ============ Hardware（11 个）============
+  {
+    name: 'AV1 QSV 2160p60 4K',
+    category: 'Hardware',
+    description: 'Intel QSV 硬件加速 AV1 编码，4K 超高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 30,
+        preset: '7',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 NVENC 2160p60 4K',
+    category: 'Hardware',
+    description: 'NVIDIA NVENC 硬件加速 H.265 编码，4K 超高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'nvenc_h265',
+        rateControl: 'cqp',
+        cqp: 22,
+        preset: 'fast',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 NVENC 1080p60',
+    category: 'Hardware',
+    description: 'NVIDIA NVENC 硬件加速 H.265 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'nvenc_h265',
+        rateControl: 'cqp',
+        cqp: 22,
+        preset: 'fast',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 QSV 2160p60 4K',
+    category: 'Hardware',
+    description: 'Intel QSV 硬件加速 H.265 编码，4K 超高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'qsv_h265',
+        rateControl: 'icq',
+        icq: 22,
+        preset: 'speed',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 QSV 1080p60',
+    category: 'Hardware',
+    description: 'Intel QSV 硬件加速 H.265 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'qsv_h265',
+        rateControl: 'icq',
+        icq: 22,
+        preset: 'speed',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 VCN 2160p60 4K',
+    category: 'Hardware',
+    description: 'AMD VCE 硬件加速 H.265 编码，4K 超高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'vce_h265',
+        rateControl: 'cqp',
+        cqp: 22,
+        preset: 'speed',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 3840, height: 2160, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.265 VCN 1080p60',
+    category: 'Hardware',
+    description: 'AMD VCE 硬件加速 H.265 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'vce_h265',
+        rateControl: 'cqp',
+        cqp: 22,
+        preset: 'speed',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 NVENC 1080p60',
+    category: 'Hardware',
+    description: 'NVIDIA NVENC 硬件加速 H.264 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'nvenc_h264',
+        rateControl: 'cqp',
+        cqp: 22,
+        preset: 'fast',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 QSV 1080p30',
+    category: 'Hardware',
+    description: 'Intel QSV 硬件加速 H.264 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'qsv_h264',
+        rateControl: 'icq',
+        icq: 22,
+        preset: 'balanced',
+        framerate: 30,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'H.264 VCN 1080p60',
+    category: 'Hardware',
+    description: 'AMD VCE 硬件加速 H.264 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'vce_h264',
+        rateControl: 'cqp',
+        cqp: 22,
+        preset: 'speed',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'AV1 QSV 1080p60',
+    category: 'Hardware',
+    description: 'Intel QSV 硬件加速 AV1 编码，1080p 全高清',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'svt-av1_10bit',
+        rateControl: 'cq',
+        cq: 35,
+        preset: '7',
+        framerate: 60,
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'av_aac', mixdown: 'stereo', bitrate: 160 } },
+      chapters: { enabled: true }
+    }
+  },
+
+  // ============ Production（4 个）============
+  {
+    name: 'Production Max',
+    category: 'Production',
+    description: '最高质量专业制作预设，最慢编码速度，适合存档',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'veryslow',
+        tune: 'film',
+        framerateMode: 'cfr',
+        multiPass: true
+      },
+      audio: { default: { codec: 'flac16', mixdown: 'stereo' } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Production Standard',
+    category: 'Production',
+    description: '标准质量专业制作预设，适合日常制作工作流',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 18,
+        preset: 'medium',
+        tune: 'film',
+        framerateMode: 'cfr',
+        multiPass: true
+      },
+      audio: { default: { codec: 'flac16', mixdown: 'stereo' } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Production Proxy 1080p',
+    category: 'Production',
+    description: '代理文件预设，1080p 分辨率适合剪辑工作流',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 12,
+        preset: 'ultrafast',
+        tune: 'fastdecode',
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 1920, height: 1080, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'flac16', mixdown: 'stereo' } },
+      chapters: { enabled: true }
+    }
+  },
+  {
+    name: 'Production Proxy 540p',
+    category: 'Production',
+    description: '代理文件预设，540p 分辨率适合离线剪辑工作流',
+    settings: {
+      format: 'mp4',
+      optimize: 'fast-start',
+      video: {
+        codec: 'x264',
+        rateControl: 'crf',
+        crf: 12,
+        preset: 'ultrafast',
+        tune: 'fastdecode',
+        framerateMode: 'cfr'
+      },
+      dimensions: { width: 960, height: 540, scaling: { keepDisplayAspect: true, modulus: 16 } },
+      audio: { default: { codec: 'flac16', mixdown: 'stereo' } },
+      chapters: { enabled: true }
+    }
+  }
+];
+
+// 获取完整 HandBrake 预设列表（自动生成 UUID）
+function getFullDefaultPresets() {
+  const { v4: uuidv4 } = require('uuid');
+  return PRESET_DEFINITIONS.map(p => ({
+    id: uuidv4(),
+    name: p.name,
+    description: p.description,
+    isBuiltIn: true,
+    category: p.category,
+    settings: JSON.stringify(p.settings)
+  }));
 }
 
 module.exports = {
