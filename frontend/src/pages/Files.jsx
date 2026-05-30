@@ -195,7 +195,7 @@ function Files() {
               </button>
             )}
             {showSearchResults && (
-              <div className='absolute top-full left-0 right-0 mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] overflow-y-auto'>
+              <div className='absolute top-full left-0 mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] overflow-y-auto min-w-[480px]'>
                 {searchLoading ? (
                   <div className='p-4 text-center text-gray-400 text-sm'>{t('common.loading')}</div>
                 ) : searchResults.directories.length === 0 && searchResults.files.length === 0 ? (
