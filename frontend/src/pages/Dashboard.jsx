@@ -200,7 +200,7 @@ function Dashboard() {
             </div>
 
             {activeJobs.length > 0 ? (
-              <div className='space-y-3 max-h-[420px] overflow-y-auto'>
+              <div className='space-y-3 max-h-[420px] overflow-y-auto py-1 -my-1'>
                 {activeJobs.map(job => (
                   <Link
                     key={job.id}
