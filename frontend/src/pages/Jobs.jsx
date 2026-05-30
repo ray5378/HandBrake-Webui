@@ -17,6 +17,7 @@ import api from '../services/api';
 import clsx from 'clsx';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import { formatFileSize } from '../utils/format';
+import { formatETA } from '../utils/format';
 
 function Jobs() {
   const { t } = useTranslation();
@@ -268,7 +269,14 @@ function Jobs() {
                     <div className='mt-3'>
                       <div className='flex items-center justify-between text-sm mb-1'>
                         <span className='text-secondary'>{t('jobs.progress')}</span>
-                        <span className='text-white font-mono'>{job.progress.toFixed(1)}%</span>
+                        <span className='text-white font-mono'>
+                          {job.progress.toFixed(1)}%
+                          {formatETA(job.eta_seconds) && (
+                            <span className='text-gray-400 font-normal ml-2 text-xs'>
+                              {formatETA(job.eta_seconds)}
+                            </span>
+                          )}
+                        </span>
                       </div>
                       <div className='w-full bg-dark-700 rounded-full h-2 overflow-hidden'>
                         <div

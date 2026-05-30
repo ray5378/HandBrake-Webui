@@ -102,7 +102,8 @@ function createTables() {
 function runMigrations() {
   const migrations = [
     'ALTER TABLE jobs ADD COLUMN source_file_size INTEGER',
-    'ALTER TABLE jobs ADD COLUMN output_file_size INTEGER'
+    'ALTER TABLE jobs ADD COLUMN output_file_size INTEGER',
+    'ALTER TABLE jobs ADD COLUMN eta_seconds INTEGER'
   ];
   for (const sql of migrations) {
     try {

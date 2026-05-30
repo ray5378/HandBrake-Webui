@@ -83,6 +83,28 @@ export function formatProgress(progress) {
 }
 
 /**
+ * 格式化预计剩余时间
+ * @param {number} seconds - 剩余秒数
+ * @returns {string} 格式化的剩余时间
+ */
+export function formatETA(seconds) {
+  if (seconds == null) return '';
+  if (seconds <= 0) return '即将完成';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `剩余 ${hours}小时${minutes}分`;
+  }
+  if (minutes > 0) {
+    return `剩余 ${minutes}分${secs}秒`;
+  }
+  return `剩余 ${secs}秒`;
+}
+
+/**
  * 截断文本
  * @param {string} text - 文本
  * @param {number} maxLength - 最大长度

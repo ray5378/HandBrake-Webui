@@ -529,11 +529,14 @@ async function startTranscode(job) {
 function parseProgress(jobId, data) {
   const db = getDatabase();
   let progress = null;
+  let etaSeconds = null;
 
-  // 优先使用 JSON 解析（因为我们总是用 --json 启动）
-  progress = tryParseJsonProgress(data);
+  const jsonResult = tryParseJsonProgress(data);
+  if (jsonResult !== null) {
+    progress = jsonResult.progress;
+    etaSeconds = jsonResult.etaSeconds;
+  }
 
-  // JSON 解析失败时才使用文本格式作为备用
   if (progress === null) {
     progress = tryParseTextProgress(data);
   }
@@ -543,11 +546,11 @@ function parseProgress(jobId, data) {
     const last = lastProgressWrite.get(jobId) || 0;
     if (now - last >= 1000) {
       lastProgressWrite.set(jobId, now);
-      db.prepare(
-        `
-        UPDATE jobs SET progress = ? WHERE id = ?
-        `
-      ).run(progress, jobId);
+      db.prepare('UPDATE jobs SET progress = ?, eta_seconds = ? WHERE id = ?').run(
+        progress,
+        etaSeconds,
+        jobId
+      );
     }
   }
 
@@ -555,13 +558,8 @@ function parseProgress(jobId, data) {
 }
 
 function tryParseJsonProgress(data) {
-  // HandBrakeCLI --json outputs multi-line blocks with key prefixes:
-  // Progress: {
-  //     "State": "WORKING",
-  //     "Working": { "Progress": 0.5, ... }
-  // }
   const lines = data.split(/\r?\n|\r/);
-  let lastProgress = null;
+  let lastResult = null;
   let i = 0;
 
   while (i < lines.length) {
@@ -596,9 +594,14 @@ function tryParseJsonProgress(data) {
       try {
         const json = JSON.parse(jsonStr);
         if (json.State === 'WORKING' && json.Working && typeof json.Working.Progress === 'number') {
-          lastProgress = json.Working.Progress * 100;
+          const progress = json.Working.Progress * 100;
+          const hours = json.Working.Hours || 0;
+          const minutes = json.Working.Minutes || 0;
+          const seconds = json.Working.Seconds || 0;
+          const etaSeconds = hours * 3600 + minutes * 60 + seconds;
+          lastResult = { progress, etaSeconds };
         } else if (json.State === 'WORKDONE') {
-          lastProgress = 100;
+          lastResult = { progress: 100, etaSeconds: 0 };
         }
       } catch (e) {
         // skip malformed blocks
@@ -608,7 +611,7 @@ function tryParseJsonProgress(data) {
     i = blockEnd + 1;
   }
 
-  return lastProgress;
+  return lastResult;
 }
 
 function tryParseTextProgress(data) {

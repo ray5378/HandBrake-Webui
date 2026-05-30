@@ -14,6 +14,7 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import { formatETA } from '../utils/format';
 
 function JobDetail() {
   const { id } = useParams();
@@ -189,7 +190,14 @@ function JobDetail() {
           <div className='mb-6'>
             <div className='flex items-center justify-between text-sm mb-2'>
               <span className='text-secondary'>转码进度</span>
-              <span className='text-white font-mono text-lg'>{job.progress.toFixed(1)}%</span>
+              <span className='text-white font-mono text-lg'>
+                {job.progress.toFixed(1)}%
+                {formatETA(job.eta_seconds) && (
+                  <span className='text-gray-400 font-normal ml-2 text-sm'>
+                    {formatETA(job.eta_seconds)}
+                  </span>
+                )}
+              </span>
             </div>
             <div className='w-full bg-dark-700 rounded-full h-3 overflow-hidden'>
               <div
