@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import { useLocalStorage } from '../hooks';
 
 const VIDEO_EXTENSIONS = [
   '.mp4',
@@ -32,8 +33,12 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
   );
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState('');
-  const [outputDirectory, setOutputDirectory] = useState('/drive/转码/转码后');
-  const [browsePath, setBrowsePath] = useState('/drive/转码/转码后');
+  const [lastOutputDir, setLastOutputDir] = useLocalStorage(
+    'handbrake_last_output_dir',
+    '/drive/转码/转码后'
+  );
+  const [outputDirectory, setOutputDirectory] = useState(lastOutputDir);
+  const [browsePath, setBrowsePath] = useState(lastOutputDir);
   const [browseDirs, setBrowseDirs] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(false);
   const [sourceTree, setSourceTree] = useState([]);
@@ -91,11 +96,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
         setSourceTree(treeRes.data.data.directories || []);
       }
 
-      setBrowsePath(ROOT_OUTPUT_PATH);
-      if (lastDir) {
-        setOutputDirectory(`${ROOT_OUTPUT_PATH}/${lastDir}`);
-      }
-      await fetchBrowseDirs(ROOT_OUTPUT_PATH);
+      await fetchBrowseDirs(browsePath);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -103,7 +104,8 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
   const handleBrowse = path => {
     setBrowsePath(path);
-    setOutputDirectory(lastDir ? `${path}/${lastDir}` : path);
+    setOutputDirectory(path);
+    setLastOutputDir(path);
     fetchBrowseDirs(path);
   };
 
@@ -184,7 +186,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     () => (browsePath || ROOT_OUTPUT_PATH).split('/').filter(Boolean),
     [browsePath]
   );
-  const lastDir = useMemo(() => directory.split('/').filter(Boolean).pop(), [directory]);
 
   const buildTree = useMemo(
     () => paths => {
@@ -313,6 +314,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             onDoubleClick={e => {
                               e.preventDefault();
                               setOutputDirectory(dir.path);
+                              setLastOutputDir(dir.path);
                             }}
                             className={clsx(
                               'flex items-center space-x-2 p-2 rounded-lg transition-colors text-left',
