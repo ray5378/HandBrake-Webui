@@ -21,17 +21,25 @@ router.get(
       const maxResults = 50;
 
       const videoExtensions = [
-        '.mp4', '.mkv', '.avi', '.mov', '.wmv',
-        '.flv', '.webm', '.m4v', '.mpg', '.mpeg'
+        '.mp4',
+        '.mkv',
+        '.avi',
+        '.mov',
+        '.wmv',
+        '.flv',
+        '.webm',
+        '.m4v',
+        '.mpg',
+        '.mpeg'
       ];
 
       const searchDir = async (dirPath, depth = 0) => {
         if (depth > 5) {
- return; 
-}
+          return;
+        }
         if (results.files.length + results.directories.length >= maxResults) {
- return; 
-}
+          return;
+        }
 
         let items;
         try {
@@ -42,8 +50,8 @@ router.get(
 
         for (const item of items) {
           if (results.files.length + results.directories.length >= maxResults) {
- break; 
-}
+            break;
+          }
 
           const itemPath = path.join(dirPath, item.name);
 

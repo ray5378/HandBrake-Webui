@@ -1500,9 +1500,7 @@ function Presets() {
   const presetTags = [
     {
       group: '类别',
-      tags: [
-        { id: 'custom', label: '自定义' }
-      ]
+      tags: [{ id: 'custom', label: '自定义' }]
     },
     {
       group: '编码',
@@ -1588,14 +1586,22 @@ function Presets() {
         </div>
 
         <div className='flex items-center gap-3'>
-          <div className='relative' onFocus={() => setShowTagDropdown(true)} onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}>
+          <div
+            className='relative'
+            onFocus={() => setShowTagDropdown(true)}
+            onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}
+          >
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500' />
             <input
               type='text'
               value={presetFilter}
               onChange={e => setPresetFilter(e.target.value)}
               className='input pl-9 py-2 text-sm w-48 sm:w-56'
-              placeholder={activeTag ? `按标签「${presetTags.flatMap(g => g.tags).find(t => t.id === activeTag)?.label || ''}」筛选...` : '搜索预设...'}
+              placeholder={
+                activeTag
+                  ? `按标签「${presetTags.flatMap(g => g.tags).find(t => t.id === activeTag)?.label || ''}」筛选...`
+                  : '搜索预设...'
+              }
             />
             {activeTag && (
               <button

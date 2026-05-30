@@ -171,7 +171,10 @@ function Files() {
                 searchTimerRef.current = setTimeout(() => doSearch(value), 300);
               }}
               onFocus={() => {
-                if (searchTerm.trim() && (searchResults.files.length > 0 || searchResults.directories.length > 0)) {
+                if (
+                  searchTerm.trim() &&
+                  (searchResults.files.length > 0 || searchResults.directories.length > 0)
+                ) {
                   setShowSearchResults(true);
                 }
               }}
@@ -194,13 +197,9 @@ function Files() {
             {showSearchResults && (
               <div className='absolute top-full left-0 right-0 mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 max-h-[400px] overflow-y-auto'>
                 {searchLoading ? (
-                  <div className='p-4 text-center text-gray-400 text-sm'>
-                    {t('common.loading')}
-                  </div>
+                  <div className='p-4 text-center text-gray-400 text-sm'>{t('common.loading')}</div>
                 ) : searchResults.directories.length === 0 && searchResults.files.length === 0 ? (
-                  <div className='p-4 text-center text-gray-500 text-sm'>
-                    未找到匹配的结果
-                  </div>
+                  <div className='p-4 text-center text-gray-500 text-sm'>未找到匹配的结果</div>
                 ) : (
                   <>
                     {searchResults.directories.length > 0 && (
