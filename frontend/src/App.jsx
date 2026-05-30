@@ -10,6 +10,7 @@ const Files = lazy(() => import('./pages/Files'));
 const Jobs = lazy(() => import('./pages/Jobs'));
 const Presets = lazy(() => import('./pages/Presets'));
 const Settings = lazy(() => import('./pages/Settings'));
+const Account = lazy(() => import('./pages/Account'));
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, checkAuth } = useAuthStore();
@@ -44,6 +45,7 @@ function App() {
             <Route path='jobs' element={<Jobs />} />
             <Route path='presets' element={<Presets />} />
             <Route path='settings' element={<Settings />} />
+            <Route path='account' element={<Account />} />
           </Route>
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>

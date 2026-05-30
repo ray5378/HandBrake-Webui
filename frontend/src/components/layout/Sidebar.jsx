@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, FolderOpen, ListTodo, Settings, Layers, LogOut } from 'lucide-react';
+import { Home, FolderOpen, ListTodo, Layers, LogOut, User } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -27,8 +27,7 @@ function Sidebar({ isOpen, setIsOpen }) {
     { path: '/', icon: Home, label: t('nav.dashboard') },
     { path: '/files', icon: FolderOpen, label: t('nav.files') },
     { path: '/jobs', icon: ListTodo, label: t('nav.jobs') },
-    { path: '/presets', icon: Layers, label: t('nav.presets') },
-    { path: '/settings', icon: Settings, label: t('nav.settings') }
+    { path: '/presets', icon: Layers, label: t('nav.presets') }
   ];
 
   const handleLogout = async () => {
@@ -111,9 +110,19 @@ function Sidebar({ isOpen, setIsOpen }) {
                   <button
                     onClick={() => {
                       setShowUserMenu(false);
-                      handleLogout();
+                      navigate('/account');
                     }}
                     className='flex items-center space-x-2 w-full px-4 py-3 text-gray-300 hover:bg-dark-600 hover:text-white transition-colors'
+                  >
+                    <User className='w-4 h-4' />
+                    <span className='text-sm'>{t('settings.account')}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      handleLogout();
+                    }}
+                    className='flex items-center space-x-2 w-full px-4 py-3 text-gray-300 hover:bg-dark-600 hover:text-white transition-colors border-t border-dark-600'
                   >
                     <LogOut className='w-4 h-4' />
                     <span className='text-sm'>{t('nav.logout')}</span>

@@ -1,31 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  User,
-  FolderOpen,
-  Save,
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-  Database,
-  ChevronRight
-} from 'lucide-react';
+import { FolderOpen, Save, Loader2, AlertCircle, CheckCircle, ChevronRight } from 'lucide-react';
 import api from '../services/api';
-import { useAuthStore } from '../stores/authStore';
-
 function Settings() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('cache');
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
 
   const [cacheDir, setCacheDir] = useState('');
   const [maxConcurrentJobs, setMaxConcurrentJobs] = useState(2);
@@ -36,13 +16,11 @@ function Settings() {
   const abortRef = useRef(null);
 
   useEffect(() => {
-    if (activeTab === 'cache') {
-      fetchCacheDir();
-    }
+    fetchCacheDir();
     return () => {
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [activeTab]);
+  }, []);
 
   const fetchCacheDir = async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -109,47 +87,6 @@ function Settings() {
     fetchBrowseDirs(path);
   };
 
-  const handlePasswordChange = async e => {
-    e.preventDefault();
-
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError(t('settings.passwordMismatch') || 'Passwords do not match');
-      return;
-    }
-
-    if (passwordForm.newPassword.length < 6) {
-      setError(t('settings.passwordTooShort') || 'Password must be at least 6 characters');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      await api.put(`/users/${user.id}/password`, {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword
-      });
-
-      setSuccess(t('settings.passwordChanged') || 'Password changed successfully');
-      setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-    } catch (error) {
-      setError(error.response?.data?.error || t('errors.unknownError'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const tabs = [
-    { id: 'cache', label: t('settings.transcodeConfig') || '转码配置', icon: Database },
-    { id: 'account', label: t('settings.account') || 'Account', icon: User }
-  ];
-
   const pathParts = (browsePath || '/drive').split('/').filter(Boolean);
 
   return (
@@ -159,299 +96,159 @@ function Settings() {
         <p className='text-gray-400 mt-1'>{t('settings.subtitle')}</p>
       </div>
 
-      <div className='flex flex-col lg:flex-row gap-6'>
-        <div className='lg:w-64 flex-shrink-0'>
-          <nav className='space-y-1'>
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-left ${
-                  activeTab === tab.id ? 'bg-primary text-white' : 'text-gray-300 hover:bg-dark-700'
-                }`}
-              >
-                <tab.icon className='w-5 h-5' />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
+      <div className='card'>
+        <h2 className='text-xl font-semibold text-white mb-4'>
+          {t('settings.transcodeConfig') || '转码配置'}
+        </h2>
 
-        <div className='flex-1'>
-          {activeTab === 'account' && (
-            <div className='space-y-6'>
-              <div className='card'>
-                <h2 className='text-xl font-semibold text-white mb-4'>
-                  {t('settings.accountInfo') || 'Account Information'}
-                </h2>
+        {error && (
+          <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
+            <AlertCircle className='w-4 h-4' />
+            <span>{error}</span>
+          </div>
+        )}
 
-                <div className='space-y-3'>
-                  <div>
-                    <p className='text-sm text-gray-400'>{t('auth.username')}</p>
-                    <p className='text-white text-lg'>{user?.username}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-gray-400'>{t('settings.role') || 'Role'}</p>
-                    <p className='text-white capitalize'>{user?.role}</p>
-                  </div>
-                </div>
-              </div>
+        {success && (
+          <div className='mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm'>
+            <CheckCircle className='w-4 h-4' />
+            <span>{success}</span>
+          </div>
+        )}
 
-              <div className='card'>
-                <h2 className='text-xl font-semibold text-white mb-4'>
-                  {t('settings.changePassword') || 'Change Password'}
-                </h2>
+        <div className='space-y-6'>
+          <div>
+            <h3 className='text-sm font-medium text-gray-400 mb-2'>
+              {t('settings.cacheDir') || '缓存目录'}
+            </h3>
+            <p className='text-gray-500 text-xs mb-3'>
+              {t('settings.cacheDirDesc') ||
+                '选择一个目录作为转码临时缓存目录。转码时中间文件会先写入此目录，完成后移动到输出目录。'}
+            </p>
 
-                {error && (
-                  <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
-                    <AlertCircle className='w-4 h-4' />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                {success && (
-                  <div className='mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm'>
-                    <CheckCircle className='w-4 h-4' />
-                    <span>{success}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handlePasswordChange} className='space-y-4'>
-                  <div>
-                    <label className='label'>
-                      {t('settings.currentPassword') || 'Current Password'}
-                    </label>
-                    <input
-                      type='password'
-                      value={passwordForm.currentPassword}
-                      onChange={e =>
-                        setPasswordForm({
-                          ...passwordForm,
-                          currentPassword: e.target.value
-                        })
-                      }
-                      className='input'
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className='label'>{t('settings.newPassword') || 'New Password'}</label>
-                    <input
-                      type='password'
-                      value={passwordForm.newPassword}
-                      onChange={e =>
-                        setPasswordForm({
-                          ...passwordForm,
-                          newPassword: e.target.value
-                        })
-                      }
-                      className='input'
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className='label'>
-                      {t('settings.confirmPassword') || 'Confirm Password'}
-                    </label>
-                    <input
-                      type='password'
-                      value={passwordForm.confirmPassword}
-                      onChange={e =>
-                        setPasswordForm({
-                          ...passwordForm,
-                          confirmPassword: e.target.value
-                        })
-                      }
-                      className='input'
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type='submit'
-                    disabled={loading}
-                    className='btn btn-primary inline-flex items-center space-x-2'
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className='w-4 h-4 animate-spin' />
-                        <span>{t('common.saving') || 'Saving...'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save className='w-4 h-4' />
-                        <span>{t('common.save')}</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
+            <div className='mb-4'>
+              <label className='label'>{t('settings.currentCacheDir') || '当前缓存目录'}</label>
+              <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1 truncate'>
+                {cacheDir || t('settings.notSet') || '（未设置）'}
+              </p>
             </div>
-          )}
 
-          {activeTab === 'cache' && (
-            <div className='card'>
-              <h2 className='text-xl font-semibold text-white mb-4'>
-                {t('settings.transcodeConfig') || '转码配置'}
-              </h2>
+            <div className='mb-4'>
+              <label className='label'>{t('settings.browseDir') || '浏览目录'}</label>
 
-              {error && (
-                <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
-                  <AlertCircle className='w-4 h-4' />
-                  <span>{error}</span>
+              {browseLoading ? (
+                <div className='flex items-center space-x-2 text-gray-400 py-2'>
+                  <Loader2 className='w-4 h-4 animate-spin' />
+                  <span className='text-sm'>{t('common.loading')}</span>
                 </div>
-              )}
-
-              {success && (
-                <div className='mb-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center space-x-2 text-success text-sm'>
-                  <CheckCircle className='w-4 h-4' />
-                  <span>{success}</span>
-                </div>
-              )}
-
-              <div className='space-y-6'>
-                <div>
-                  <h3 className='text-sm font-medium text-gray-400 mb-2'>
-                    {t('settings.cacheDir') || '缓存目录'}
-                  </h3>
-                  <p className='text-gray-500 text-xs mb-3'>
-                    {t('settings.cacheDirDesc') ||
-                      '选择一个目录作为转码临时缓存目录。转码时中间文件会先写入此目录，完成后移动到输出目录。'}
-                  </p>
-
-                  <div className='mb-4'>
-                    <label className='label'>
-                      {t('settings.currentCacheDir') || '当前缓存目录'}
-                    </label>
-                    <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1 truncate'>
-                      {cacheDir || t('settings.notSet') || '（未设置）'}
-                    </p>
-                  </div>
-
-                  <div className='mb-4'>
-                    <label className='label'>{t('settings.browseDir') || '浏览目录'}</label>
-
-                    {browseLoading ? (
-                      <div className='flex items-center space-x-2 text-gray-400 py-2'>
-                        <Loader2 className='w-4 h-4 animate-spin' />
-                        <span className='text-sm'>{t('common.loading')}</span>
-                      </div>
-                    ) : (
-                      <>
-                        <div className='flex flex-wrap items-center gap-1 text-sm mb-3'>
+              ) : (
+                <>
+                  <div className='flex flex-wrap items-center gap-1 text-sm mb-3'>
+                    <button
+                      type='button'
+                      onClick={() => handleBrowse('/drive')}
+                      className={`hover:underline truncate max-w-[100px] ${
+                        browsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
+                      }`}
+                    >
+                      drive
+                    </button>
+                    {pathParts.slice(1).map((part, i) => {
+                      const fullPath = '/drive/' + pathParts.slice(1, i + 2).join('/');
+                      return (
+                        <React.Fragment key={i}>
+                          <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />
                           <button
                             type='button'
-                            onClick={() => handleBrowse('/drive')}
+                            onClick={() => handleBrowse(fullPath)}
                             className={`hover:underline truncate max-w-[100px] ${
-                              browsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
+                              browsePath === fullPath ? 'text-white font-medium' : 'text-primary'
                             }`}
                           >
-                            drive
+                            {part}
                           </button>
-                          {pathParts.slice(1).map((part, i) => {
-                            const fullPath = '/drive/' + pathParts.slice(1, i + 2).join('/');
-                            return (
-                              <React.Fragment key={i}>
-                                <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />
-                                <button
-                                  type='button'
-                                  onClick={() => handleBrowse(fullPath)}
-                                  className={`hover:underline truncate max-w-[100px] ${
-                                    browsePath === fullPath
-                                      ? 'text-white font-medium'
-                                      : 'text-primary'
-                                  }`}
-                                >
-                                  {part}
-                                </button>
-                              </React.Fragment>
-                            );
-                          })}
-                        </div>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
 
-                        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
-                          {browseDirs.map(dir => (
-                            <button
-                              type='button'
-                              key={dir.path}
-                              onClick={() => handleBrowse(dir.path)}
-                              className={`flex items-center space-x-2 p-2 rounded-lg transition-colors text-left ${
-                                cacheDir === dir.path
-                                  ? 'bg-primary/20 border border-primary'
-                                  : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
-                              }`}
-                            >
-                              <FolderOpen className='w-4 h-4 text-warning shrink-0' />
-                              <span className='text-white text-xs truncate'>{dir.name}</span>
-                            </button>
-                          ))}
-                          {browseDirs.length === 0 && (
-                            <p className='col-span-full text-gray-500 text-xs py-2'>
-                              {t('common.empty') || '空目录'}
-                            </p>
-                          )}
-                        </div>
-                      </>
+                  <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
+                    {browseDirs.map(dir => (
+                      <button
+                        type='button'
+                        key={dir.path}
+                        onClick={() => handleBrowse(dir.path)}
+                        className={`flex items-center space-x-2 p-2 rounded-lg transition-colors text-left ${
+                          cacheDir === dir.path
+                            ? 'bg-primary/20 border border-primary'
+                            : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
+                        }`}
+                      >
+                        <FolderOpen className='w-4 h-4 text-warning shrink-0' />
+                        <span className='text-white text-xs truncate'>{dir.name}</span>
+                      </button>
+                    ))}
+                    {browseDirs.length === 0 && (
+                      <p className='col-span-full text-gray-500 text-xs py-2'>
+                        {t('common.empty') || '空目录'}
+                      </p>
                     )}
-
-                    <p className='text-xs text-gray-400'>
-                      {t('settings.selected') || '已选'}:{' '}
-                      <span className='text-primary truncate'>
-                        {cacheDir || t('settings.notSelected') || '（未选择）'}
-                      </span>
-                    </p>
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className='border-t border-dark-700 pt-6'>
-                  <h3 className='text-sm font-medium text-gray-400 mb-2'>
-                    {t('settings.concurrentJobs') || '同时转码任务数'}
-                  </h3>
-                  <p className='text-gray-500 text-xs mb-3'>
-                    {t('settings.concurrentJobsDesc') ||
-                      '设置同时运行的转码任务数量，数值越大 CPU 占用越高。'}
-                  </p>
-                  <div className='flex items-center space-x-3'>
-                    <input
-                      type='number'
-                      min={1}
-                      max={10}
-                      value={maxConcurrentJobs}
-                      onChange={e => {
-                        const val = parseInt(e.target.value) || 1;
-                        setMaxConcurrentJobs(Math.min(10, Math.max(1, val)));
-                      }}
-                      className='input w-24 text-center font-mono text-lg'
-                    />
-                    <span className='text-gray-400 text-sm'>{t('settings.tasks') || '个任务'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className='mt-6 pt-6 border-t border-dark-700'>
-                <button
-                  type='button'
-                  onClick={handleSaveCacheDir}
-                  disabled={savingCacheDir || !cacheDir}
-                  className='btn btn-primary inline-flex items-center space-x-2'
-                >
-                  {savingCacheDir ? (
-                    <>
-                      <Loader2 className='w-4 h-4 animate-spin' />
-                      <span>{t('common.saving')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className='w-4 h-4' />
-                      <span>{t('common.save')}</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              <p className='text-xs text-gray-400'>
+                {t('settings.selected') || '已选'}:{' '}
+                <span className='text-primary truncate'>
+                  {cacheDir || t('settings.notSelected') || '（未选择）'}
+                </span>
+              </p>
             </div>
-          )}
+          </div>
+
+          <div className='border-t border-dark-700 pt-6'>
+            <h3 className='text-sm font-medium text-gray-400 mb-2'>
+              {t('settings.concurrentJobs') || '同时转码任务数'}
+            </h3>
+            <p className='text-gray-500 text-xs mb-3'>
+              {t('settings.concurrentJobsDesc') ||
+                '设置同时运行的转码任务数量，数值越大 CPU 占用越高。'}
+            </p>
+            <div className='flex items-center space-x-3'>
+              <input
+                type='number'
+                min={1}
+                max={10}
+                value={maxConcurrentJobs}
+                onChange={e => {
+                  const val = parseInt(e.target.value) || 1;
+                  setMaxConcurrentJobs(Math.min(10, Math.max(1, val)));
+                }}
+                className='input w-24 text-center font-mono text-lg'
+              />
+              <span className='text-gray-400 text-sm'>{t('settings.tasks') || '个任务'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className='mt-6 pt-6 border-t border-dark-700'>
+          <button
+            type='button'
+            onClick={handleSaveCacheDir}
+            disabled={savingCacheDir || !cacheDir}
+            className='btn btn-primary inline-flex items-center space-x-2'
+          >
+            {savingCacheDir ? (
+              <>
+                <Loader2 className='w-4 h-4 animate-spin' />
+                <span>{t('common.saving')}</span>
+              </>
+            ) : (
+              <>
+                <Save className='w-4 h-4' />
+                <span>{t('common.save')}</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
