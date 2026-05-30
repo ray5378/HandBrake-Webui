@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   X,
   Video,
@@ -29,6 +30,7 @@ const VIDEO_EXTENSIONS = [
 ];
 
 function BatchTranscodeModal({ directory, onClose, onSuccess }) {
+  const { t } = useTranslation();
   const isSingleFile = VIDEO_EXTENSIONS.includes(
     '.' + (directory || '').split('.').pop()?.toLowerCase()
   );
@@ -151,7 +153,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
       setNewDirName('');
       fetchBrowseDirs(browsePath);
     } catch (err) {
-      setError(err.response?.data?.error || '创建目录失败');
+      setError(err.response?.data?.error || t('batchTranscode.createDirFailed', '创建目录失败'));
     }
   };
 
@@ -159,23 +161,23 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
     e.preventDefault();
 
     if (!outputDirectory) {
-      setError('请选择输出目录');
+      setError(t('batchTranscode.selectOutputDir', '请选择输出目录'));
       return;
     }
 
     if (!selectedPreset) {
-      setError('请选择转码预设');
+      setError(t('batchTranscode.selectPresetError', '请选择转码预设'));
       return;
     }
 
     try {
       const cacheRes = await api.get('/system/cache-dir', { signal: abortRef.current?.signal });
       if (!cacheRes.data.data.cacheDir) {
-        setError('请先在设置中配置缓存目录');
+        setError(t('batchTranscode.configCacheDir', '请先在设置中配置缓存目录'));
         return;
       }
     } catch (err) {
-      setError('检查缓存目录失败，请先在设置中配置');
+      setError(t('batchTranscode.checkCacheDirFailed', '检查缓存目录失败，请先在设置中配置'));
       return;
     }
 
@@ -214,7 +216,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
         onClose();
       }, 2000);
     } catch (error) {
-      setError(error.response?.data?.error || '提交任务失败');
+      setError(error.response?.data?.error || t('batchTranscode.submitFailed', '提交任务失败'));
     } finally {
       setSubmitting(false);
     }
@@ -313,10 +315,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
           <div>
             <h2 className='text-2xl font-bold text-white flex items-center space-x-3'>
               <Video className='w-6 h-6' />
-              <span>{isSingleFile ? '转码' : '批量转码'}</span>
+              <span>
+                {isSingleFile
+                  ? t('batchTranscode.title', '转码')
+                  : t('batchTranscode.batchTitle', '批量转码')}
+              </span>
             </h2>
             <p className='text-gray-400 mt-1'>
-              {isSingleFile ? '源文件' : '源目录'}: {directory}
+              {isSingleFile
+                ? t('batchTranscode.sourceFile', '源文件')
+                : t('batchTranscode.sourceDir', '源目录')}
+              : {directory}
             </p>
           </div>
           <button onClick={onClose} className='p-2 hover:bg-dark-700 rounded-lg transition-colors'>
@@ -327,8 +336,12 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
         {success ? (
           <div className='p-8 text-center'>
             <CheckCircle className='w-16 h-16 text-success mx-auto mb-4' />
-            <h3 className='text-xl font-bold text-white mb-2'>任务已提交!</h3>
-            <p className='text-gray-400'>正在跳转到任务列表...</p>
+            <h3 className='text-xl font-bold text-white mb-2'>
+              {t('batchTranscode.taskSubmitted', '任务已提交!')}
+            </h3>
+            <p className='text-gray-400'>
+              {t('batchTranscode.redirecting', '正在跳转到任务列表...')}
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className='p-6 space-y-6'>
@@ -342,17 +355,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
             <div className='bg-dark-700 rounded-lg p-4'>
               <h3 className='text-lg font-semibold text-white mb-3 flex items-center space-x-2'>
                 <FolderOpen className='w-5 h-5' />
-                <span>输出设置</span>
+                <span>{t('batchTranscode.outputSettings', '输出设置')}</span>
               </h3>
 
               <div className='space-y-4'>
                 <div>
-                  <label className='label'>输出目录</label>
+                  <label className='label'>{t('batchTranscode.outputDir', '输出目录')}</label>
 
                   {browseLoading ? (
                     <div className='flex items-center space-x-2 text-gray-400 py-2'>
                       <Loader2 className='w-4 h-4 animate-spin' />
-                      <span className='text-sm'>加载中...</span>
+                      <span className='text-sm'>{t('batchTranscode.loading', '加载中...')}</span>
                     </div>
                   ) : (
                     <>
@@ -402,7 +415,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                           </button>
                         ))}
                         {browseDirs.length === 0 && (
-                          <p className='col-span-full text-gray-500 text-xs py-2'>空目录</p>
+                          <p className='col-span-full text-gray-500 text-xs py-2'>
+                            {t('batchTranscode.emptyDir', '空目录')}
+                          </p>
                         )}
                       </div>
                     </>
@@ -410,7 +425,8 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
                   <div className='flex items-center justify-between'>
                     <p className='text-xs text-gray-400 truncate max-w-[250px] sm:max-w-none'>
-                      已选: <span className='text-primary'>{outputDirectory}</span>
+                      {t('batchTranscode.selected', '已选')}:{' '}
+                      <span className='text-primary'>{outputDirectory}</span>
                     </p>
                     <div className='flex space-x-2'>
                       {showNewDirInput ? (
@@ -420,7 +436,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             value={newDirName}
                             onChange={e => setNewDirName(e.target.value)}
                             className='input text-xs py-1 w-20 sm:w-28'
-                            placeholder='目录名'
+                            placeholder={t('batchTranscode.dirName', '目录名')}
                             onKeyDown={e => {
                               if (e.key === 'Enter') handleCreateDir();
                               if (e.key === 'Escape') {
@@ -434,7 +450,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             onClick={handleCreateDir}
                             className='btn btn-primary text-xs py-1'
                           >
-                            创建
+                            {t('batchTranscode.create', '创建')}
                           </button>
                           <button
                             type='button'
@@ -444,7 +460,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             }}
                             className='btn btn-secondary text-xs py-1'
                           >
-                            取消
+                            {t('batchTranscode.cancel', '取消')}
                           </button>
                         </div>
                       ) : (
@@ -454,7 +470,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                           className='text-xs text-primary hover:underline flex items-center space-x-1'
                         >
                           <Plus className='w-3 h-3' />
-                          <span>新建目录</span>
+                          <span>{t('batchTranscode.newDir', '新建目录')}</span>
                         </button>
                       )}
                     </div>
@@ -465,14 +481,16 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   <div className='p-3 bg-dark-600 rounded-lg'>
                     <h4 className='text-sm font-semibold text-white mb-2 flex items-center space-x-1'>
                       <GitBranch className='w-4 h-4 text-primary' />
-                      <span>目录结构预览</span>
+                      <span>{t('batchTranscode.dirTreePreview', '目录结构预览')}</span>
                     </h4>
                     <div className='max-h-48 overflow-y-auto overflow-x-auto'>
                       {/* 左右两列表格 */}
                       <div className='grid grid-cols-2 gap-3 min-w-[400px]'>
                         {/* 左侧 - 源目录 */}
                         <div>
-                          <div className='text-xs text-gray-400 mb-1 font-semibold'>源</div>
+                          <div className='text-xs text-gray-400 mb-1 font-semibold'>
+                            {t('batchTranscode.source', '源')}
+                          </div>
                           <div className='bg-dark-700 rounded px-2 py-1'>
                             <div className='text-xs font-mono mb-2 border-b border-dark-600 pb-1'>
                               <span className='text-gray-400 break-all'>{directory}</span>
@@ -496,7 +514,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                         </div>
                         {/* 右侧 - 输出目录 */}
                         <div>
-                          <div className='text-xs text-primary mb-1 font-semibold'>输出</div>
+                          <div className='text-xs text-primary mb-1 font-semibold'>
+                            {t('batchTranscode.output', '输出')}
+                          </div>
                           <div className='bg-dark-700 rounded px-2 py-1'>
                             <div className='text-xs font-mono mb-2 border-b border-dark-600 pb-1'>
                               <span className='text-primary break-all'>{outputDirectory}</span>
@@ -524,7 +544,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                 )}
 
                 <div>
-                  <label className='label mb-2'>选择预设</label>
+                  <label className='label mb-2'>
+                    {t('batchTranscode.selectPreset', '选择预设')}
+                  </label>
                   {presets.length > 0 ? (
                     <div className='relative'>
                       <div
@@ -567,7 +589,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                             }
                           }}
                           className='bg-transparent border-none outline-none text-white flex-1 min-w-0'
-                          placeholder='输入搜索预设...'
+                          placeholder={t('batchTranscode.searchPreset', '输入搜索预设...')}
                         />
                         <ChevronDown className='w-4 h-4 text-gray-400 shrink-0' />
                       </div>
@@ -592,7 +614,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                                 <span className='truncate'>
                                   {preset.name}
                                   {!preset.isBuiltIn && (
-                                    <span className='text-xs text-gray-500 ml-1'>(自定义)</span>
+                                    <span className='text-xs text-gray-500 ml-1'>
+                                      {t('batchTranscode.custom', '(自定义)')}
+                                    </span>
                                   )}
                                 </span>
                                 <span className='text-xs text-gray-500 shrink-0 ml-2'>
@@ -601,13 +625,15 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                               </button>
                             ))
                           ) : (
-                            <div className='px-3 py-2 text-sm text-gray-500'>无匹配预设</div>
+                            <div className='px-3 py-2 text-sm text-gray-500'>
+                              {t('batchTranscode.noMatchPreset', '无匹配预设')}
+                            </div>
                           )}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <p className='text-gray-400'>暂无预设可用</p>
+                    <p className='text-gray-400'>{t('batchTranscode.noPresets', '暂无预设可用')}</p>
                   )}
                 </div>
 
@@ -621,7 +647,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                     />
                     <label htmlFor='copyNonVideoFiles' className='text-sm text-gray-300'>
-                      把源目录不能转码的文件复制到目标目录
+                      {t('batchTranscode.copyNonVideo', '把源目录不能转码的文件复制到目标目录')}
                     </label>
                   </div>
                 )}
@@ -636,7 +662,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                       className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
                     />
                     <label htmlFor='moveNonVideoFiles' className='text-sm text-gray-300'>
-                      把源目录不能转码的文件移动到目标目录
+                      {t('batchTranscode.moveNonVideo', '把源目录不能转码的文件移动到目标目录')}
                     </label>
                   </div>
                 )}
@@ -644,20 +670,34 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
             </div>
 
             <div className='bg-dark-700 rounded-lg p-4'>
-              <h3 className='text-lg font-semibold text-white mb-3'>说明</h3>
+              <h3 className='text-lg font-semibold text-white mb-3'>
+                {t('batchTranscode.instructions', '说明')}
+              </h3>
               <ul className='text-gray-400 text-sm space-y-2'>
                 {isSingleFile ? (
                   <>
-                    <li>• 转码单个视频文件</li>
-                    <li>• 转码后的文件保持原文件名，扩展名改为 .mp4</li>
-                    <li>• 任务会自动加入队列处理</li>
+                    <li>• {t('batchTranscode.singleFileDesc1', '转码单个视频文件')}</li>
+                    <li>
+                      •{' '}
+                      {t(
+                        'batchTranscode.singleFileDesc2',
+                        '转码后的文件保持原文件名，扩展名改为 .mp4'
+                      )}
+                    </li>
+                    <li>• {t('batchTranscode.singleFileDesc3', '任务会自动加入队列处理')}</li>
                   </>
                 ) : (
                   <>
-                    <li>• 递归扫描源目录中的所有视频文件</li>
-                    <li>• 保持原始目录结构</li>
-                    <li>• 转码后的文件保持原文件名，仅扩展名改为容器格式</li>
-                    <li>• 所有任务会自动加入队列处理</li>
+                    <li>• {t('batchTranscode.batchDesc1', '递归扫描源目录中的所有视频文件')}</li>
+                    <li>• {t('batchTranscode.batchDesc2', '保持原始目录结构')}</li>
+                    <li>
+                      •{' '}
+                      {t(
+                        'batchTranscode.batchDesc3',
+                        '转码后的文件保持原文件名，仅扩展名改为容器格式'
+                      )}
+                    </li>
+                    <li>• {t('batchTranscode.batchDesc4', '所有任务会自动加入队列处理')}</li>
                   </>
                 )}
               </ul>
@@ -665,7 +705,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
 
             <div className='flex space-x-3 pt-4'>
               <button type='button' onClick={onClose} className='btn btn-secondary flex-1'>
-                取消
+                {t('batchTranscode.cancel', '取消')}
               </button>
               <button
                 type='submit'
@@ -675,12 +715,16 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                 {submitting ? (
                   <>
                     <Loader2 className='w-4 h-4 animate-spin' />
-                    <span>提交中...</span>
+                    <span>{t('batchTranscode.submit', '提交中...')}</span>
                   </>
                 ) : (
                   <>
                     <Settings className='w-4 h-4' />
-                    <span>{isSingleFile ? '开始转码' : '开始批量转码'}</span>
+                    <span>
+                      {isSingleFile
+                        ? t('batchTranscode.startSingle', '开始转码')
+                        : t('batchTranscode.startBatch', '开始批量转码')}
+                    </span>
                   </>
                 )}
               </button>
