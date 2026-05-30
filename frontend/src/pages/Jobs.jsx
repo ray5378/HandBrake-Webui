@@ -230,7 +230,10 @@ function Jobs() {
       ) : filteredJobs.length > 0 ? (
         <div className='space-y-3'>
           {filteredJobs.map(job => (
-            <div key={job.id} className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-green-900/20 border-green-700/40' : ''}`}>
+            <div
+              key={job.id}
+              className={`card hover:border-primary/50 transition-colors ${job.status === 'processing' ? 'bg-green-900/20 border-green-700/40' : ''}`}
+            >
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>
                   <div className='space-y-1 mb-2'>
