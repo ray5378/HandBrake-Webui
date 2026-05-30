@@ -223,11 +223,11 @@ function Jobs() {
                         </span>
                       )}
                     </div>
-                    <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
-                      <span className='text-gray-500'>{t('jobs.outputFile', '输出文件')}: </span>
+                    <div className='text-primary font-mono text-sm' title={job.output_file}>
+                      <span className='text-primary/60'>{t('jobs.outputFile', '输出文件')}: </span>
                       <span className='break-all'>{job.output_file}</span>
                       {job.status === 'completed' && job.output_file_size != null && (
-                        <span className='text-gray-500 ml-3'>
+                        <span className='text-primary/60 ml-3'>
                           {t('jobs.outputSize', '转码后')}：{formatFileSize(job.output_file_size)}
                         </span>
                       )}
