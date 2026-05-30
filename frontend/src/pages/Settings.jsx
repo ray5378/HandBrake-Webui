@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Settings as SettingsIcon,
   User,
   FolderOpen,
   Save,
@@ -17,7 +16,6 @@ import { useAuthStore } from '../stores/authStore';
 function Settings() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const [systemInfo, setSystemInfo] = useState(null);
   const [activeTab, setActiveTab] = useState('cache');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -36,13 +34,6 @@ function Settings() {
   const [browseLoading, setBrowseLoading] = useState(false);
   const [savingCacheDir, setSavingCacheDir] = useState(false);
   const abortRef = useRef(null);
-
-  useEffect(() => {
-    fetchSystemInfo();
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, []);
 
   useEffect(() => {
     if (activeTab === 'cache') {
@@ -89,19 +80,6 @@ function Settings() {
       console.error('Failed to fetch directories:', err);
     } finally {
       setBrowseLoading(false);
-    }
-  };
-
-  const fetchSystemInfo = async () => {
-    if (abortRef.current) abortRef.current.abort();
-    abortRef.current = new AbortController();
-    const signal = abortRef.current.signal;
-    try {
-      const infoRes = await api.get('/system/info', { signal });
-
-      setSystemInfo(infoRes.data.data);
-    } catch (error) {
-      console.error('Failed to fetch system info:', error);
     }
   };
 
@@ -167,18 +145,9 @@ function Settings() {
     }
   };
 
-  const formatBytes = bytes => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
-
   const tabs = [
     { id: 'cache', label: t('settings.transcodeConfig') || '转码配置', icon: Database },
-    { id: 'account', label: t('settings.account') || 'Account', icon: User },
-    { id: 'general', label: t('settings.general'), icon: SettingsIcon }
+    { id: 'account', label: t('settings.account') || 'Account', icon: User }
   ];
 
   const pathParts = (browsePath || '/drive').split('/').filter(Boolean);
@@ -209,76 +178,6 @@ function Settings() {
         </div>
 
         <div className='flex-1'>
-          {activeTab === 'general' && (
-            <div className='card'>
-              <h2 className='text-xl font-semibold text-white mb-4'>{t('settings.about')}</h2>
-
-              {systemInfo ? (
-                <div className='space-y-4'>
-                  <div className='grid grid-cols-2 gap-4'>
-                    <div>
-                      <p className='text-sm text-gray-400'>HandBrake {t('settings.version')}</p>
-                      <p className='text-white font-mono'>{systemInfo.handbrakeVersion}</p>
-                    </div>
-                    <div>
-                      <p className='text-sm text-gray-400'>Web UI {t('settings.version')}</p>
-                      <p className='text-white font-mono'>
-                        {import.meta.env.VITE_GIT_COMMIT || 'unknown'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className='text-sm text-gray-400'>
-                        {t('settings.platform') || 'Platform'}
-                      </p>
-                      <p className='text-white'>
-                        {systemInfo.platform} ({systemInfo.arch})
-                      </p>
-                    </div>
-                    <div>
-                      <p className='text-sm text-gray-400'>{t('common.uptime') || 'Uptime'}</p>
-                      <p className='text-white font-mono'>
-                        {Math.floor(systemInfo.uptime / 3600)} h{' '}
-                        {Math.floor((systemInfo.uptime % 3600) / 60)} m
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className='text-sm text-gray-400 mb-2'>
-                      {t('settings.memoryUsage') || 'Memory Usage'}
-                    </p>
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-                      <div>
-                        <p className='text-xs text-gray-500'>RSS</p>
-                        <p className='text-white font-mono'>
-                          {formatBytes(systemInfo.memoryUsage?.rss)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className='text-xs text-gray-500'>
-                          {t('common.heapTotal') || 'Heap Total'}
-                        </p>
-                        <p className='text-white font-mono'>
-                          {formatBytes(systemInfo.memoryUsage?.heapTotal)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className='text-xs text-gray-500'>
-                          {t('common.heapUsed') || 'Heap Used'}
-                        </p>
-                        <p className='text-white font-mono'>
-                          {formatBytes(systemInfo.memoryUsage?.heapUsed)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <p className='text-gray-400'>{t('common.loading')}</p>
-              )}
-            </div>
-          )}
-
           {activeTab === 'account' && (
             <div className='space-y-6'>
               <div className='card'>
