@@ -146,12 +146,28 @@ router.post(
 
       const jobId = uuidv4();
 
+      let sourceFileSize = null;
+      try {
+        const stats = fs.statSync(sourceFile);
+        sourceFileSize = stats.size;
+      } catch (e) {
+        logger.warn('Failed to stat source file', { file: sourceFile, error: e.message });
+      }
+
       db.prepare(
         `
-        INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'queued')
+        INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status, source_file_size)
+        VALUES (?, ?, ?, ?, ?, ?, 'queued', ?)
       `
-      ).run(jobId, req.user.userId, sourceFile, outputFile, presetId || null, settings);
+      ).run(
+        jobId,
+        req.user.userId,
+        sourceFile,
+        outputFile,
+        presetId || null,
+        settings,
+        sourceFileSize
+      );
 
       const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(jobId);
 
@@ -507,12 +523,28 @@ router.post(
 
         const jobId = uuidv4();
 
+        let sourceFileSize = null;
+        try {
+          const stats = fs.statSync(sourceFile);
+          sourceFileSize = stats.size;
+        } catch (e) {
+          // 无法获取文件大小时忽略
+        }
+
         db.prepare(
           `
-          INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status)
-          VALUES (?, ?, ?, ?, ?, ?, 'queued')
+          INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status, source_file_size)
+          VALUES (?, ?, ?, ?, ?, ?, 'queued', ?)
         `
-        ).run(jobId, req.user.userId, sourceFile, outputFile, presetId || null, settings);
+        ).run(
+          jobId,
+          req.user.userId,
+          sourceFile,
+          outputFile,
+          presetId || null,
+          settings,
+          sourceFileSize
+        );
 
         jobIds.push(jobId);
       }

@@ -441,13 +441,20 @@ async function startTranscode(job) {
 
     if (code === 0) {
       moveTempFile();
+      let outputFileSize = null;
+      try {
+        const stats = fs.statSync(job.output_file);
+        outputFileSize = stats.size;
+      } catch (e) {
+        logger.warn('Failed to stat output file', { jobId: job.id, error: e.message });
+      }
       db.prepare(
         `
         UPDATE jobs
-        SET status = 'completed', progress = 100, completed_at = datetime('now')
+        SET status = 'completed', progress = 100, completed_at = datetime('now'), output_file_size = ?
         WHERE id = ?
         `
-      ).run(job.id);
+      ).run(outputFileSize, job.id);
       logger.info('Job completed successfully', { jobId: job.id });
     } else if (code === null) {
       cleanupJob();

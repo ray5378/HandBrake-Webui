@@ -36,6 +36,7 @@ function initializeDatabase() {
   db.pragma('foreign_keys = ON');
 
   createTables();
+  runMigrations();
   createIndexes();
   createDefaultData();
 
@@ -68,6 +69,8 @@ function createTables() {
       progress REAL DEFAULT 0,
       error_log TEXT,
       settings TEXT,
+      source_file_size INTEGER,
+      output_file_size INTEGER,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       started_at DATETIME,
       completed_at DATETIME,
@@ -94,6 +97,21 @@ function createTables() {
   `);
 
   logger.info('Database tables created');
+}
+
+function runMigrations() {
+  const migrations = [
+    'ALTER TABLE jobs ADD COLUMN source_file_size INTEGER',
+    'ALTER TABLE jobs ADD COLUMN output_file_size INTEGER'
+  ];
+  for (const sql of migrations) {
+    try {
+      db.exec(sql);
+      logger.info('Migration applied', { sql });
+    } catch (e) {
+      // 字段已存在时静默跳过
+    }
+  }
 }
 
 /**
