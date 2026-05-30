@@ -16,7 +16,7 @@ const config = {
   jwtSecret: process.env.JWT_SECRET || generateSecret(),
   jwtExpiresIn: '24h',
   refreshTokenExpiresIn: '90d',
-  maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS) || 2,
+  maxConcurrentJobs: 2,
   configDir: process.env.CONFIG_DIR || '/config',
   cacheDir: process.env.CACHE_DIR || null,
   databasePath: null,
@@ -35,9 +35,6 @@ const config = {
     }
 
     // 环境变量优先级高于配置文件
-    if (process.env.MAX_CONCURRENT_JOBS) {
-      config.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS) || 2;
-    }
     if (process.env.JWT_SECRET) {
       config.jwtSecret = process.env.JWT_SECRET;
     }

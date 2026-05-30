@@ -389,7 +389,18 @@
     "passwordChanged": "Password changed successfully",
     "platform": "Platform",
     "memoryUsage": "Memory Usage",
-    "commit": "Build Commit"
+    "commit": "Build Commit",
+    "transcodeConfig": "Transcode Config",
+    "cacheDir": "Cache Directory",
+    "cacheDirDesc": "Select a directory for temporary transcode cache. Intermediate files are written here first, then moved to the output directory upon completion.",
+    "currentCacheDir": "Current Cache Directory",
+    "browseDir": "Browse Directory",
+    "notSet": "(Not set)",
+    "notSelected": "(Not selected)",
+    "selected": "Selected",
+    "concurrentJobs": "Concurrent Jobs",
+    "concurrentJobsDesc": "Set the number of simultaneous transcode jobs. Higher values increase CPU usage.",
+    "tasks": "tasks"
   },
   "errors": {
     "networkError": "Network error, please try again",

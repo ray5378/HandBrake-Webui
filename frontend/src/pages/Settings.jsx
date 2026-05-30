@@ -31,6 +31,7 @@ function Settings() {
   });
 
   const [cacheDir, setCacheDir] = useState('');
+  const [maxConcurrentJobs, setMaxConcurrentJobs] = useState(2);
   const [browsePath, setBrowsePath] = useState('/drive');
   const [browseDirs, setBrowseDirs] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(false);
@@ -59,12 +60,16 @@ function Settings() {
     try {
       const res = await api.get('/system/cache-dir', { signal: abortRef.current.signal });
       const dir = res.data.data.cacheDir;
+      const jobs = res.data.data.maxConcurrentJobs;
       if (dir) {
         setCacheDir(dir);
         setBrowsePath(dir);
         fetchBrowseDirs(dir);
       } else {
         fetchBrowseDirs('/drive');
+      }
+      if (jobs) {
+        setMaxConcurrentJobs(jobs);
       }
     } catch (err) {
       console.error('Failed to fetch cache dir:', err);
@@ -112,10 +117,10 @@ function Settings() {
     setSuccess('');
 
     try {
-      await api.post('/system/cache-dir', { path: cacheDir });
-      setSuccess('缓存目录设置成功');
+      await api.post('/system/cache-dir', { path: cacheDir, maxConcurrentJobs });
+      setSuccess('转码配置保存成功');
     } catch (err) {
-      setError(err.response?.data?.error || '设置缓存目录失败');
+      setError(err.response?.data?.error || '保存配置失败');
     } finally {
       setSavingCacheDir(false);
     }
@@ -175,7 +180,7 @@ function Settings() {
     { id: 'general', label: t('settings.general'), icon: SettingsIcon },
     { id: 'account', label: t('settings.account') || 'Account', icon: User },
     { id: 'storage', label: t('settings.storage'), icon: HardDrive },
-    { id: 'cache', label: '缓存目录', icon: Database }
+    { id: 'cache', label: t('settings.transcodeConfig') || '转码配置', icon: Database }
   ];
 
   const pathParts = (browsePath || '/drive').split('/').filter(Boolean);
@@ -444,10 +449,9 @@ function Settings() {
 
           {activeTab === 'cache' && (
             <div className='card'>
-              <h2 className='text-xl font-semibold text-white mb-4'>缓存目录设置</h2>
-              <p className='text-gray-400 text-sm mb-4'>
-                选择一个目录作为转码临时缓存目录。转码时中间文件会先写入此目录，完成后移动到输出目录。
-              </p>
+              <h2 className='text-xl font-semibold text-white mb-4'>
+                {t('settings.transcodeConfig') || '转码配置'}
+              </h2>
 
               {error && (
                 <div className='mb-4 p-3 bg-error/10 border border-error/20 rounded-lg flex items-center space-x-2 text-error text-sm'>
@@ -463,98 +467,145 @@ function Settings() {
                 </div>
               )}
 
-              <div className='mb-4'>
-                <label className='label'>当前缓存目录</label>
-                <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1 truncate'>
-                  {cacheDir || '（未设置）'}
-                </p>
-              </div>
+              <div className='space-y-6'>
+                <div>
+                  <h3 className='text-sm font-medium text-gray-400 mb-2'>
+                    {t('settings.cacheDir') || '缓存目录'}
+                  </h3>
+                  <p className='text-gray-500 text-xs mb-3'>
+                    {t('settings.cacheDirDesc') ||
+                      '选择一个目录作为转码临时缓存目录。转码时中间文件会先写入此目录，完成后移动到输出目录。'}
+                  </p>
 
-              <div className='mb-4'>
-                <label className='label'>浏览目录</label>
-
-                {browseLoading ? (
-                  <div className='flex items-center space-x-2 text-gray-400 py-2'>
-                    <Loader2 className='w-4 h-4 animate-spin' />
-                    <span className='text-sm'>加载中...</span>
+                  <div className='mb-4'>
+                    <label className='label'>
+                      {t('settings.currentCacheDir') || '当前缓存目录'}
+                    </label>
+                    <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 mt-1 truncate'>
+                      {cacheDir || t('settings.notSet') || '（未设置）'}
+                    </p>
                   </div>
-                ) : (
-                  <>
-                    <div className='flex flex-wrap items-center gap-1 text-sm mb-3'>
-                      <button
-                        type='button'
-                        onClick={() => handleBrowse('/drive')}
-                        className={`hover:underline truncate max-w-[100px] ${
-                          browsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
-                        }`}
-                      >
-                        drive
-                      </button>
-                      {pathParts.slice(1).map((part, i) => {
-                        const fullPath = '/drive/' + pathParts.slice(1, i + 2).join('/');
-                        return (
-                          <React.Fragment key={i}>
-                            <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />
+
+                  <div className='mb-4'>
+                    <label className='label'>{t('settings.browseDir') || '浏览目录'}</label>
+
+                    {browseLoading ? (
+                      <div className='flex items-center space-x-2 text-gray-400 py-2'>
+                        <Loader2 className='w-4 h-4 animate-spin' />
+                        <span className='text-sm'>{t('common.loading')}</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className='flex flex-wrap items-center gap-1 text-sm mb-3'>
+                          <button
+                            type='button'
+                            onClick={() => handleBrowse('/drive')}
+                            className={`hover:underline truncate max-w-[100px] ${
+                              browsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
+                            }`}
+                          >
+                            drive
+                          </button>
+                          {pathParts.slice(1).map((part, i) => {
+                            const fullPath = '/drive/' + pathParts.slice(1, i + 2).join('/');
+                            return (
+                              <React.Fragment key={i}>
+                                <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />
+                                <button
+                                  type='button'
+                                  onClick={() => handleBrowse(fullPath)}
+                                  className={`hover:underline truncate max-w-[100px] ${
+                                    browsePath === fullPath
+                                      ? 'text-white font-medium'
+                                      : 'text-primary'
+                                  }`}
+                                >
+                                  {part}
+                                </button>
+                              </React.Fragment>
+                            );
+                          })}
+                        </div>
+
+                        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
+                          {browseDirs.map(dir => (
                             <button
                               type='button'
-                              onClick={() => handleBrowse(fullPath)}
-                              className={`hover:underline truncate max-w-[100px] ${
-                                browsePath === fullPath ? 'text-white font-medium' : 'text-primary'
+                              key={dir.path}
+                              onClick={() => handleBrowse(dir.path)}
+                              className={`flex items-center space-x-2 p-2 rounded-lg transition-colors text-left ${
+                                cacheDir === dir.path
+                                  ? 'bg-primary/20 border border-primary'
+                                  : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
                               }`}
                             >
-                              {part}
+                              <FolderOpen className='w-4 h-4 text-warning shrink-0' />
+                              <span className='text-white text-xs truncate'>{dir.name}</span>
                             </button>
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
+                          ))}
+                          {browseDirs.length === 0 && (
+                            <p className='col-span-full text-gray-500 text-xs py-2'>
+                              {t('common.empty') || '空目录'}
+                            </p>
+                          )}
+                        </div>
+                      </>
+                    )}
 
-                    <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
-                      {browseDirs.map(dir => (
-                        <button
-                          type='button'
-                          key={dir.path}
-                          onClick={() => handleBrowse(dir.path)}
-                          className={`flex items-center space-x-2 p-2 rounded-lg transition-colors text-left ${
-                            cacheDir === dir.path
-                              ? 'bg-primary/20 border border-primary'
-                              : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
-                          }`}
-                        >
-                          <FolderOpen className='w-4 h-4 text-warning shrink-0' />
-                          <span className='text-white text-xs truncate'>{dir.name}</span>
-                        </button>
-                      ))}
-                      {browseDirs.length === 0 && (
-                        <p className='col-span-full text-gray-500 text-xs py-2'>空目录</p>
-                      )}
-                    </div>
-                  </>
-                )}
+                    <p className='text-xs text-gray-400'>
+                      {t('settings.selected') || '已选'}:{' '}
+                      <span className='text-primary truncate'>
+                        {cacheDir || t('settings.notSelected') || '（未选择）'}
+                      </span>
+                    </p>
+                  </div>
+                </div>
 
-                <p className='text-xs text-gray-400'>
-                  已选: <span className='text-primary truncate'>{cacheDir || '（未选择）'}</span>
-                </p>
+                <div className='border-t border-dark-700 pt-6'>
+                  <h3 className='text-sm font-medium text-gray-400 mb-2'>
+                    {t('settings.concurrentJobs') || '同时转码任务数'}
+                  </h3>
+                  <p className='text-gray-500 text-xs mb-3'>
+                    {t('settings.concurrentJobsDesc') ||
+                      '设置同时运行的转码任务数量，数值越大 CPU 占用越高。'}
+                  </p>
+                  <div className='flex items-center space-x-3'>
+                    <input
+                      type='number'
+                      min={1}
+                      max={10}
+                      value={maxConcurrentJobs}
+                      onChange={e => {
+                        const val = parseInt(e.target.value) || 1;
+                        setMaxConcurrentJobs(Math.min(10, Math.max(1, val)));
+                      }}
+                      className='input w-24 text-center font-mono text-lg'
+                    />
+                    <span className='text-gray-400 text-sm'>{t('settings.tasks') || '个任务'}</span>
+                  </div>
+                </div>
               </div>
 
-              <button
-                type='button'
-                onClick={handleSaveCacheDir}
-                disabled={savingCacheDir || !cacheDir}
-                className='btn btn-primary inline-flex items-center space-x-2'
-              >
-                {savingCacheDir ? (
-                  <>
-                    <Loader2 className='w-4 h-4 animate-spin' />
-                    <span>保存中...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className='w-4 h-4' />
-                    <span>保存</span>
-                  </>
-                )}
-              </button>
+              <div className='mt-6 pt-6 border-t border-dark-700'>
+                <button
+                  type='button'
+                  onClick={handleSaveCacheDir}
+                  disabled={savingCacheDir || !cacheDir}
+                  className='btn btn-primary inline-flex items-center space-x-2'
+                >
+                  {savingCacheDir ? (
+                    <>
+                      <Loader2 className='w-4 h-4 animate-spin' />
+                      <span>{t('common.saving')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className='w-4 h-4' />
+                      <span>{t('common.save')}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
         </div>

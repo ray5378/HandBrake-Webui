@@ -389,7 +389,18 @@
     "passwordChanged": "密码修改成功",
     "platform": "平台",
     "memoryUsage": "内存使用",
-    "commit": "构建版本"
+    "commit": "构建版本",
+    "transcodeConfig": "转码配置",
+    "cacheDir": "缓存目录",
+    "cacheDirDesc": "选择一个目录作为转码临时缓存目录。转码时中间文件会先写入此目录，完成后移动到输出目录。",
+    "currentCacheDir": "当前缓存目录",
+    "browseDir": "浏览目录",
+    "notSet": "（未设置）",
+    "notSelected": "（未选择）",
+    "selected": "已选",
+    "concurrentJobs": "同时转码任务数",
+    "concurrentJobsDesc": "设置同时运行的转码任务数量，数值越大 CPU 占用越高。",
+    "tasks": "个任务"
   },
   "errors": {
     "networkError": "网络错误，请重试",

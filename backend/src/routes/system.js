@@ -53,53 +53,69 @@ router.get('/cache-dir', authenticateToken, (req, res) => {
   res.json({
     success: true,
     data: {
-      cacheDir: config.cacheDir
+      cacheDir: config.cacheDir,
+      maxConcurrentJobs: config.maxConcurrentJobs
     }
   });
 });
 
 router.post('/cache-dir', authenticateToken, (req, res, next) => {
   try {
-    const { path: cachePath } = req.body;
+    const { path: cachePath, maxConcurrentJobs } = req.body;
 
-    if (!cachePath || typeof cachePath !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: '请提供有效的目录路径'
-      });
+    if (cachePath !== undefined) {
+      if (!cachePath || typeof cachePath !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: '请提供有效的目录路径'
+        });
+      }
+
+      if (!fs.existsSync(cachePath)) {
+        return res.status(400).json({
+          success: false,
+          error: '目录不存在'
+        });
+      }
+
+      const stats = fs.statSync(cachePath);
+      if (!stats.isDirectory()) {
+        return res.status(400).json({
+          success: false,
+          error: '路径不是一个目录'
+        });
+      }
+
+      try {
+        fs.accessSync(cachePath, fs.constants.W_OK);
+      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          error: '目录不可写'
+        });
+      }
+
+      config.cacheDir = cachePath;
     }
 
-    if (!fs.existsSync(cachePath)) {
-      return res.status(400).json({
-        success: false,
-        error: '目录不存在'
-      });
+    if (maxConcurrentJobs !== undefined) {
+      const num = parseInt(maxConcurrentJobs);
+      if (isNaN(num) || num < 1 || num > 10) {
+        return res.status(400).json({
+          success: false,
+          error: '同时转码任务数必须在 1-10 之间'
+        });
+      }
+      config.maxConcurrentJobs = num;
     }
 
-    const stats = fs.statSync(cachePath);
-    if (!stats.isDirectory()) {
-      return res.status(400).json({
-        success: false,
-        error: '路径不是一个目录'
-      });
-    }
-
-    try {
-      fs.accessSync(cachePath, fs.constants.W_OK);
-    } catch (e) {
-      return res.status(400).json({
-        success: false,
-        error: '目录不可写'
-      });
-    }
-
-    config.cacheDir = cachePath;
     config.saveConfig();
 
     res.json({
       success: true,
       data: {
-        cacheDir: config.cacheDir
+        cacheDir: config.cacheDir,
+        maxConcurrentJobs: config.maxConcurrentJobs
       }
     });
   } catch (error) {
