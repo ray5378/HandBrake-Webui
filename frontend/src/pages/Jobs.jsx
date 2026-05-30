@@ -6,7 +6,6 @@ import {
   Play,
   CheckCircle,
   XCircle,
-  Clock,
   Trash2,
   Eye,
   AlertTriangle,
@@ -63,8 +62,6 @@ function Jobs() {
     const counts = {
       all: jobs.length,
       active: 0,
-      queued: 0,
-      processing: 0,
       completed: 0,
       failed: 0,
       skipped: 0
@@ -162,10 +159,8 @@ function Jobs() {
   };
 
   const filters = [
-    { value: 'all', label: t('common.all') || '全部', icon: ListTodo },
     { value: 'active', label: t('jobs.active', '进行中'), icon: Play },
-    { value: 'queued', label: t('jobs.queue'), icon: Clock },
-    { value: 'processing', label: t('transcode.transcoding'), icon: Play },
+    { value: 'all', label: t('common.all') || '全部', icon: ListTodo },
     { value: 'completed', label: t('dashboard.completedJobs'), icon: CheckCircle },
     { value: 'failed', label: t('dashboard.failedJobs'), icon: XCircle },
     { value: 'skipped', label: t('jobs.skipped', '已跳过'), icon: SkipForward }
