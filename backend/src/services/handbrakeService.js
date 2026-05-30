@@ -512,9 +512,6 @@ async function startTranscode(job) {
   handbrake.on('error', onError);
 }
 
-// 每个 job 的进度解析缓存，避免重复解析相同数据
-const parseProgressCache = new Map();
-
 function parseProgress(jobId, data) {
   const db = getDatabase();
   let progress = null;
