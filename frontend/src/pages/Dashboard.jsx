@@ -7,10 +7,11 @@ import {
   Play,
   CheckCircle,
   XCircle,
-  TrendingUp,
   ArrowRight,
   X,
-  ListTodo
+  ListTodo,
+  Layers,
+  Settings
 } from 'lucide-react';
 import api from '../services/api';
 import { formatFileSize } from '../utils/format';
@@ -300,7 +301,7 @@ function Dashboard() {
               to='/presets'
               className='flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors'
             >
-              <TrendingUp className='w-8 h-8 text-secondary' />
+              <Layers className='w-8 h-8 text-secondary' />
               <div>
                 <p className='text-white font-medium'>{t('presets.title')}</p>
                 <p className='text-sm text-gray-400'>{t('presets.subtitle')}</p>
@@ -311,7 +312,7 @@ function Dashboard() {
               to='/settings'
               className='flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors'
             >
-              <XCircle className='w-8 h-8 text-warning' />
+              <Settings className='w-8 h-8 text-warning' />
               <div>
                 <p className='text-white font-medium'>{t('settings.title')}</p>
                 <p className='text-sm text-gray-400'>
