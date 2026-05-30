@@ -225,24 +225,32 @@ function Dashboard() {
                       <p className='text-xs text-gray-400 truncate'>
                         {new Date(job.created_at).toLocaleString()}
                       </p>
+                      {job.status === 'processing' && (
+                        <div className='mt-2'>
+                          <div className='flex items-center justify-between text-sm'>
+                            <span className='text-white font-mono text-xs'>
+                              {job.progress.toFixed(1)}%
+                            </span>
+                            {formatETA(job.eta_seconds) && (
+                              <span className='text-success text-xs'>
+                                {formatETA(job.eta_seconds)}
+                              </span>
+                            )}
+                          </div>
+                          <div className='w-full bg-dark-600 rounded-full h-1.5 mt-1 overflow-hidden'>
+                            <div
+                              className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
+                              style={{ width: `${job.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className='flex items-center space-x-2 shrink-0'>
                       {job.status !== 'processing' && (
                         <span className={`badge badge-${job.status}`}>
                           {getJobStatusLabel(job.status)}
                         </span>
-                      )}
-                      {job.status === 'processing' && (
-                        <div className='text-right'>
-                          <div className='text-secondary font-mono text-sm'>
-                            {job.progress.toFixed(0)}%
-                          </div>
-                          {formatETA(job.eta_seconds) && (
-                            <div className='text-gray-500 text-xs'>
-                              {formatETA(job.eta_seconds)}
-                            </div>
-                          )}
-                        </div>
                       )}
                     </div>
                   </Link>
