@@ -140,7 +140,7 @@
     "active": "进行中",
     "history": "历史",
     "sourceFile": "源文件",
-    "clearAll": "清空队列",
+    "clearAll": "清理任务",
     "confirmClearAll": "确定要清空所有等待中的任务吗？正在转码和已完成的任务不受影响。",
     "clearHistory": "清空历史",
     "confirmClearHistory": "确定要清空所有已完成/失败/取消的历史记录吗？",
