@@ -650,7 +650,9 @@ function Presets() {
           <div className='space-y-6'>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className='label'>{t('dimensions.width')} (px)</label>
+                <label className='label'>
+                  {t('dimensions.width')} {t('unit.px', '(px)')}
+                </label>
                 <input
                   type='number'
                   value={formData.settings.dimensions?.width || ''}
@@ -665,7 +667,9 @@ function Presets() {
                 />
               </div>
               <div>
-                <label className='label'>{t('dimensions.height')} (px)</label>
+                <label className='label'>
+                  {t('dimensions.height')} {t('unit.px', '(px)')}
+                </label>
                 <input
                   type='number'
                   value={formData.settings.dimensions?.height || ''}

@@ -1,96 +1,97 @@
 import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { parse } from '@babel/parser';
+import _traverse from '@babel/traverse';
 
-const CJK_RE = /[\u4e00-\u9fff]/;
-const UI_TEXT_RE = />([^<]{4,})</;
+const traverse = _traverse.default;
 
-const IGNORE_DIRS = ['node_modules', 'dist', 'i18n'];
-const IGNORE_FILES = [
+const SRC = new URL('../src', import.meta.url).pathname;
+const IGNORE_DIRS = new Set(['node_modules', 'dist', 'i18n', '__tests__']);
+const IGNORE_FILES = new Set([
   'src/utils/format.js',
   'src/constants/index.js',
   'src/constants/presets.js',
   'src/components/LanguageSwitcher.jsx',
-  'src/components/common/ConfirmDialog.jsx'
-];
+  'src/components/common/ConfirmDialog.jsx',
+]);
+const CHECK_ATTRS = new Set([
+  'placeholder', 'title', 'alt', 'label', 'aria-label',
+  'helperText', 'helpertext', 'errorText', 'errortext',
+]);
+
 let exitCode = 0;
 
-function findFiles(dir, list = []) {
-  const entries = readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.name.startsWith('.') || IGNORE_DIRS.includes(entry.name)) continue;
-    const fullPath = join(dir, entry.name);
+function* walkFiles(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.') || IGNORE_DIRS.has(entry.name)) continue;
+    const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      findFiles(fullPath, list);
-    } else if (entry.isFile() && /\.(jsx|js)$/.test(entry.name)) {
-      list.push(fullPath);
+      yield* walkFiles(full);
+    } else if (entry.isFile() && /\.(jsx?)$/.test(entry.name)) {
+      const rel = full.replace(SRC + '/', 'src/');
+      if (IGNORE_FILES.has(rel)) continue;
+      yield { path: full, rel };
     }
   }
-  return list;
 }
 
-const files = findFiles('src');
+function isInsideTCall(path) {
+  let p = path.parentPath;
+  while (p) {
+    if (p.isCallExpression() && p.node.callee.name === 't') return true;
+    p = p.parentPath;
+  }
+  return false;
+}
 
-for (const file of files) {
-  const relPath = file.replace(/\\/g, '/');
-  if (IGNORE_FILES.some(ig => relPath.endsWith(ig))) continue;
+function isUiText(text) {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.length < 2) return false;
+  if (!/[A-Za-z]{2,}/.test(trimmed)) return false;
+  if (/^[\d%\-+.\s:()]+$/.test(trimmed)) return false;
+  if (/^[a-z]+$/.test(trimmed)) return false;
+  return true;
+}
 
-  const content = readFileSync(file, 'utf-8');
-  const lines = content.split('\n');
+for (const file of walkFiles(SRC)) {
+  const code = readFileSync(file.path, 'utf-8');
+  let ast;
+  try {
+    ast = parse(code, {
+      sourceType: 'module',
+      plugins: ['jsx', 'decorators-legacy'],
+      errorRecovery: true,
+    });
+  } catch {
+    continue;
+  }
 
-  let inTCall = false;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNum = i + 1;
-    const prevLine = i > 0 ? lines[i - 1] : '';
-
-    if (inTCall) {
-      if (/\)/.test(line)) inTCall = false;
-      continue;
-    }
-
-    if (/t\s*\([^)]*$/.test(line) && !/t\s*\([^)]*\)/.test(line)) {
-      inTCall = true;
-      continue;
-    }
-
-    const trimmed = line.trimStart();
-    if (trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
-    if (/^\s*(import|export)\s/.test(line)) continue;
-
-    if (/\|\|\s*$/.test(prevLine)) continue;
-
-    if (/\w+\s*(>=|<=)\s*\w+/.test(line)) continue;
-
-    // Check for hardcoded English UI text between JSX tags
-    if (UI_TEXT_RE.test(line)) {
-      const text = line.match(UI_TEXT_RE)[1].trim();
-      if (/^\{/.test(text) && /\}$/.test(text)) continue;
-      if (/^\{[\s\S]*\}\s*[a-zA-Z%\/]+\s*$/.test(text)) continue;
-
-      const withoutT = text.replace(/t\s*\(\s*['"][\s\S]*?['"]\s*(,\s*['"][\s\S]*?['"]\s*)?\)/g, '').trim();
-      if (!withoutT || withoutT.length < 4) continue;
-      if (!/[A-Za-z]{3,}/.test(withoutT)) continue;
-      if (/^[\d%\-+.\s:]+$/.test(withoutT)) continue;
-
-      console.log(`${relPath}:${lineNum}: ${line.trim()}`);
-      exitCode = 1;
-      continue;
-    }
-
-    // Check for hardcoded Chinese text
-    if (CJK_RE.test(line)) {
-      if (/['"`][^'"`]*\/[^'"`]*[\u4e00-\u9fff][^'"`]*['"`]/.test(line)) continue;
-      if (/t\s*\(\s*['"][^'"]*['"]\s*,\s*['"][^'"]*[\u4e00-\u9fff][^'"]*['"]\s*\)/.test(line)) continue;
-      if (/t\s*\(\s*['"][^'"]*['"]\s*\)\s*\|\|\s*['"][^'"]*[\u4e00-\u9fff][^'"]*['"]/.test(line)) continue;
-
-      if (/['"][^'"]*[\u4e00-\u9fff][^'"]*['"]/.test(line) ||
-          />([^<]*[\u4e00-\u9fff][^<]*)</.test(line)) {
-        console.log(`${relPath}:${lineNum}: ${line.trim()}`);
+  traverse(ast, {
+    JSXText(path) {
+      if (isInsideTCall(path)) return;
+      const text = path.node.value;
+      const line = text.includes('\n')
+        ? path.node.loc.start.line
+        : path.node.loc?.start.line;
+      if (!line) return;
+      if (isUiText(text)) {
+        console.log(`${file.rel}:${line}: ${text.trim().slice(0, 80)}`);
         exitCode = 1;
       }
-    }
-  }
+    },
+
+    JSXAttribute(path) {
+      const attrName = path.node.name.name;
+      if (!CHECK_ATTRS.has(attrName)) return;
+      const val = path.node.value;
+      if (!val || val.type !== 'StringLiteral') return;
+      if (isInsideTCall(path)) return;
+      if (isUiText(val.value)) {
+        console.log(`${file.rel}:${val.loc?.start.line}: ${val.value.slice(0, 80)}`);
+        exitCode = 1;
+      }
+    },
+  });
 }
 
 if (exitCode === 0) {

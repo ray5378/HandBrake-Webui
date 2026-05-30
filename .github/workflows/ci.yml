@@ -48,6 +48,11 @@ jobs:
           cd frontend
           node scripts/check-hardcoded-text.js
 
+      - name: Check Frontend i18n Key Completeness
+        run: |
+          cd frontend
+          node scripts/check-i18n-keys.js
+
       - name: Check Frontend Formatting
         run: |
           cd frontend

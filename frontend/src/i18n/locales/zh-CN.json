@@ -77,7 +77,8 @@
     "presets": "预设",
     "transcode": "转码",
     "settings": "设置",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "more": "更多"
   },
   "app": {
     "name": "HandBrake",
@@ -85,7 +86,8 @@
     "fullName": "HandBrake Web UI"
   },
   "unit": {
-    "kbps": "(kbps)"
+    "kbps": "(kbps)",
+    "px": "(px)"
   },
   "auth": {
     "login": "登录",
@@ -226,7 +228,8 @@
     "categoryGroup": "类别",
     "codecGroup": "编码",
     "resolutionGroup": "分辨率",
-    "vendorGroup": "厂商"
+    "vendorGroup": "厂商",
+    "noMatchPreset": "无匹配预设"
   },
   "presetTabs": {
     "summary": "基本信息",

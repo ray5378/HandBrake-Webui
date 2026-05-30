@@ -57,7 +57,7 @@ function Sidebar({ isOpen, setIsOpen }) {
               <div className='w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden'>
                 <img
                   src='/logo.png'
-                  alt='HandBrake Web UI'
+                  alt={t('app.fullName', 'HandBrake Web UI')}
                   className='w-full h-full object-contain'
                 />
               </div>

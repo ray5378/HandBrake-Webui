@@ -86,7 +86,8 @@
     "fullName": "HandBrake Web UI"
   },
   "unit": {
-    "kbps": "(kbps)"
+    "kbps": "(kbps)",
+    "px": "(px)"
   },
   "auth": {
     "login": "Login",
@@ -227,7 +228,8 @@
     "categoryGroup": "Category",
     "codecGroup": "Codec",
     "resolutionGroup": "Resolution",
-    "vendorGroup": "Vendor"
+    "vendorGroup": "Vendor",
+    "noMatchPreset": "No matching presets"
   },
   "presetTabs": {
     "summary": "Summary",
