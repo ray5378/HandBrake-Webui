@@ -136,13 +136,24 @@ async function startTranscode(job) {
     processingCount--;
 
     if (code === 0) {
+      // 获取输出文件大小
+      let outputFileSize = null;
+      try {
+        if (fs.existsSync(job.output_file)) {
+          const stats = fs.statSync(job.output_file);
+          outputFileSize = stats.size;
+        }
+      } catch (e) {
+        console.error('Failed to get output file size:', e);
+      }
+
       db.prepare(
         `
         UPDATE jobs
-        SET status = 'completed', progress = 100, completed_at = datetime('now')
+        SET status = 'completed', progress = 100, completed_at = datetime('now'), output_file_size = ?
         WHERE id = ?
-      `
-      ).run(job.id);
+        `
+      ).run(outputFileSize, job.id);
 
       console.log(`Job ${job.id} completed successfully`);
     } else if (code === null) {

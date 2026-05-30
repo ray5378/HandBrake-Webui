@@ -70,6 +70,8 @@ function createTables() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       started_at DATETIME,
       completed_at DATETIME,
+      source_file_size INTEGER,
+      output_file_size INTEGER,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
@@ -91,6 +93,15 @@ function createTables() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+
+  // 数据库迁移：为现有表添加新字段
+  try {
+    db.prepare('ALTER TABLE jobs ADD COLUMN source_file_size INTEGER').run();
+  } catch (e) { /* 字段可能已存在，忽略错误 */ }
+  
+  try {
+    db.prepare('ALTER TABLE jobs ADD COLUMN output_file_size INTEGER').run();
+  } catch (e) { /* 字段可能已存在，忽略错误 */ }
 
   logger.info('Database tables created');
 }

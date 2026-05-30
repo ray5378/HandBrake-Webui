@@ -121,6 +121,18 @@ router.post(
     try {
       const { sourceFile, outputFile, presetId, customSettings } = req.body;
       const db = getDatabase();
+      const fs = require('fs');
+
+      // 获取源文件大小
+      let sourceFileSize = null;
+      try {
+        if (fs.existsSync(sourceFile)) {
+          const stats = fs.statSync(sourceFile);
+          sourceFileSize = stats.size;
+        }
+      } catch (e) {
+        console.error('Failed to get source file size:', e);
+      }
 
       let settings = null;
       if (presetId) {
@@ -136,10 +148,10 @@ router.post(
 
       db.prepare(
         `
-        INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'queued')
-      `
-      ).run(jobId, req.user.userId, sourceFile, outputFile, presetId || null, settings);
+        INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status, source_file_size)
+        VALUES (?, ?, ?, ?, ?, ?, 'queued', ?)
+        `
+      ).run(jobId, req.user.userId, sourceFile, outputFile, presetId || null, settings, sourceFileSize);
 
       const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(jobId);
 

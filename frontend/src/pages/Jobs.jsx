@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import { formatFileSize } from '../utils/format';
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -186,10 +187,16 @@ function Jobs() {
                     </div>
 
                     <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                      <span>输出: {job.output_file.split('/').pop()}</span>
-                      {job.preset_name && <span>预设: {job.preset_name}</span>}
-                      <span>创建: {new Date(job.created_at).toLocaleString('zh-CN')}</span>
-                    </div>
+                    <span>输出: {job.output_file.split('/').pop()}</span>
+                    {job.preset_name && <span>预设: {job.preset_name}</span>}
+                    <span>创建: {new Date(job.created_at).toLocaleString('zh-CN')}</span>
+                    {job.source_file_size && (
+                      <span>源文件: {formatFileSize(job.source_file_size)}</span>
+                    )}
+                    {job.output_file_size && (
+                      <span className="text-green-400">输出文件: {formatFileSize(job.output_file_size)}</span>
+                    )}
+                  </div>
 
                     {job.status === 'processing' && (
                       <div className="mt-3">

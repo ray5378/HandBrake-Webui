@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
+import { formatFileSize } from '../utils/format';
 
 function JobDetail() {
   const { id } = useParams();
@@ -186,6 +187,20 @@ function JobDetail() {
             <div>
               <p className="text-sm text-gray-400 mb-1">完成时间</p>
               <p className="text-white">{new Date(job.completed_at).toLocaleString('zh-CN')}</p>
+            </div>
+          )}
+          
+          {job.source_file_size && (
+            <div>
+              <p className="text-sm text-gray-400 mb-1">源文件大小</p>
+              <p className="text-white">{formatFileSize(job.source_file_size)}</p>
+            </div>
+          )}
+          
+          {job.output_file_size && (
+            <div>
+              <p className="text-sm text-gray-400 mb-1">输出文件大小</p>
+              <p className="text-green-400">{formatFileSize(job.output_file_size)}</p>
             </div>
           )}
         </div>
