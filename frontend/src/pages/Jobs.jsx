@@ -285,7 +285,7 @@ function Jobs() {
                       </div>
                     </div>
 
-                    <div className='flex items-center space-x-3 mb-1'>
+                    <div className='flex items-center space-x-3 mb-1 font-mono'>
                       {job.status !== 'processing' && (
                         <span className={clsx('badge', `badge-${job.status}`)}>
                           {getStatusLabel(job.status)}
@@ -303,9 +303,9 @@ function Jobs() {
 
                     {job.status === 'processing' && (
                       <div className='mt-3'>
-                        <div className='flex items-center justify-between text-sm mb-1'>
+                        <div className='flex items-center justify-between text-sm mb-1 font-mono'>
                           <span className='text-gray-400'>{t('jobs.progress')}</span>
-                          <span className='text-white font-mono'>
+                          <span className='text-white'>
                             {job.progress.toFixed(1)}%
                             {formatETA(job.eta_seconds) && (
                               <span className='text-white font-normal ml-2 text-xs'>
