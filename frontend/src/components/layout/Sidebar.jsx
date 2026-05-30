@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, FolderOpen, ListTodo, Layers, LogOut, User } from 'lucide-react';
+import { Home, FolderOpen, ListTodo, Settings, Layers, LogOut, User } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -27,7 +27,8 @@ function Sidebar({ isOpen, setIsOpen }) {
     { path: '/', icon: Home, label: t('nav.dashboard') },
     { path: '/files', icon: FolderOpen, label: t('nav.files') },
     { path: '/jobs', icon: ListTodo, label: t('nav.jobs') },
-    { path: '/presets', icon: Layers, label: t('nav.presets') }
+    { path: '/presets', icon: Layers, label: t('nav.presets') },
+    { path: '/settings', icon: Settings, label: t('nav.settings') }
   ];
 
   const handleLogout = async () => {
