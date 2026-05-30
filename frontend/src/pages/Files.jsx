@@ -36,14 +36,7 @@ function Files() {
   const contextMenuRef = useRef(null);
   const abortRef = useRef(null);
 
-  useEffect(() => {
-    fetchFiles();
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, [currentPath]);
-
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
     setLoading(true);
@@ -59,7 +52,14 @@ function Files() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPath]);
+
+  useEffect(() => {
+    fetchFiles();
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [fetchFiles]);
 
   // formatSize 已弃用，请使用 formatFileSize
   const formatSize = formatFileSize;
@@ -216,8 +216,12 @@ function Files() {
                           >
                             <FolderOpen className='w-5 h-5 text-warning shrink-0' />
                             <div className='flex-1 min-w-0'>
-                              <p className='text-white text-sm break-all whitespace-normal'>{dir.name}</p>
-                              <p className='text-gray-500 text-xs break-all whitespace-normal'>{dir.path}</p>
+                              <p className='text-white text-sm break-all whitespace-normal'>
+                                {dir.name}
+                              </p>
+                              <p className='text-gray-500 text-xs break-all whitespace-normal'>
+                                {dir.path}
+                              </p>
                             </div>
                           </button>
                         ))}
@@ -237,7 +241,9 @@ function Files() {
                           >
                             <Video className='w-5 h-5 text-primary shrink-0' />
                             <div className='flex-1 min-w-0'>
-                              <p className='text-white text-sm break-all whitespace-normal'>{file.name}</p>
+                              <p className='text-white text-sm break-all whitespace-normal'>
+                                {file.name}
+                              </p>
                               <p className='text-gray-500 text-xs break-all whitespace-normal'>
                                 {file.path}
                                 <span className='ml-2'>{formatFileSize(file.size)}</span>
