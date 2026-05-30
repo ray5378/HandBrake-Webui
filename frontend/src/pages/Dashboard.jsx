@@ -122,11 +122,11 @@ function Dashboard() {
                       {job.status === 'processing' && (
                         <div className='mt-2'>
                           <div className='flex items-center justify-between text-sm'>
-                            <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-mono text-xs'>
+                            <span className='text-white font-mono text-xs'>
                               {job.progress.toFixed(1)}%
                             </span>
                             {formatETA(job.eta_seconds) && (
-                              <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary text-xs'>
+                              <span className='text-white text-xs'>
                                 {formatETA(job.eta_seconds)}
                               </span>
                             )}

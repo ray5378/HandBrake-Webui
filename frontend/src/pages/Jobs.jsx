@@ -305,12 +305,10 @@ function Jobs() {
                       <div className='mt-3'>
                         <div className='flex items-center justify-between text-sm mb-1'>
                           <span className='text-gray-400'>{t('jobs.progress')}</span>
-                          <span className='font-mono'>
-                            <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary'>
-                              {job.progress.toFixed(1)}%
-                            </span>
+                          <span className='text-white font-mono'>
+                            {job.progress.toFixed(1)}%
                             {formatETA(job.eta_seconds) && (
-                              <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-normal ml-2 text-xs'>
+                              <span className='text-white font-normal ml-2 text-xs'>
                                 {formatETA(job.eta_seconds)}
                               </span>
                             )}
