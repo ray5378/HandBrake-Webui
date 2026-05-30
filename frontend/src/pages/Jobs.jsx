@@ -247,21 +247,21 @@ function Jobs() {
                 <div className='flex-1 min-w-0'>
                   <div className='space-y-1 mb-2'>
                     <div className='text-gray-400 font-mono text-sm' title={job.source_file}>
-                      <span className='text-gray-500'>{t('jobs.sourceFile', '源文件')}: </span>
-                      <span className='break-all'>{job.source_file}</span>
+                      <span className='text-gray-400'>{t('jobs.sourceFile', '源文件')}: </span>
+                      <span className='text-white break-all'>{job.source_file}</span>
                       {job.source_file_size != null && (
-                        <span className='text-gray-500 ml-3'>
+                        <span className='text-gray-400 ml-3'>
                           {t('jobs.originalSize', '原体积')}：{formatFileSize(job.source_file_size)}
                         </span>
                       )}
                     </div>
-                    <div className='text-primary font-mono text-sm' title={job.output_file}>
-                      <span className='text-primary/60'>{t('jobs.outputFile', '输出文件')}: </span>
-                      <span className='break-all'>{job.output_file}</span>
+                    <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
+                      <span className='text-gray-400'>{t('jobs.outputFile', '输出文件')}: </span>
+                      <span className='text-white break-all'>{job.output_file}</span>
                       {(job.status === 'completed' || job.status === 'skipped') &&
                         job.output_file_size != null && (
-                          <span className='text-primary ml-3'>
-                            <span className='text-primary/60'>
+                          <span className='text-gray-400 ml-3'>
+                            <span className='text-gray-400'>
                               {t('jobs.outputSize', '转码后')}：
                             </span>
                             {formatFileSize(job.output_file_size)}
@@ -289,7 +289,7 @@ function Jobs() {
                   {job.status === 'processing' && (
                     <div className='mt-3'>
                       <div className='flex items-center justify-between text-sm mb-1'>
-                        <span className='text-secondary'>{t('jobs.progress')}</span>
+                        <span className='text-gray-400'>{t('jobs.progress')}</span>
                         <span className='text-white font-mono'>
                           {job.progress.toFixed(1)}%
                           {formatETA(job.eta_seconds) && (
