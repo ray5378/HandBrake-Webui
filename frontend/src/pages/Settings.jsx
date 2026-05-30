@@ -298,15 +298,6 @@ function Settings() {
                     <p className='text-white capitalize'>{user?.role}</p>
                   </div>
                 </div>
-
-                <div className='grid grid-cols-2 gap-4 mt-4'>
-                  <div>
-                    <p className='text-sm text-gray-400'>{t('settings.commit')}</p>
-                    <p className='text-white font-mono text-xs'>
-                      {import.meta.env.VITE_GIT_COMMIT || 'unknown'}
-                    </p>
-                  </div>
-                </div>
               </div>
 
               <div className='card'>
