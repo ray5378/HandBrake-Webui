@@ -114,6 +114,13 @@ function Dashboard() {
       icon: CheckCircle,
       color: 'text-success',
       status: 'completed'
+    },
+    {
+      label: t('dashboard.failedJobs'),
+      value: stats?.failed || 0,
+      icon: XCircle,
+      color: 'text-error',
+      status: 'failed'
     }
   ];
 
@@ -143,7 +150,7 @@ function Dashboard() {
           </Link>
         </div>
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
           {statCards.map(stat => (
             <button
               key={stat.label}
