@@ -283,7 +283,7 @@ function Jobs() {
                         <span className='text-white font-mono'>
                           {job.progress.toFixed(1)}%
                           {formatETA(job.eta_seconds) && (
-                            <span className='text-gray-400 font-normal ml-2 text-xs'>
+                            <span className='text-success font-normal ml-2 text-xs'>
                               {formatETA(job.eta_seconds)}
                             </span>
                           )}

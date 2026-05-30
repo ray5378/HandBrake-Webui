@@ -193,7 +193,7 @@ function JobDetail() {
               <span className='text-white font-mono text-lg'>
                 {job.progress.toFixed(1)}%
                 {formatETA(job.eta_seconds) && (
-                  <span className='text-gray-400 font-normal ml-2 text-sm'>
+                  <span className='text-success font-normal ml-2 text-sm'>
                     {formatETA(job.eta_seconds)}
                   </span>
                 )}
