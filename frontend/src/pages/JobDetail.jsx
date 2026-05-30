@@ -8,7 +8,8 @@ import {
   Clock,
   Download,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  SkipForward
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -141,6 +142,7 @@ function JobDetail() {
             {job.status === 'completed' && <CheckCircle className='w-8 h-8 text-success' />}
             {job.status === 'failed' && <XCircle className='w-8 h-8 text-error' />}
             {job.status === 'cancelled' && <XCircle className='w-8 h-8 text-gray-500' />}
+            {job.status === 'skipped' && <SkipForward className='w-8 h-8 text-cyan-400' />}
             <div>
               <h2 className='text-xl font-semibold text-white'>
                 {job.source_file.split('/').pop()}
@@ -151,6 +153,7 @@ function JobDetail() {
                 {job.status === 'completed' && '已完成'}
                 {job.status === 'failed' && '失败'}
                 {job.status === 'cancelled' && '已取消'}
+                {job.status === 'skipped' && '已跳过'}
               </span>
             </div>
           </div>
@@ -172,7 +175,8 @@ function JobDetail() {
 
             {(job.status === 'completed' ||
               job.status === 'failed' ||
-              job.status === 'cancelled') && (
+              job.status === 'cancelled' ||
+              job.status === 'skipped') && (
               <button onClick={handleDelete} className='btn btn-secondary'>
                 <Trash2 className='w-4 h-4' />
                 <span className='hidden sm:inline ml-2'>删除</span>
@@ -240,6 +244,15 @@ function JobDetail() {
             <pre className='bg-dark-700 p-4 rounded-lg text-xs text-gray-300 font-mono overflow-x-auto max-h-64'>
               {job.error_log}
             </pre>
+          </div>
+        )}
+
+        {job.status === 'skipped' && (
+          <div className='mt-6 p-4 bg-cyan-900/20 border border-cyan-700/30 rounded-lg'>
+            <p className='text-sm text-cyan-400 font-medium'>
+              <SkipForward className='w-4 h-4 inline mr-1' />
+              输出文件已存在，已自动跳过该任务
+            </p>
           </div>
         )}
       </div>

@@ -188,7 +188,7 @@ router.delete('/all', authenticateToken, async (req, res, next) => {
     const db = getDatabase();
 
     const result = db
-      .prepare("DELETE FROM jobs WHERE status IN ('completed', 'failed', 'cancelled')")
+      .prepare("DELETE FROM jobs WHERE status IN ('completed', 'failed', 'cancelled', 'skipped')")
       .run();
 
     res.json({
@@ -394,7 +394,8 @@ router.get('/stats/summary', authenticateToken, (req, res, next) => {
           SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
           SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
           SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
-          SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
+          SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
+          SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) as skipped
         FROM jobs
         WHERE user_id = ?
       `

@@ -10,7 +10,8 @@ import {
   Trash2,
   Eye,
   AlertTriangle,
-  Trash
+  Trash,
+  SkipForward
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -48,7 +49,14 @@ function Jobs() {
 
   // 各状态数量统计
   const statusCounts = useMemo(() => {
-    const counts = { all: jobs.length, queued: 0, processing: 0, completed: 0, failed: 0 };
+    const counts = {
+      all: jobs.length,
+      queued: 0,
+      processing: 0,
+      completed: 0,
+      failed: 0,
+      skipped: 0
+    };
     for (const job of jobs) {
       if (Object.hasOwn(counts, job.status)) counts[job.status]++;
     }
@@ -133,7 +141,8 @@ function Jobs() {
       processing: t('transcode.transcoding'),
       completed: t('dashboard.completedJobs'),
       failed: t('dashboard.failedJobs'),
-      cancelled: t('common.cancel')
+      cancelled: t('common.cancel'),
+      skipped: t('jobs.skipped', '已跳过')
     };
     return statusMap[status] || status;
   };
@@ -143,7 +152,8 @@ function Jobs() {
     { value: 'queued', label: t('jobs.queue'), icon: Clock },
     { value: 'processing', label: t('transcode.transcoding'), icon: Play },
     { value: 'completed', label: t('dashboard.completedJobs'), icon: CheckCircle },
-    { value: 'failed', label: t('dashboard.failedJobs'), icon: XCircle }
+    { value: 'failed', label: t('dashboard.failedJobs'), icon: XCircle },
+    { value: 'skipped', label: t('jobs.skipped', '已跳过'), icon: SkipForward }
   ];
 
   return (
@@ -276,7 +286,8 @@ function Jobs() {
 
                   {(job.status === 'completed' ||
                     job.status === 'failed' ||
-                    job.status === 'cancelled') && (
+                    job.status === 'cancelled' ||
+                    job.status === 'skipped') && (
                     <>
                       <Link to={`/jobs/${job.id}`} className='btn btn-secondary text-sm'>
                         <Eye className='w-4 h-4' />
@@ -304,6 +315,15 @@ function Jobs() {
                   <pre className='text-xs text-gray-300 font-mono overflow-x-auto'>
                     {job.error_log}
                   </pre>
+                </div>
+              )}
+
+              {job.status === 'skipped' && (
+                <div className='mt-4 p-3 bg-cyan-900/20 border border-cyan-700/30 rounded-lg'>
+                  <p className='text-sm text-cyan-400 font-medium'>
+                    <SkipForward className='w-4 h-4 inline mr-1' />
+                    {t('jobs.outputExists', '输出文件已存在，已自动跳过该任务')}
+                  </p>
                 </div>
               )}
             </div>

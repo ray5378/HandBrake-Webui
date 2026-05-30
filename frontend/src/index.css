@@ -64,6 +64,10 @@
   .badge-cancelled {
     @apply bg-warning text-white;
   }
+
+  .badge-skipped {
+    @apply bg-cyan-700 text-white;
+  }
 }
 
 @layer utilities {

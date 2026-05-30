@@ -144,7 +144,9 @@
     "confirmClearCache": "Are you sure you want to clear the transcode cache directory? Active transcoding jobs may be affected.",
     "confirmClearAllTitle": "Clear Queue",
     "confirmClearHistoryTitle": "Clear Job History",
-    "confirmClearCacheTitle": "Clear Transcode Cache"
+    "confirmClearCacheTitle": "Clear Transcode Cache",
+    "skipped": "Skipped",
+    "outputExists": "Output file already exists, task skipped automatically"
   },
   "files": {
     "title": "Files",

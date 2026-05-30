@@ -144,7 +144,9 @@
     "confirmClearCache": "确定要清空转码缓存目录吗？正在进行的转码任务可能会受到影响。",
     "confirmClearAllTitle": "清空队列",
     "confirmClearHistoryTitle": "清理任务历史",
-    "confirmClearCacheTitle": "清空转码缓存"
+    "confirmClearCacheTitle": "清空转码缓存",
+    "skipped": "已跳过",
+    "outputExists": "输出文件已存在，已自动跳过该任务"
   },
   "files": {
     "title": "文件",

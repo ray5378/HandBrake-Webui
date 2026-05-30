@@ -118,7 +118,8 @@ function Dashboard() {
       processing: t('transcode.transcoding'),
       completed: t('common.success'),
       failed: t('common.error'),
-      cancelled: t('common.cancel')
+      cancelled: t('common.cancel'),
+      skipped: t('jobs.skipped', '已跳过')
     };
     return statusMap[status] || status;
   };

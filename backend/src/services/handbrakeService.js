@@ -336,6 +336,17 @@ async function startTranscode(job) {
   const db = getDatabase();
   processingCount++;
 
+  // 检查输出文件是否已存在，存在则跳过该任务
+  if (fs.existsSync(job.output_file)) {
+    processingCount--;
+    db.prepare(
+      "UPDATE jobs SET status = 'skipped', completed_at = datetime('now') WHERE id = ?"
+    ).run(job.id);
+    logger.info('Job skipped - output file already exists', { jobId: job.id, output: job.output_file });
+    processNextJob();
+    return;
+  }
+
   let settings = {};
   if (job.preset_id) {
     const preset = db.prepare('SELECT settings FROM presets WHERE id = ?').get(job.preset_id);
