@@ -150,7 +150,7 @@ router.get(
         { timeout: 10000 }, // 10秒超时
         (error, stdout) => {
           clearTimeout(timeoutId);
-          
+
           if (error) {
             fallbackResponse();
             return;

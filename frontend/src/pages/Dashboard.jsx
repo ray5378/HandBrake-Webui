@@ -28,7 +28,7 @@ function Dashboard() {
 
   // 根据是否有活动任务动态调整轮询频率
   const hasActiveTasks = useMemo(() => {
-    return stats ? (stats.queued > 0 || stats.processing > 0) : false;
+    return stats ? stats.queued > 0 || stats.processing > 0 : false;
   }, [stats]);
 
   useEffect(() => {
@@ -36,9 +36,9 @@ function Dashboard() {
 
     // 有活动任务时每30秒轮询，无活动任务时每120秒轮询
     const intervalTime = hasActiveTasks ? 30000 : 120000;
-    
+
     intervalRef.current = setInterval(fetchDashboardData, intervalTime);
-    
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();

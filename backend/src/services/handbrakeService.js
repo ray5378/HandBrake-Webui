@@ -512,7 +512,7 @@ function parseProgress(jobId, data) {
 
   // 优先使用 JSON 解析（因为我们总是用 --json 启动）
   progress = tryParseJsonProgress(data);
-  
+
   // JSON 解析失败时才使用文本格式作为备用
   if (progress === null) {
     progress = tryParseTextProgress(data);
@@ -564,7 +564,9 @@ function tryParseJsonProgress(data) {
       }
     }
 
-    if (blockEnd === -1) break;
+    if (blockEnd === -1) {
+      break;
+    }
 
     if (key === 'Progress') {
       const jsonLines = lines.slice(i, blockEnd + 1);

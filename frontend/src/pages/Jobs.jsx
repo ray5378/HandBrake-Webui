@@ -52,9 +52,9 @@ function Jobs() {
 
     // 有活动任务时每10秒轮询，无活动任务时每60秒轮询
     const intervalTime = hasActiveTasks ? 10000 : 60000;
-    
+
     intervalRef.current = setInterval(fetchJobs, intervalTime);
-    
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
