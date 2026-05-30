@@ -67,7 +67,6 @@ function Dashboard() {
             if (a.status !== 'processing' && b.status === 'processing') return 1;
             return 0;
           })
-          .slice(0, 5)
       );
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -201,7 +200,7 @@ function Dashboard() {
             </div>
 
             {activeJobs.length > 0 ? (
-              <div className='space-y-3'>
+              <div className='space-y-3 max-h-[420px] overflow-y-auto'>
                 {activeJobs.map(job => (
                   <Link
                     key={job.id}
