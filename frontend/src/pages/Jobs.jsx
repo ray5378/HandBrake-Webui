@@ -9,7 +9,8 @@ import {
   Trash2,
   AlertTriangle,
   Trash,
-  SkipForward
+  SkipForward,
+  X
 } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
@@ -152,6 +153,16 @@ function Jobs() {
       fetchJobs();
     } catch (error) {
       console.error('Failed to clear queued jobs:', error);
+    }
+    setConfirmAction(null);
+  };
+
+  const handleClearAllForce = async () => {
+    try {
+      await api.delete('/jobs/all-force');
+      fetchJobs();
+    } catch (error) {
+      console.error('Failed to force clear all jobs:', error);
     }
     setConfirmAction(null);
   };
@@ -412,19 +423,43 @@ function Jobs() {
         </div>
       )}
 
-      <ConfirmDialog
-        open={confirmAction === 'clearAll'}
-        title={t('jobs.confirmClearAllTitle', '清空队列')}
-        message={t(
-          'jobs.confirmClearAll',
-          '确定要清空所有等待中的任务吗？正在转码和已完成的任务不受影响。此操作不可撤销。'
-        )}
-        confirmText={t('common.confirm', '确认清理')}
-        cancelText={t('common.cancel', '取消')}
-        onConfirm={handleClearAll}
-        onCancel={() => setConfirmAction(null)}
-        danger
-      />
+      {confirmAction === 'clearAll' && (
+        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4'>
+          <div className='bg-dark-800 rounded-xl max-w-md w-full p-6'>
+            <div className='flex items-start justify-between mb-4'>
+              <div className='flex items-center space-x-3'>
+                <AlertTriangle className='w-6 h-6 text-error' />
+                <h3 className='text-lg font-bold text-white'>
+                  {t('jobs.confirmClearAllTitle', '清空队列')}
+                </h3>
+              </div>
+              <button
+                onClick={() => setConfirmAction(null)}
+                className='p-1 hover:bg-dark-700 rounded-lg transition-colors'
+              >
+                <X className='w-5 h-5 text-gray-400' />
+              </button>
+            </div>
+            <p className='text-gray-400 mb-5'>
+              {t('jobs.confirmClearAll', '请选择清空方式：')}
+            </p>
+            <div className='space-y-3'>
+              <button onClick={handleClearAllForce} className='w-full btn btn-danger'>
+                {t('jobs.clearAllWithProcessing', '清空所有任务（含正在转码）')}
+              </button>
+              <button onClick={handleClearAll} className='w-full btn btn-danger'>
+                {t('jobs.clearAllQueuedOnly', '只清空队列任务')}
+              </button>
+              <button
+                onClick={() => setConfirmAction(null)}
+                className='w-full btn btn-secondary'
+              >
+                {t('common.cancel', '取消')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ConfirmDialog
         open={confirmAction === 'clearHistory'}
         title={t('jobs.confirmClearHistoryTitle') || '清理任务历史'}
