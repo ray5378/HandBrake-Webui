@@ -110,7 +110,6 @@ export const ROUTES = {
   FILES: '/files',
   TRANSCODE: '/transcode',
   JOBS: '/jobs',
-  JOB_DETAIL: '/jobs/:id',
   PRESETS: '/presets',
   SETTINGS: '/settings'
 };

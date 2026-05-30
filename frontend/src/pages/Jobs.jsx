@@ -7,7 +7,6 @@ import {
   CheckCircle,
   XCircle,
   Trash2,
-  Eye,
   AlertTriangle,
   Trash,
   SkipForward
@@ -340,9 +339,6 @@ function Jobs() {
                       job.status === 'cancelled' ||
                       job.status === 'skipped') && (
                       <>
-                        <Link to={`/jobs/${job.id}`} className='btn btn-secondary text-sm'>
-                          <Eye className='w-4 h-4' />
-                        </Link>
                         <button
                           onClick={() => handleDelete(job.id)}
                           className='btn btn-danger text-sm'

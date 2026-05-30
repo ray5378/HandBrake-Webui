@@ -112,13 +112,12 @@ function Dashboard() {
             {activeJobs.length > 0 ? (
               <div className='space-y-3 max-h-[420px] overflow-y-auto p-1 -m-1 scrollbar-hide'>
                 {activeJobs.map(job => (
-                  <Link
+                  <div
                     key={job.id}
-                    to={`/jobs/${job.id}`}
                     className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
                       job.status === 'processing'
                         ? 'bg-[#fbbf24]/20'
-                        : 'bg-dark-700 hover:bg-dark-600'
+                        : 'bg-dark-700'
                     }`}
                   >
                     <div className='flex-1 min-w-0'>
@@ -156,7 +155,7 @@ function Dashboard() {
                         </span>
                       )}
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             ) : (

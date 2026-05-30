@@ -8,7 +8,6 @@ const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Files = lazy(() => import('./pages/Files'));
 const Jobs = lazy(() => import('./pages/Jobs'));
-const JobDetail = lazy(() => import('./pages/JobDetail'));
 const Presets = lazy(() => import('./pages/Presets'));
 const Settings = lazy(() => import('./pages/Settings'));
 
@@ -43,7 +42,6 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path='files' element={<Files />} />
             <Route path='jobs' element={<Jobs />} />
-            <Route path='jobs/:id' element={<JobDetail />} />
             <Route path='presets' element={<Presets />} />
             <Route path='settings' element={<Settings />} />
           </Route>
