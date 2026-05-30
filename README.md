@@ -64,7 +64,6 @@ docker-compose logs -f
 |-----------|------|------|
 | `/config` | 配置和数据库 | 持久化配置和 SQLite 数据库 |
 | `/drive` | 文件存储根目录 | 存放源视频、转码输出、缓存文件 |
-| `/drive/转码/转码后` | 转码输出目录 | 转码完成的文件自动输出到此目录 |
 
 #### 5. 转码前配置
 
@@ -140,8 +139,6 @@ handbrake-webui/
 | 变量 | 描述 | 默认值 |
 |------|------|--------|
 | JWT_SECRET | JWT 密钥 | (随机生成) |
-| PORT | 服务端口 | 52389 |
-| MAX_CONCURRENT_JOBS | 最大并发转码数 | 2 |
 | CONFIG_DIR | 配置目录 | /config |
 
 ### 目录映射指南
@@ -181,10 +178,6 @@ sudo systemctl restart docker
 - MP4 (H.264, H.265)
 - MKV (H.264, H.265, VP9, AV1)
 - WebM (VP9, AV1)
-
-## API 文档
-
-启动服务后访问 `http://localhost:3000/api/docs` 查看完整 API 文档。
 
 ## 技术栈
 
