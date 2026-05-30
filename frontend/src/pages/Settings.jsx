@@ -4,7 +4,6 @@ import {
   Settings as SettingsIcon,
   User,
   FolderOpen,
-  HardDrive,
   Save,
   Loader2,
   AlertCircle,
@@ -179,7 +178,6 @@ function Settings() {
   const tabs = [
     { id: 'cache', label: t('settings.transcodeConfig') || '转码配置', icon: Database },
     { id: 'account', label: t('settings.account') || 'Account', icon: User },
-    { id: 'storage', label: t('settings.storage'), icon: HardDrive },
     { id: 'general', label: t('settings.general'), icon: SettingsIcon }
   ];
 
@@ -391,59 +389,6 @@ function Settings() {
                   </button>
                 </form>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'storage' && (
-            <div className='card'>
-              <h2 className='text-xl font-semibold text-white mb-4'>{t('settings.storage')}</h2>
-
-              {systemInfo ? (
-                <div className='space-y-6'>
-                  <div>
-                    <h3 className='text-sm font-medium text-gray-400 mb-3'>
-                      {t('dashboard.diskUsage')}
-                    </h3>
-                    <div className='space-y-2'>
-                      <div className='flex justify-between text-sm'>
-                        <span className='text-gray-300'>{t('common.used') || 'Used'}</span>
-                        <span className='text-white font-mono'>
-                          {formatBytes(systemInfo.diskUsage?.used || 0)}
-                        </span>
-                      </div>
-                      <div className='w-full bg-dark-700 rounded-full h-3 overflow-hidden'>
-                        <div
-                          className='h-full bg-gradient-to-r from-primary to-secondary rounded-full'
-                          style={{
-                            width: `${
-                              systemInfo.diskUsage?.total > 0
-                                ? (
-                                    (systemInfo.diskUsage.used / systemInfo.diskUsage.total) *
-                                    100
-                                  ).toFixed(1)
-                                : 0
-                            }%`
-                          }}
-                        />
-                      </div>
-                      <div className='flex justify-between text-sm'>
-                        <span className='text-gray-400'>{t('common.total') || 'Total'}</span>
-                        <span className='text-gray-300 font-mono'>
-                          {formatBytes(systemInfo.diskUsage?.total || 0)}
-                        </span>
-                      </div>
-                      <div className='flex justify-between text-sm'>
-                        <span className='text-gray-400'>{t('common.free') || 'Free'}</span>
-                        <span className='text-gray-300 font-mono'>
-                          {formatBytes(systemInfo.diskUsage?.free || 0)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <p className='text-gray-400'>{t('common.loading')}</p>
-              )}
             </div>
           )}
 
