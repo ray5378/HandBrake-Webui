@@ -21,7 +21,7 @@ jobs:
       - name: Install Backend Dependencies
         run: |
           cd backend
-          npm install
+          npm install --ignore-scripts
 
       - name: Install Frontend Dependencies
         run: |
@@ -31,22 +31,22 @@ jobs:
       - name: Run Backend Linting
         run: |
           cd backend
-          npx eslint src/ --format stylish
+          ./node_modules/.bin/eslint src/ --format stylish
 
       - name: Check Backend Formatting
         run: |
           cd backend
-          npx prettier --check src/
+          ./node_modules/.bin/prettier --check src/
 
       - name: Run Frontend Linting
         run: |
           cd frontend
-          npx eslint src/ --format stylish
+          ./node_modules/.bin/eslint src/ --format stylish
 
       - name: Check Frontend Formatting
         run: |
           cd frontend
-          npx prettier --check src/
+          ./node_modules/.bin/prettier --check src/
 
   build:
     runs-on: ubuntu-latest
