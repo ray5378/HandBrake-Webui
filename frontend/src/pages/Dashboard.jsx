@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Video, FolderOpen, ArrowRight, ListTodo, Layers, Settings } from 'lucide-react';
+import { Video, FolderOpen, ArrowRight, Layers, Settings } from 'lucide-react';
 import api from '../services/api';
 import { formatFileSize, formatETA } from '../utils/format';
 
@@ -83,15 +83,9 @@ function Dashboard() {
   return (
     <>
       <div className='space-y-8'>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-          <div>
-            <h1 className='text-3xl font-bold text-white'>{t('dashboard.title')}</h1>
-            <p className='text-gray-400 mt-1'>{t('dashboard.subtitle')}</p>
-          </div>
-          <Link to='/jobs' className='btn btn-primary inline-flex items-center space-x-2'>
-            <ListTodo className='w-4 h-4' />
-            <span>{t('jobs.title')}</span>
-          </Link>
+        <div>
+          <h1 className='text-3xl font-bold text-white'>{t('dashboard.title')}</h1>
+          <p className='text-gray-400 mt-1'>{t('dashboard.subtitle')}</p>
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
