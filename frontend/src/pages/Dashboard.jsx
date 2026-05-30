@@ -115,9 +115,7 @@ function Dashboard() {
                   <div
                     key={job.id}
                     className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                      job.status === 'processing'
-                        ? 'bg-[#fbbf24]/20'
-                        : 'bg-dark-700'
+                      job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700'
                     }`}
                   >
                     <div className='flex-1 min-w-0'>

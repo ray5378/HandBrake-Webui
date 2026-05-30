@@ -15,7 +15,10 @@ export default function LanguageSwitcher({ className }) {
   return (
     <button
       onClick={toggle}
-      className={clsx('flex items-center space-x-1 text-sm font-medium transition-colors', className)}
+      className={clsx(
+        'flex items-center space-x-1 text-sm font-medium transition-colors',
+        className
+      )}
     >
       <span className={clsx(isZh ? 'text-white' : 'text-gray-500')}>中文</span>
       <span className='text-gray-500'>/</span>
