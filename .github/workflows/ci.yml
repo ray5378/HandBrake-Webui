@@ -43,6 +43,11 @@ jobs:
           cd frontend
           ./node_modules/.bin/eslint src/ --format stylish
 
+      - name: Check Frontend Hardcoded Text
+        run: |
+          cd frontend
+          node scripts/check-hardcoded-text.js
+
       - name: Check Frontend Formatting
         run: |
           cd frontend

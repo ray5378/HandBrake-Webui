@@ -1717,7 +1717,7 @@ function Presets() {
                   className='btn btn-secondary flex-1 text-sm flex items-center justify-center'
                 >
                   <Eye className='w-4 h-4' />
-                  <span className='ml-2'>查看</span>
+                  <span className='ml-2'>{t('common.view', '查看')}</span>
                 </button>
                 <button
                   onClick={() => handleCopy(preset)}
@@ -1745,7 +1745,7 @@ function Presets() {
             </div>
           ))}
           {filteredPresets.length === 0 && (
-            <div className='col-span-full text-center py-12 text-gray-500'>无匹配预设</div>
+            <div className='col-span-full text-center py-12 text-gray-500'>{t('presets.noMatchPreset', '无匹配预设')}</div>
           )}
         </div>
       )}
