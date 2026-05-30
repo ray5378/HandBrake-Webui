@@ -106,6 +106,8 @@
     "failedJobs": "Failed",
     "diskUsage": "Disk Usage",
     "recentJobs": "Recent Jobs",
+    "activeJobs": "Active Jobs",
+    "noActiveJobs": "No active jobs",
     "systemStatus": "System Status",
     "noJobs": "No jobs yet",
     "settingsDesc": "Cache, Threads, General"

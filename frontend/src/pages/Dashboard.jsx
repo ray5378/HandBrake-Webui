@@ -21,6 +21,7 @@ function Dashboard() {
   const [stats, setStats] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
   const [modalStatus, setModalStatus] = useState(null);
+  const [activeJobs, setActiveJobs] = useState([]);
   const [modalJobs, setModalJobs] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
   const abortRef = useRef(null);
@@ -50,13 +51,23 @@ function Dashboard() {
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
     try {
-      const [jobsRes, systemRes] = await Promise.all([
+      const [jobsRes, systemRes, activeRes] = await Promise.all([
         api.get('/jobs/stats/summary', { signal }),
-        api.get('/system/info', { signal })
+        api.get('/system/info', { signal }),
+        api.get('/jobs', { params: { limit: 50 }, signal })
       ]);
 
       setStats(jobsRes.data.data);
       setSystemInfo(systemRes.data.data);
+      setActiveJobs(
+        (activeRes.data.data.jobs || [])
+          .filter(j => j.status === 'processing' || j.status === 'queued')
+          .sort((a, b) => {
+            if (a.status === 'processing' && b.status !== 'processing') return -1;
+            if (a.status !== 'processing' && b.status === 'processing') return 1;
+            return 0;
+          })
+      );
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     }
@@ -170,7 +181,9 @@ function Dashboard() {
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <div className='card'>
             <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl font-semibold text-white'>{t('dashboard.recentJobs')}</h2>
+              <h2 className='text-xl font-semibold text-white'>
+                {t('dashboard.activeJobs', '进行中的任务')}
+              </h2>
               <Link
                 to='/jobs'
                 className='text-primary hover:text-primary/80 text-sm flex items-center space-x-1'
@@ -180,9 +193,9 @@ function Dashboard() {
               </Link>
             </div>
 
-            {stats?.recentJobs && stats.recentJobs.length > 0 ? (
+            {activeJobs.length > 0 ? (
               <div className='space-y-3'>
-                {stats.recentJobs.map(job => (
+                {activeJobs.map(job => (
                   <Link
                     key={job.id}
                     to={`/jobs/${job.id}`}
@@ -212,7 +225,7 @@ function Dashboard() {
             ) : (
               <div className='text-center py-8 text-gray-400'>
                 <Video className='w-12 h-12 mx-auto mb-2 opacity-50' />
-                <p>{t('dashboard.noJobs')}</p>
+                <p>{t('dashboard.noActiveJobs', '当前没有进行中的任务')}</p>
               </div>
             )}
           </div>
