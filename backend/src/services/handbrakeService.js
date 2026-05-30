@@ -339,9 +339,15 @@ async function startTranscode(job) {
   // 检查输出文件是否已存在，存在则跳过该任务
   if (fs.existsSync(job.output_file)) {
     processingCount--;
+    let outputFileSize = null;
+    try {
+      outputFileSize = fs.statSync(job.output_file).size;
+    } catch (e) {
+      // 忽略 stat 错误
+    }
     db.prepare(
-      "UPDATE jobs SET status = 'skipped', completed_at = datetime('now') WHERE id = ?"
-    ).run(job.id);
+      "UPDATE jobs SET status = 'skipped', completed_at = datetime('now'), output_file_size = ? WHERE id = ?"
+    ).run(outputFileSize, job.id);
     logger.info('Job skipped - output file already exists', {
       jobId: job.id,
       output: job.output_file

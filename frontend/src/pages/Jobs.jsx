@@ -246,14 +246,15 @@ function Jobs() {
                     <div className='text-primary font-mono text-sm' title={job.output_file}>
                       <span className='text-primary/60'>{t('jobs.outputFile', '输出文件')}: </span>
                       <span className='break-all'>{job.output_file}</span>
-                      {job.status === 'completed' && job.output_file_size != null && (
-                        <span className='text-primary ml-3'>
-                          <span className='text-primary/60'>
-                            {t('jobs.outputSize', '转码后')}：
+                      {(job.status === 'completed' || job.status === 'skipped') &&
+                        job.output_file_size != null && (
+                          <span className='text-primary ml-3'>
+                            <span className='text-primary/60'>
+                              {t('jobs.outputSize', '转码后')}：
+                            </span>
+                            {formatFileSize(job.output_file_size)}
                           </span>
-                          {formatFileSize(job.output_file_size)}
-                        </span>
-                      )}
+                        )}
                     </div>
                   </div>
 
