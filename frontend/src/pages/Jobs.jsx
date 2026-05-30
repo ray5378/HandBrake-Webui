@@ -206,20 +206,20 @@ function Jobs() {
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                 <div className='flex-1 min-w-0'>
                   <div className='space-y-1 mb-2'>
-                    <p className='text-gray-400 font-mono text-sm truncate' title={job.source_file}>
+                    <div className='text-gray-400 font-mono text-sm' title={job.source_file}>
                       <span className='text-gray-500'>{t('jobs.sourceFile') || '源文件'}: </span>
-                      {job.source_file}
+                      <span className='break-all'>{job.source_file}</span>
                       {job.source_file_size != null && (
                         <span className='text-gray-500 ml-3'>
                           {t('jobs.originalSize') || '原体积'}：
                           {formatFileSize(job.source_file_size)}
                         </span>
                       )}
-                    </p>
-                    <p className='text-gray-400 font-mono text-sm truncate' title={job.output_file}>
+                    </div>
+                    <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
                       <span className='text-gray-500'>{t('jobs.outputFile')}: </span>
-                      {job.output_file}
-                    </p>
+                      <span className='break-all'>{job.output_file}</span>
+                    </div>
                   </div>
 
                   <div className='flex items-center space-x-3 mb-1'>
