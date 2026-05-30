@@ -67,6 +67,7 @@ function Dashboard() {
             if (a.status !== 'processing' && b.status === 'processing') return 1;
             return 0;
           })
+          .slice(0, 5)
       );
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -88,6 +89,12 @@ function Dashboard() {
             if (a.status !== 'processing' && b.status === 'processing') return 1;
             return 0;
           });
+      } else if (status === 'completed') {
+        const [completedRes, skippedRes] = await Promise.all([
+          api.get('/jobs', { params: { status: 'completed' }, signal: controller.signal }),
+          api.get('/jobs', { params: { status: 'skipped' }, signal: controller.signal })
+        ]);
+        jobs = [...(completedRes.data.data.jobs || []), ...(skippedRes.data.data.jobs || [])];
       } else {
         const params = status ? { status } : {};
         const res = await api.get('/jobs', { params, signal: controller.signal });
