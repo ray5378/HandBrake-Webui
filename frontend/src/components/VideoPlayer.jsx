@@ -51,8 +51,10 @@ export default function VideoPlayer({ file, onClose }) {
       const vh = videoEl.videoHeight;
       const gap = 16;
       const headerH = 40;
-      const maxW = window.innerWidth - gap * 2;
-      const maxH = window.innerHeight - headerH - gap * 2;
+      const isDesktop = window.innerWidth >= 768;
+      const scale = isDesktop ? 2 / 3 : 1;
+      const maxW = (window.innerWidth - gap * 2) * scale;
+      const maxH = (window.innerHeight - headerH - gap * 2) * scale;
 
       let w, h;
       if (vw >= vh) {
@@ -118,8 +120,10 @@ export default function VideoPlayer({ file, onClose }) {
         const vh = v.videoHeight;
         const gap = 16;
         const headerH = 40;
-        const maxW = window.innerWidth - gap * 2;
-        const maxH = window.innerHeight - headerH - gap * 2;
+        const isDesktop = window.innerWidth >= 768;
+        const scale = isDesktop ? 2 / 3 : 1;
+        const maxW = (window.innerWidth - gap * 2) * scale;
+        const maxH = (window.innerHeight - headerH - gap * 2) * scale;
 
         let w, h;
         if (vw >= vh) {
