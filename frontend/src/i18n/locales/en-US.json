@@ -222,6 +222,7 @@
     "threshold": "Threshold",
     "hFlip": "Horizontal Flip",
     "vFlip": "Vertical Flip",
+    "rotateClockwise": "(clockwise)",
     "tuSize": "TU Size",
     "fast": "Fast",
     "slow": "Slow",

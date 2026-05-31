@@ -1339,16 +1339,19 @@ function Presets() {
               </div>
               {formData.settings.filters?.rotate?.enabled && (
                 <div className='pl-6 space-y-4'>
-                  <select
-                    value={(formData.settings.filters?.rotate?.angle as number) || 0}
-                    onChange={e => updateSettings('filters.rotate.angle', parseInt(e.target.value))}
-                    className='input'
-                  >
-                    <option value={0}>0°</option>
-                    <option value={90}>90°</option>
-                    <option value={180}>180°</option>
-                    <option value={270}>270°</option>
-                  </select>
+                  <div className='flex items-center space-x-3'>
+                    <select
+                      value={(formData.settings.filters?.rotate?.angle as number) || 0}
+                      onChange={e => updateSettings('filters.rotate.angle', parseInt(e.target.value))}
+                      className='input'
+                    >
+                      <option value={0}>0°</option>
+                      <option value={90}>90°</option>
+                      <option value={180}>180°</option>
+                      <option value={270}>270°</option>
+                    </select>
+                    <span className='text-gray-500 text-sm'>{t('filters.rotateClockwise')}</span>
+                  </div>
                   <div className='flex items-center space-x-4'>
                     <div className='flex items-center space-x-2'>
                       <input

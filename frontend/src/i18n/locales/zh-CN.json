@@ -222,6 +222,7 @@
     "threshold": "阈值",
     "hFlip": "水平翻转",
     "vFlip": "垂直翻转",
+    "rotateClockwise": "旋转方向为顺时针",
     "tuSize": "TU 尺寸",
     "fast": "快速 (Fast)",
     "slow": "慢速 (Slow)",
