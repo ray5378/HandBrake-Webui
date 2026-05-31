@@ -288,8 +288,31 @@ function Jobs() {
                       <div className='text-gray-400 font-mono text-sm'>
                         <span className='text-gray-400'>{t('jobs.sourceFile', '源文件')}: </span>
                         <span
-                          className='text-white break-all underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary hover:decoration-primary transition-colors'
+                          className='text-white break-all'
+                          style={{
+                            textDecoration: 'underline',
+                            textDecorationStyle: 'dotted',
+                            textUnderlineOffset: '2px',
+                            cursor: 'pointer',
+                            transition: 'color 0.15s, text-decoration-color 0.15s'
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.color = '#6366F1';
+                            e.currentTarget.style.textDecorationColor = '#6366F1';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.color = '';
+                            e.currentTarget.style.textDecorationColor = '';
+                          }}
                           onClick={() => handlePlayFile(job.source_file)}
+                          role='button'
+                          tabIndex={0}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handlePlayFile(job.source_file);
+                            }
+                          }}
                         >
                           {job.source_file}
                         </span>
@@ -304,8 +327,31 @@ function Jobs() {
                         <span className='text-gray-400'>{t('jobs.outputFile', '输出文件')}: </span>
                         {job.status === 'completed' || job.status === 'skipped' ? (
                           <span
-                            className='text-white break-all underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary hover:decoration-primary transition-colors'
+                            className='text-white break-all'
+                            style={{
+                              textDecoration: 'underline',
+                              textDecorationStyle: 'dotted',
+                              textUnderlineOffset: '2px',
+                              cursor: 'pointer',
+                              transition: 'color 0.15s, text-decoration-color 0.15s'
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.color = '#6366F1';
+                              e.currentTarget.style.textDecorationColor = '#6366F1';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.color = '';
+                              e.currentTarget.style.textDecorationColor = '';
+                            }}
                             onClick={() => handlePlayFile(job.output_file)}
+                            role='button'
+                            tabIndex={0}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handlePlayFile(job.output_file);
+                              }
+                            }}
                           >
                             {job.output_file}
                           </span>
