@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import DPlayer from 'dplayer';
 import { useAuthStore } from '../stores/authStore';
 
@@ -10,7 +10,7 @@ interface VideoPlayerProps {
   onClose: () => void;
 }
 
-export default function VideoPlayer({ file, onClose }: VideoPlayerProps) {
+const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dpRef = useRef<DPlayer | null>(null);
   const token = useAuthStore(s => s.token);
@@ -224,4 +224,6 @@ export default function VideoPlayer({ file, onClose }: VideoPlayerProps) {
       `}</style>
     </div>
   );
-}
+});
+
+export default VideoPlayer;

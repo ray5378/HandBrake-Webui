@@ -33,6 +33,14 @@ const VIDEO_EXTENSIONS = [
   '.mpeg'
 ];
 
+function validateDirectory(dirPath: string): string {
+  const resolved = path.resolve(dirPath);
+  if (resolved !== dirPath && !dirPath.startsWith('/')) {
+    throw new Error('Access denied: path traversal detected');
+  }
+  return resolved;
+}
+
 router.get(
   '/',
   authenticateToken,
@@ -461,9 +469,13 @@ router.post(
         copyNonVideoFiles,
         moveNonVideoFiles
       } = req.body;
+
+      const safeSourceDir = validateDirectory(sourceDirectory);
+      const safeOutputDir = validateDirectory(outputDirectory);
+
       const db = getDatabase();
 
-      if (!fs.existsSync(sourceDirectory)) {
+      if (!fs.existsSync(safeSourceDir)) {
         res.status(400).json({
           success: false,
           error: '源目录不存在'
@@ -498,7 +510,7 @@ router.post(
         return videoFiles;
       };
 
-      const videoFiles = await findVideoFiles(sourceDirectory);
+      const videoFiles = await findVideoFiles(safeSourceDir);
 
       if (videoFiles.length === 0) {
         res.status(400).json({
@@ -526,8 +538,8 @@ router.post(
       }
 
       for (const sourceFile of videoFiles) {
-        const relativePath = path.relative(sourceDirectory, path.dirname(sourceFile));
-        const outputDir = path.join(outputDirectory, relativePath);
+        const relativePath = path.relative(safeSourceDir, path.dirname(sourceFile));
+        const outputDir = path.join(safeOutputDir, relativePath);
 
         if (!fs.existsSync(outputDir)) {
           fs.mkdirSync(outputDir, { recursive: true });
@@ -606,7 +618,7 @@ router.post(
             }
           }
         };
-        await copyNonVideoRecursive(sourceDirectory, outputDirectory);
+        await copyNonVideoRecursive(safeSourceDir, safeOutputDir);
       }
 
       if (moveNonVideoFiles) {
@@ -644,7 +656,7 @@ router.post(
             }
           }
         };
-        await moveNonVideoRecursive(sourceDirectory, outputDirectory);
+        await moveNonVideoRecursive(safeSourceDir, safeOutputDir);
       }
 
       res.status(201).json({

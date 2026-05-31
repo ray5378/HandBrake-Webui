@@ -1,14 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import logger from '../utils/logger';
 
 function generateSecret(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 64; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  return crypto.randomBytes(48).toString('base64').replace(/[+/=]/g, '');
 }
 
 const config = {
@@ -16,7 +12,9 @@ const config = {
   jwtSecret: process.env.JWT_SECRET || generateSecret(),
   jwtExpiresIn: '24h',
   refreshTokenExpiresIn: '90d',
-  maxConcurrentJobs: 2,
+  maxConcurrentJobs: process.env.MAX_CONCURRENT_JOBS
+    ? parseInt(process.env.MAX_CONCURRENT_JOBS)
+    : 2,
   configDir: process.env.CONFIG_DIR || '/config',
   cacheDir: process.env.CACHE_DIR || null,
   databasePath: null as string | null,

@@ -1718,74 +1718,30 @@ function Presets() {
                 <div className='flex items-center justify-between'>
                   <span className='text-gray-400'>{t('common.video')}</span>
                   <span className='text-white'>
-                    {getCodecLabel(
-                      (
-                        (preset.settings as unknown as Record<string, unknown>).video as Record<
-                          string,
-                          unknown
-                        >
-                      )?.codec as string
-                    )}
+                    {getCodecLabel(preset.settings.video?.codec as string)}
                   </span>
                 </div>
-                {(
-                  (preset.settings as unknown as Record<string, unknown>).video as Record<
-                    string,
-                    unknown
-                  >
-                )?.crf !== undefined && (
+                {preset.settings.video?.crf !== undefined && (
                   <div className='flex items-center justify-between'>
                     <span className='text-gray-400'>
                       {t('video.crf')} ({t('video.quality')})
                     </span>
                     <span className='text-white'>
-                      {
-                        (
-                          (preset.settings as unknown as Record<string, unknown>).video as Record<
-                            string,
-                            unknown
-                          >
-                        )?.crf as number
-                      }
+                      {preset.settings.video?.crf as number}
                     </span>
                   </div>
                 )}
                 <div className='flex items-center justify-between'>
                   <span className='text-gray-400'>{t('common.audio')}</span>
                   <span className='text-white'>
-                    {getCodecLabel(
-                      (
-                        (
-                          (preset.settings as unknown as Record<string, unknown>).audio as Record<
-                            string,
-                            unknown
-                          >
-                        )?.default as Record<string, unknown>
-                      )?.codec as string
-                    )}
+                    {getCodecLabel((preset.settings.audio?.default as Record<string, unknown>)?.codec as string)}
                   </span>
                 </div>
-                {!!(
-                  (
-                    (preset.settings as unknown as Record<string, unknown>).audio as Record<
-                      string,
-                      unknown
-                    >
-                  )?.default as Record<string, unknown>
-                )?.bitrate && (
+                {!!(preset.settings.audio?.default as Record<string, unknown>)?.bitrate && (
                   <div className='flex items-center justify-between'>
                     <span className='text-gray-400'>{t('common.audioBitrate')}</span>
                     <span className='text-white'>
-                      {
-                        (
-                          (
-                            (preset.settings as unknown as Record<string, unknown>).audio as Record<
-                              string,
-                              unknown
-                            >
-                          )?.default as Record<string, unknown>
-                        )?.bitrate as number
-                      }{' '}
+                      {(preset.settings.audio?.default as Record<string, unknown>)?.bitrate as number}{' '}
                       kbps
                     </span>
                   </div>

@@ -107,6 +107,7 @@ function createIndexes(): void {
     'CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)',
     'CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at DESC)',
     'CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id)',
+    'CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token)',
     'CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires ON refresh_tokens(expires_at)',
     'CREATE INDEX IF NOT EXISTS idx_presets_builtin ON presets(is_built_in)'
   ];

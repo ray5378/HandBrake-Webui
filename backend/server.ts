@@ -15,6 +15,9 @@ import jobRoutes from './src/routes/jobs';
 import presetRoutes from './src/routes/presets';
 import userRoutes from './src/routes/users';
 import systemRoutes from './src/routes/system';
+import { startThumbnailCleanup } from './src/services/thumbnailService';
+import { closeDatabase } from './src/models/database';
+import { killAllJobs } from './src/services/handbrakeService';
 
 const app = express();
 
@@ -63,6 +66,25 @@ app.use('/api/auth/login', authStrictLimiter);
 app.use('/api/auth/setup-admin', authStrictLimiter);
 app.use('/api/auth/logout', authStrictLimiter);
 
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: { success: false, error: 'Too many requests, please try again later.' }
+});
+
+const fileOpsLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: { success: false, error: 'Too many file operations, please try again later.' }
+});
+
+app.use('/api/files/search', fileOpsLimiter);
+app.use('/api/files/info', fileOpsLimiter);
+app.use('/api/files/stream', fileOpsLimiter);
+app.use('/api/files/download', fileOpsLimiter);
+app.use('/api/files/tree', fileOpsLimiter);
+app.use('/api', apiLimiter);
+
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
@@ -102,7 +124,6 @@ const server: http.Server = app.listen(config.port, '0.0.0.0', () => {
   }
 
   if (config.cacheDir) {
-    const { startThumbnailCleanup } = require('./src/services/thumbnailService');
     startThumbnailCleanup();
     console.log('Thumbnail cleanup service started');
   }
@@ -140,14 +161,12 @@ const shutdown = async (signal: string) => {
   });
 
   try {
-    const { closeDatabase } = require('./src/models/database');
     closeDatabase();
   } catch (_e) {
     // ignore
   }
 
   try {
-    const { killAllJobs } = require('./src/services/handbrakeService');
     killAllJobs();
   } catch (_e2) {
     // ignore

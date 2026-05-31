@@ -51,7 +51,9 @@
     "play": "Play",
     "logout": "Logout",
     "more": "More",
-    "preview": "Preview"
+    "preview": "Preview",
+    "mainNavigation": "Main navigation",
+    "userMenu": "User menu"
   },
   "app": {
     "name": "HandBrake",

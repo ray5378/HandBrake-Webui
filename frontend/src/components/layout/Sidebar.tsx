@@ -73,7 +73,7 @@ function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </div>
           </div>
 
-          <nav className='flex-1 p-4 space-y-1'>
+          <nav className='flex-1 p-4 space-y-1' aria-label={t('nav.mainNavigation', 'Main navigation')}>
             {navItems.map(item => (
               <NavLink
                 key={item.path}
@@ -99,6 +99,8 @@ function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className='flex items-center space-x-2 w-full'
+                aria-label={t('nav.userMenu', 'User menu')}
+                aria-expanded={showUserMenu}
               >
                 <div className='w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center'>
                   <span className='text-primary text-sm font-medium'>

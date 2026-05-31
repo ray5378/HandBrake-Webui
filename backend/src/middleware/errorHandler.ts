@@ -25,7 +25,7 @@ function errorHandler(
 
   res.status(statusCode).json({
     success: false,
-    error: message,
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : message,
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 }

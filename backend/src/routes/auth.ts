@@ -69,12 +69,12 @@ router.post(
       logger.info('Admin user created', { username });
 
       const token = jwt.sign({ userId, username, role: 'admin' }, config.jwtSecret, {
-        expiresIn: config.jwtExpiresIn
-      } as any);
+        expiresIn: config.jwtExpiresIn as jwt.SignOptions['expiresIn']
+      });
 
       const refreshToken = jwt.sign({ userId, type: 'refresh' }, config.jwtSecret, {
-        expiresIn: config.refreshTokenExpiresIn
-      } as any);
+        expiresIn: config.refreshTokenExpiresIn as jwt.SignOptions['expiresIn']
+      });
 
       saveRefreshToken(userId, refreshToken);
 
@@ -129,12 +129,12 @@ router.post(
       const token = jwt.sign(
         { userId: user.id, username: user.username, role: user.role },
         config.jwtSecret,
-        { expiresIn: config.jwtExpiresIn } as any
+        { expiresIn: config.jwtExpiresIn as jwt.SignOptions['expiresIn'] }
       );
 
       const refreshToken = jwt.sign({ userId: user.id, type: 'refresh' }, config.jwtSecret, {
-        expiresIn: config.refreshTokenExpiresIn
-      } as any);
+        expiresIn: config.refreshTokenExpiresIn as jwt.SignOptions['expiresIn']
+      });
 
       saveRefreshToken(user.id, refreshToken);
 
@@ -187,7 +187,7 @@ router.post(
       const newToken = jwt.sign(
         { userId: tokenRecord.user_id, username: tokenRecord.username, role: tokenRecord.role },
         config.jwtSecret,
-        { expiresIn: config.jwtExpiresIn } as any
+        { expiresIn: config.jwtExpiresIn as jwt.SignOptions['expiresIn'] }
       );
 
       res.json({

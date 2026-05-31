@@ -51,7 +51,9 @@
     "settings": "设置",
     "logout": "退出登录",
     "more": "更多",
-    "preview": "预览"
+    "preview": "预览",
+    "mainNavigation": "主导航",
+    "userMenu": "用户菜单"
   },
   "app": {
     "name": "HandBrake",

@@ -12,6 +12,23 @@ import { AuthRequest } from '../types';
 
 const router = Router();
 const fsPromises = fs.promises;
+const DRIVE_ROOT = '/drive';
+
+function isPathSafe(userPath: string): boolean {
+  const resolved = path.resolve(DRIVE_ROOT, userPath);
+  return (
+    resolved.startsWith(path.resolve(DRIVE_ROOT) + path.sep) ||
+    resolved === path.resolve(DRIVE_ROOT)
+  );
+}
+
+function resolveSafePath(userPath: string): string {
+  const resolved = path.resolve(DRIVE_ROOT, userPath);
+  if (!isPathSafe(userPath)) {
+    throw new Error('Access denied: path traversal detected');
+  }
+  return resolved;
+}
 
 const VIDEO_EXTENSIONS = [
   '.mp4',
@@ -112,15 +129,12 @@ router.get(
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const directory = (req.query.directory as string) || '/drive';
+      const directory = resolveSafePath(req.query.directory as string);
       const page = parseInt((req.query.page as string) || '1');
       const limit = parseInt((req.query.limit as string) || '20');
       const offset = (page - 1) * limit;
 
-      const targetDir = path.join(directory.startsWith('/') ? directory : `/${directory}`);
-      const absolutePath = path.isAbsolute(targetDir) ? targetDir : path.join('/', targetDir);
-
-      if (!fs.existsSync(absolutePath)) {
+      if (!fs.existsSync(directory)) {
         res.json({
           success: true,
           data: {
@@ -132,7 +146,7 @@ router.get(
         return;
       }
 
-      const items = fs.readdirSync(absolutePath, { withFileTypes: true });
+      const items = fs.readdirSync(directory, { withFileTypes: true });
 
       const files: {
         name: string;
@@ -146,7 +160,7 @@ router.get(
       const directories: Record<string, unknown>[] = [];
 
       for (const item of items) {
-        const itemPath = path.join(absolutePath, item.name);
+        const itemPath = path.join(directory, item.name);
 
         if (item.isDirectory()) {
           directories.push({
@@ -203,7 +217,7 @@ router.get(
   validate,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const { path: filePath } = req.query as { path: string };
+      const filePath = resolveSafePath(decodeURIComponent(req.query.path as string));
 
       if (!fs.existsSync(filePath)) {
         res.status(404).json({
@@ -325,17 +339,15 @@ router.delete(
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const { path: filePath } = req.query as { path: string };
+      const fileToDelete = resolveSafePath((req.query.path as string) || '');
 
-      if (!fs.existsSync(filePath)) {
+      if (!fs.existsSync(fileToDelete)) {
         res.status(404).json({
           success: false,
           error: 'File not found'
         });
         return;
       }
-
-      const fileToDelete = path.resolve(filePath);
 
       fs.unlinkSync(fileToDelete);
 
@@ -356,7 +368,7 @@ router.get(
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const { path: filePath } = req.query as { path: string };
+      const filePath = resolveSafePath((req.query.path as string) || '');
 
       if (!fs.existsSync(filePath)) {
         res.status(404).json({
@@ -426,7 +438,7 @@ router.post(
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const dir = req.body.path;
+      const dir = resolveSafePath(req.body.path);
       if (fs.existsSync(dir)) {
         res.status(400).json({ success: false, error: '目录已存在' });
         return;
@@ -458,7 +470,7 @@ router.get(
         return;
       }
 
-      const { path: filePath } = req.query as { path: string };
+      const filePath = resolveSafePath((req.query.path as string) || '');
 
       if (!fs.existsSync(filePath)) {
         res.status(404).json({ success: false, error: 'File not found' });
@@ -471,7 +483,7 @@ router.get(
         return;
       }
 
-      res.sendFile(filePath);
+      res.sendFile(filePath, { root: '/drive' });
     } catch (error) {
       next(error);
     }
@@ -506,7 +518,7 @@ router.get('/thumbnail/:filename', (req: Request, res: Response, next: NextFunct
       res.status(404).json({ success: false, error: 'Thumbnail not found' });
       return;
     }
-    res.sendFile(filePath);
+    res.sendFile(filePath, { root: '/' });
   } catch (error) {
     next(error);
   }
