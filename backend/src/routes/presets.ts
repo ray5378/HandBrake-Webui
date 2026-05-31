@@ -16,7 +16,7 @@ router.get('/', authenticateToken, (req: AuthRequest, res: Response, next: NextF
       .prepare(
         `
         SELECT * FROM presets
-        ORDER BY is_built_in DESC, name ASC
+        ORDER BY is_built_in ASC, name ASC
       `
       )
       .all() as Record<string, unknown>[];
