@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, Settings, X, ChevronRight, FileText } from 'lucide-react';
+import { Loader2, Settings, X, ChevronRight, ChevronDown, FileText, FolderOpen, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 import { useToastStore } from '../stores/toastStore';
@@ -31,8 +31,31 @@ interface BatchTranscodeModalProps {
   onSuccess: () => void;
 }
 
+interface TreeLine {
+  connector: string;
+  name: string;
+  depth: number;
+}
+
 function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeModalProps) {
   const { t } = useTranslation();
+
+  const isSingleFile = useMemo(() => {
+    const ext = '.' + directory.split('.').pop()?.toLowerCase();
+    return [
+      '.mp4',
+      '.mkv',
+      '.webm',
+      '.avi',
+      '.mov',
+      '.wmv',
+      '.flv',
+      '.ts',
+      '.mts',
+      '.m2ts',
+      '.m4v'
+    ].includes(ext);
+  }, [directory]);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -42,7 +65,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
 
   const [selectedPresetId, setSelectedPresetId] = useState('');
   const [presets, setPresets] = useState<Preset[]>([]);
-  const [, setShowPresetModal] = useState(false);
   const [quickSettings, setQuickSettings] = useState(getDefaultPresetSettings());
   const [activeTab, setActiveTab] = useState('summary');
   const [editingPreset, setEditingPreset] = useState(false);
@@ -55,7 +77,26 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
   const [browseLoading, setBrowseLoading] = useState(false);
   const [customOutputDir, setCustomOutputDir] = useState('');
 
+  const [copyNonVideoFiles, setCopyNonVideoFiles] = useState(false);
+  const [moveNonVideoFiles, setMoveNonVideoFiles] = useState(false);
+
+  const [presetSearch, setPresetSearch] = useState('');
+  const [showPresetDropdown, setShowPresetDropdown] = useState(false);
+  const [presetHighlightIdx, setPresetHighlightIdx] = useState(-1);
+  const presetInputRef = useRef<HTMLDivElement>(null);
+  const presetDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [showCacheSettingsModal, setShowCacheSettingsModal] = useState(false);
+  const [cacheDir, setCacheDir] = useState('');
+  const [cacheBrowsePath, setCacheBrowsePath] = useState('/drive');
+  const [cacheBrowseDirs, setCacheBrowseDirs] = useState<Array<{ name: string; path: string }>>([]);
+  const [cacheBrowseLoading, setCacheBrowseLoading] = useState(false);
+  const [maxConcurrentJobs, setMaxConcurrentJobs] = useState(2);
+  const [savingCacheDir, setSavingCacheDir] = useState(false);
+
   const abortRef = useRef<AbortController | null>(null);
+
+  const outputDirectory = customOutputDir || outputPath;
 
   const fetchPresets = async () => {
     try {
@@ -142,6 +183,84 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
     browseOutputDirs(path);
   };
 
+  const filteredPresets = useMemo(() => {
+    if (!presetSearch) return presets;
+    const q = presetSearch.toLowerCase();
+    return presets.filter(p => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
+  }, [presets, presetSearch]);
+
+  const selectedPresetName = useMemo(() => {
+    if (!selectedPresetId) return '';
+    const preset = presets.find(p => p.id === selectedPresetId);
+    return preset ? preset.name : '';
+  }, [selectedPresetId, presets]);
+
+  const handleSelectPreset = (presetId: string) => {
+    setSelectedPresetId(presetId);
+    localStorage.setItem('lastUsedPresetId', presetId);
+    setShowPresetDropdown(false);
+    setPresetSearch('');
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        presetDropdownRef.current &&
+        !presetDropdownRef.current.contains(e.target as Node) &&
+        presetInputRef.current &&
+        !presetInputRef.current.contains(e.target as Node)
+      ) {
+        setShowPresetDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getTreeLines = useMemo((): TreeLine[] => {
+    if (isSingleFile) return [];
+    const sourceDir = directory;
+    const lines: TreeLine[] = [];
+    const dirMap = new Map<string, Set<string>>();
+
+    for (const file of sourceFiles) {
+      const rel = file.path.startsWith(sourceDir) ? file.path.slice(sourceDir.length) : file.path;
+      const parts = rel.split('/').filter(Boolean);
+      const dirs = parts.slice(0, -1);
+      let current = '';
+      for (const d of dirs) {
+        const parent = current;
+        current = current ? current + '/' + d : d;
+        if (!dirMap.has(parent)) dirMap.set(parent, new Set());
+        dirMap.get(parent)!.add(d);
+        if (!dirMap.has(current)) dirMap.set(current, new Set());
+      }
+    }
+
+    const rootSet = dirMap.get('') || new Set();
+    const sortedRoot = Array.from(rootSet).sort();
+
+    const walk = (dirs: string[], prefix: string, depth: number) => {
+      for (let i = 0; i < dirs.length; i++) {
+        const isLast = i === dirs.length - 1;
+        const connector = prefix + (isLast ? '└── ' : '├── ');
+        const childPrefix = prefix + (isLast ? '    ' : '│   ');
+        lines.push({ connector, name: dirs[i], depth });
+        const childPath = dirs[i];
+        const childSet = dirMap.get(childPath) || new Set();
+        const childDirs = Array.from(childSet).sort();
+        if (childDirs.length > 0) {
+          walk(childDirs, childPrefix, depth + 1);
+        }
+      }
+    };
+
+    if (sortedRoot.length > 0) {
+      walk(sortedRoot, '', 0);
+    }
+    return lines;
+  }, [isSingleFile, directory, sourceFiles]);
+
   const displayedFiles = useMemo(() => {
     return sourceFiles.slice(0, page * limit);
   }, [sourceFiles, page, limit]);
@@ -197,36 +316,35 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
     if (selectedFiles.size === 0) return;
     setSubmitting(true);
     try {
-      const finalOutputDir = customOutputDir || outputPath;
       const response = (await api.post('/jobs/batch', {
-        directory,
+        sourceDirectory: directory,
+        outputDirectory,
         files: Array.from(selectedFiles),
         presetId: selectedPresetId || null,
-        outputDir: finalOutputDir,
-        settings: quickSettings
+        customSettings: quickSettings,
+        copyNonVideoFiles,
+        moveNonVideoFiles
       })) as {
         data: ApiResponse<{
-          accepted: number;
           total: number;
-          skipped: number;
-          skipReport: Array<{ file: string; existing: string }>;
+          jobIds: string[];
         }>;
       };
 
       const data = response.data.data;
       const addToast = useToastStore.getState().addToast;
       if (data) {
-        if (data.skipped > 0) {
-          const message =
-            `${t('transcode.tasksAccepted', '已接受')} ${data.accepted} ${t('transcode.tasksTotal', '个转码任务')}\n` +
-            `${t('transcode.tasksSkipped', data.skipped + ' 个被跳过（输出已存在）')}` +
-            (data.skipReport ? '\n\n' + data.skipReport.map(r => r.file).join('\n') : '');
-          addToast({ message, type: 'warning', duration: 8000 });
-        }
+        addToast({
+          message: `${t('transcode.tasksAccepted', '已创建')} ${data.total} ${t('transcode.tasksTotal', '个转码任务')}`,
+          type: 'success',
+          duration: 5000
+        });
         onSuccess();
       }
     } catch (error) {
       console.error('Failed to submit batch job:', error);
+      const addToast = useToastStore.getState().addToast;
+      addToast({ message: t('transcode.submitFailed', '提交失败'), type: 'error', duration: 5000 });
     } finally {
       setSubmitting(false);
     }
@@ -248,6 +366,57 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
       console.error('Failed to save preset:', error);
     }
   };
+
+  const fetchCacheDir = useCallback(async () => {
+    try {
+      const res = await api.get('/system/cache-dir');
+      const dir = res.data.data.cacheDir;
+      const jobs = res.data.data.maxConcurrentJobs;
+      if (dir) {
+        setCacheDir(dir);
+        setCacheBrowsePath(dir);
+        handleCacheBrowse(dir);
+      }
+      if (jobs) {
+        setMaxConcurrentJobs(jobs);
+      }
+    } catch (err) {
+      console.error('Failed to fetch cache dir:', err);
+    }
+  }, []);
+
+  const handleCacheBrowse = async (path: string) => {
+    setCacheBrowsePath(path);
+    setCacheBrowseLoading(true);
+    try {
+      const res = await api.get('/files', { params: { directory: path } });
+      setCacheBrowseDirs(res.data.data.directories || []);
+    } catch (err) {
+      console.error('Failed to browse cache dir:', err);
+    } finally {
+      setCacheBrowseLoading(false);
+    }
+  };
+
+  const handleSaveCacheDir = async () => {
+    if (!cacheDir) return;
+    setSavingCacheDir(true);
+    try {
+      await api.put('/system/cache-dir', {
+        cacheDir,
+        maxConcurrentJobs
+      });
+      setShowCacheSettingsModal(false);
+    } catch (err) {
+      console.error('Failed to save cache dir:', err);
+    } finally {
+      setSavingCacheDir(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCacheDir();
+  }, [fetchCacheDir]);
 
   const tabs: Array<{ id: string; label: string; icon: LucideIcon }> = [
     { id: 'summary', label: t('presetTabs.summary'), icon: FileText },
@@ -469,21 +638,21 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                 >
                   {(() => {
                     const codec = (quickSettings.video?.codec as string) || 'x264';
-                    let presets: ReadonlyArray<{ value: string; label: string }>;
+                    let presetsList: ReadonlyArray<{ value: string; label: string }>;
                     if (codec.startsWith('qsv_')) {
-                      presets = QSV_PRESETS;
+                      presetsList = QSV_PRESETS;
                     } else if (codec.startsWith('nvenc_')) {
-                      presets = NVENC_PRESETS;
+                      presetsList = NVENC_PRESETS;
                     } else if (codec.startsWith('vce_')) {
-                      presets = VCE_PRESETS;
+                      presetsList = VCE_PRESETS;
                     } else if (codec === 'x265') {
-                      presets = X265_PRESETS;
+                      presetsList = X265_PRESETS;
                     } else {
-                      presets = X264_PRESETS;
+                      presetsList = X264_PRESETS;
                     }
-                    return presets.map(preset => (
-                      <option key={preset.value} value={preset.value}>
-                        {preset.label}
+                    return presetsList.map(p => (
+                      <option key={p.value} value={p.value}>
+                        {p.label}
                       </option>
                     ));
                   })()}
@@ -578,7 +747,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
         <div className='p-6 border-b border-dark-700'>
           <div className='flex items-center justify-between'>
             <h2 className='text-2xl font-bold text-white'>
-              {t('transcode.batchTranscode', '批量转码')}
+              {isSingleFile
+                ? t('batchTranscode.singleFileTitle', '单个文件转码')
+                : t('batchTranscode.batchTitle', '批量转码')}
             </h2>
             <button
               onClick={onClose}
@@ -589,7 +760,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
           </div>
 
           <div className='text-sm text-gray-400 mt-1'>
-            {t('transcode.sourceDirectory', '源目录')}:{' '}
+            {t('batchTranscode.sourceDirectory', '源目录')}:{' '}
             <span className='text-white'>{directory}</span>
           </div>
         </div>
@@ -597,33 +768,161 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
         <div className='flex-1 overflow-y-auto'>
           <div className='p-6'>
             <div className='space-y-6'>
-              <div>
-                <div className='flex items-center justify-between mb-2'>
-                  <label className='label'>{t('presets.usePreset', '使用预设')}</label>
-                  <button
-                    onClick={() => {
-                      setShowPresetModal(true);
-                    }}
-                    className='text-xs text-primary hover:underline'
-                  >
-                    {t('presets.refreshPresets', '刷新')}
-                  </button>
+              {!isSingleFile && getTreeLines.length > 0 && (
+                <div className='bg-dark-900 rounded-xl p-4 border border-dark-700'>
+                  <div className='flex items-center space-x-2 mb-3'>
+                    <FolderOpen className='w-4 h-4 text-primary' />
+                    <h3 className='text-white font-medium'>
+                      {t('batchTranscode.directoryMapping', '目录结构映射')}
+                    </h3>
+                  </div>
+                  <div className='grid grid-cols-2 gap-4'>
+                    <div>
+                      <div className='text-xs text-warning mb-1 font-semibold'>
+                        {t('batchTranscode.source', '源')}
+                      </div>
+                      <div className='bg-dark-700 rounded px-2 py-1'>
+                        <div className='text-xs font-mono mb-2 border-b border-dark-600 pb-1'>
+                          <span className='text-gray-400 break-all'>{directory}</span>
+                        </div>
+                        <div className='space-y-0.5'>
+                          {getTreeLines.map((line, i) => (
+                            <div
+                              key={i}
+                              className='text-xs text-gray-400 font-mono'
+                              style={{ paddingLeft: line.depth * 16 }}
+                            >
+                              <div className='flex items-baseline space-x-1'>
+                                <span className='text-gray-600 shrink-0'>{line.connector}</span>
+                                <FolderOpen className='w-3 h-3 text-warning shrink-0 relative top-0.5' />
+                                <span className='text-gray-400'>{line.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className='text-xs text-primary mb-1 font-semibold'>
+                        {t('batchTranscode.output', '输出')}
+                      </div>
+                      <div className='bg-dark-700 rounded px-2 py-1'>
+                        <div className='text-xs font-mono mb-2 border-b border-dark-600 pb-1'>
+                          <span className='text-primary break-all'>{outputDirectory}</span>
+                        </div>
+                        <div className='space-y-0.5'>
+                          {getTreeLines.map((line, i) => (
+                            <div
+                              key={i}
+                              className='text-xs text-gray-400 font-mono'
+                              style={{ paddingLeft: line.depth * 16 }}
+                            >
+                              <div className='flex items-baseline space-x-1'>
+                                <span className='text-gray-600 shrink-0'>{line.connector}</span>
+                                <FolderOpen className='w-3 h-3 text-primary shrink-0 relative top-0.5' />
+                                <span className='text-primary'>{line.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <select
-                  value={selectedPresetId}
-                  onChange={e => {
-                    setSelectedPresetId(e.target.value);
-                    localStorage.setItem('lastUsedPresetId', e.target.value);
-                  }}
-                  className='input'
-                >
-                  <option value=''>{t('transcode.customSettings', '自定义设置')}</option>
-                  {presets.map(preset => (
-                    <option key={preset.id} value={preset.id}>
-                      {preset.name} {preset.isBuiltIn ? `(${t('presets.builtIn', '内置')})` : ''}
-                    </option>
-                  ))}
-                </select>
+              )}
+
+              <div>
+                <label className='label mb-2'>
+                  {t('batchTranscode.selectPreset', '选择预设')}
+                </label>
+                {presets.length > 0 ? (
+                  <div className='relative'>
+                    <div
+                      ref={presetInputRef}
+                      className='input flex items-center cursor-text'
+                      onClick={() => {
+                        setShowPresetDropdown(true);
+                        presetInputRef.current?.querySelector('input')?.focus();
+                      }}
+                    >
+                      <input
+                        type='text'
+                        value={showPresetDropdown ? presetSearch : selectedPresetName}
+                        onChange={e => {
+                          setPresetSearch(e.target.value);
+                          setShowPresetDropdown(true);
+                          setPresetHighlightIdx(-1);
+                        }}
+                        onFocus={() => {
+                          setPresetSearch('');
+                          setShowPresetDropdown(true);
+                        }}
+                        onKeyDown={e => {
+                          const filtered = filteredPresets;
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setPresetHighlightIdx(prev =>
+                              prev < filtered.length - 1 ? prev + 1 : 0
+                            );
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setPresetHighlightIdx(prev =>
+                              prev > 0 ? prev - 1 : filtered.length - 1
+                            );
+                          } else if (e.key === 'Enter' && presetHighlightIdx >= 0) {
+                            e.preventDefault();
+                            handleSelectPreset(filtered[presetHighlightIdx].id);
+                          } else if (e.key === 'Escape') {
+                            setShowPresetDropdown(false);
+                          }
+                        }}
+                        className='bg-transparent border-none outline-none text-white flex-1 min-w-0'
+                        placeholder={t('batchTranscode.searchPreset', '输入搜索预设...')}
+                      />
+                      <ChevronDown className='w-4 h-4 text-gray-400 shrink-0' />
+                    </div>
+                    {showPresetDropdown && (
+                      <div
+                        ref={presetDropdownRef}
+                        className='absolute z-50 left-0 right-0 mt-1 bg-dark-700 border border-dark-600 rounded-lg max-h-60 overflow-y-auto shadow-xl'
+                      >
+                        {filteredPresets.length > 0 ? (
+                          filteredPresets.map((preset, idx) => (
+                            <button
+                              key={preset.id}
+                              type='button'
+                              onMouseDown={() => handleSelectPreset(preset.id)}
+                              onMouseEnter={() => setPresetHighlightIdx(idx)}
+                              className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between ${
+                                idx === presetHighlightIdx
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'text-gray-300 hover:bg-dark-600'
+                              }`}
+                            >
+                              <span className='truncate'>
+                                {preset.name}
+                                {!preset.isBuiltIn && (
+                                  <span className='text-xs text-gray-500 ml-1'>
+                                    {t('batchTranscode.custom', '(自定义)')}
+                                  </span>
+                                )}
+                              </span>
+                              <span className='text-xs text-gray-500 shrink-0 ml-2'>
+                                {preset.description}
+                              </span>
+                            </button>
+                          ))
+                        ) : (
+                          <div className='px-3 py-2 text-sm text-gray-500'>
+                            {t('batchTranscode.noMatchPreset', '无匹配预设')}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className='text-gray-400'>{t('batchTranscode.noPresets', '暂无预设可用')}</p>
+                )}
               </div>
 
               <div className='bg-dark-900 rounded-xl p-4 border border-dark-700'>
@@ -810,7 +1109,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                             onClick={() => handleBrowse(dir.path)}
                             className='flex items-center space-x-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-left'
                           >
-                            <span className='w-4 h-4 text-warning'>📁</span>
+                            <FolderOpen className='w-4 h-4 text-warning shrink-0' />
                             <span className='text-white text-xs truncate'>{dir.name}</span>
                           </button>
                         ))}
@@ -826,8 +1125,78 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
 
                 <p className='text-xs text-gray-400'>
                   {t('transcode.currentPath', '当前路径')}:{' '}
-                  <span className='text-primary font-mono'>{customOutputDir || outputPath}</span>
+                  <span className='text-primary font-mono'>{outputDirectory}</span>
                 </p>
+              </div>
+
+              {!isSingleFile && (
+                <div className='flex items-center space-x-2'>
+                  <input
+                    type='checkbox'
+                    id='copyNonVideoFiles'
+                    checked={copyNonVideoFiles}
+                    onChange={e => {
+                      setCopyNonVideoFiles(e.target.checked);
+                      if (e.target.checked) setMoveNonVideoFiles(false);
+                    }}
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                  />
+                  <label htmlFor='copyNonVideoFiles' className='text-sm text-gray-300'>
+                    {t('batchTranscode.copyNonVideo', '把源目录不能转码的文件复制到目标目录')}
+                  </label>
+                </div>
+              )}
+
+              {!isSingleFile && (
+                <div className='flex items-center space-x-2'>
+                  <input
+                    type='checkbox'
+                    id='moveNonVideoFiles'
+                    checked={moveNonVideoFiles}
+                    onChange={e => {
+                      setMoveNonVideoFiles(e.target.checked);
+                      if (e.target.checked) setCopyNonVideoFiles(false);
+                    }}
+                    className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                  />
+                  <label htmlFor='moveNonVideoFiles' className='text-sm text-gray-300'>
+                    {t('batchTranscode.moveNonVideo', '把源目录不能转码的文件移动到目标目录')}
+                  </label>
+                </div>
+              )}
+
+              <div className='bg-dark-700 rounded-lg p-4'>
+                <h3 className='text-lg font-semibold text-white mb-3'>
+                  {t('batchTranscode.instructions', '说明')}
+                </h3>
+                <ul className='text-gray-400 text-sm space-y-2'>
+                  {isSingleFile ? (
+                    <>
+                      <li>&bull; {t('batchTranscode.singleFileDesc1', '转码单个视频文件')}</li>
+                      <li>
+                        &bull;{' '}
+                        {t(
+                          'batchTranscode.singleFileDesc2',
+                          '转码后的文件保持原文件名，扩展名改为所选容器格式'
+                        )}
+                      </li>
+                      <li>&bull; {t('batchTranscode.singleFileDesc3', '任务会自动加入队列处理')}</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>&bull; {t('batchTranscode.batchDesc1', '递归扫描源目录中的所有视频文件')}</li>
+                      <li>&bull; {t('batchTranscode.batchDesc2', '保持原始目录结构')}</li>
+                      <li>
+                        &bull;{' '}
+                        {t(
+                          'batchTranscode.batchDesc3',
+                          '转码后的文件保持原文件名，仅扩展名改为容器格式'
+                        )}
+                      </li>
+                      <li>&bull; {t('batchTranscode.batchDesc4', '所有任务会自动加入队列处理')}</li>
+                    </>
+                  )}
+                </ul>
               </div>
             </div>
           </div>
@@ -840,19 +1209,196 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
           <button
             onClick={handleSubmit}
             disabled={selectedFiles.size === 0 || submitting}
-            className='btn btn-primary'
+            className='btn btn-primary flex items-center space-x-2'
           >
             {submitting ? (
               <>
-                <Loader2 className='w-4 h-4 animate-spin mr-2 inline' />
-                {t('common.processing')}
+                <Loader2 className='w-4 h-4 animate-spin' />
+                <span>{t('batchTranscode.submit', '提交中...')}</span>
               </>
             ) : (
-              t('transcode.startTranscoding', '开始转码')
+              <>
+                <Settings className='w-4 h-4' />
+                <span>
+                  {isSingleFile
+                    ? t('batchTranscode.startSingle', '开始转码')
+                    : t('batchTranscode.startBatch', '开始批量转码')}
+                </span>
+              </>
             )}
           </button>
         </div>
       </div>
+
+      {showCacheSettingsModal && (
+        <div className='fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4'>
+          <div className='bg-dark-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto border-2 border-primary'>
+            <div className='flex items-center justify-between p-6 border-b border-dark-700'>
+              <div>
+                <h2 className='text-2xl font-bold text-white flex items-center space-x-3'>
+                  <AlertCircle className='w-6 h-6 text-warning' />
+                  <span>{t('batchTranscode.cacheDirRequired', '请先设置缓存目录')}</span>
+                </h2>
+                <p className='text-gray-400 mt-1'>
+                  {t('batchTranscode.cacheDirRequiredDesc', '转码任务需要设置缓存目录才能开始')}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCacheSettingsModal(false)}
+                className='p-2 hover:bg-dark-700 rounded-lg transition-colors'
+              >
+                <X className='w-5 h-5 text-gray-400' />
+              </button>
+            </div>
+
+            <div className='p-6 space-y-6'>
+              <div>
+                <h3 className='text-sm font-medium text-gray-400 mb-2'>
+                  {t('batchTranscode.selectCacheDir', '选择缓存目录')}
+                </h3>
+                <p className='text-gray-500 text-xs mb-3'>
+                  {t(
+                    'batchTranscode.cacheDirDesc',
+                    '转码时中间文件会先写入此目录，完成后移动到输出目录'
+                  )}
+                </p>
+
+                <div className='mb-4'>
+                  <p className='text-white font-mono text-sm bg-dark-700 rounded-lg p-3 truncate'>
+                    {cacheDir || t('batchTranscode.notSelected', '（未选择）')}
+                  </p>
+                </div>
+
+                <div className='mb-4'>
+                  {cacheBrowseLoading ? (
+                    <div className='flex items-center space-x-2 text-gray-400 py-2'>
+                      <Loader2 className='w-4 h-4 animate-spin' />
+                      <span className='text-sm'>{t('common.loading')}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className='flex flex-wrap items-center gap-1 text-sm mb-3'>
+                        <button
+                          type='button'
+                          onClick={() => handleCacheBrowse('/drive')}
+                          className={`hover:underline truncate max-w-[100px] ${
+                            cacheBrowsePath === '/drive' ? 'text-white font-medium' : 'text-primary'
+                          }`}
+                        >
+                          drive
+                        </button>
+                        {cacheBrowsePath
+                          .split('/')
+                          .filter(Boolean)
+                          .slice(1)
+                          .map((part, i) => {
+                            const fullPath =
+                              '/drive/' +
+                              cacheBrowsePath
+                                .split('/')
+                                .filter(Boolean)
+                                .slice(1, i + 2)
+                                .join('/');
+                            return (
+                              <span key={i} className='flex items-center gap-1'>
+                                <ChevronRight className='w-3 h-3 text-gray-500 shrink-0' />
+                                <button
+                                  type='button'
+                                  onClick={() => handleCacheBrowse(fullPath)}
+                                  className={`hover:underline truncate max-w-[100px] ${
+                                    cacheBrowsePath === fullPath
+                                      ? 'text-white font-medium'
+                                      : 'text-primary'
+                                  }`}
+                                >
+                                  {part}
+                                </button>
+                              </span>
+                            );
+                          })}
+                      </div>
+
+                      <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3 max-h-48 overflow-y-auto overflow-x-auto'>
+                        {cacheBrowseDirs.map(dir => (
+                          <button
+                            type='button'
+                            key={dir.path}
+                            onClick={() => handleCacheBrowse(dir.path)}
+                            className={`flex items-center space-x-2 p-2 rounded-lg transition-colors text-left ${
+                              cacheDir === dir.path
+                                ? 'bg-primary/20 border border-primary'
+                                : 'bg-dark-600 hover:bg-dark-500 border border-transparent'
+                            }`}
+                          >
+                            <FolderOpen className='w-4 h-4 text-warning shrink-0' />
+                            <span className='text-white text-xs truncate'>{dir.name}</span>
+                          </button>
+                        ))}
+                        {cacheBrowseDirs.length === 0 && (
+                          <p className='col-span-full text-gray-500 text-xs py-2'>
+                            {t('common.empty') || '空目录'}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className='border-t border-dark-700 pt-6'>
+                <h3 className='text-sm font-medium text-gray-400 mb-2'>
+                  {t('batchTranscode.concurrentJobs', '同时转码任务数')}
+                </h3>
+                <p className='text-gray-500 text-xs mb-3'>
+                  {t('batchTranscode.concurrentJobsDesc', '设置同时运行的转码任务数量')}
+                </p>
+                <div className='flex items-center space-x-3'>
+                  <input
+                    type='number'
+                    min={1}
+                    max={10}
+                    value={maxConcurrentJobs}
+                    onChange={e => {
+                      const val = parseInt(e.target.value) || 1;
+                      setMaxConcurrentJobs(Math.min(10, Math.max(1, val)));
+                    }}
+                    className='input w-24 text-center font-mono text-lg'
+                  />
+                  <span className='text-gray-400 text-sm'>{t('settings.tasks', '个任务')}</span>
+                </div>
+              </div>
+
+              <div className='flex space-x-3 pt-4'>
+                <button
+                  type='button'
+                  onClick={() => setShowCacheSettingsModal(false)}
+                  className='btn btn-secondary flex-1'
+                >
+                  {t('batchTranscode.cancel', '取消')}
+                </button>
+                <button
+                  type='button'
+                  onClick={handleSaveCacheDir}
+                  disabled={savingCacheDir || !cacheDir}
+                  className='btn btn-primary flex-1 flex items-center justify-center space-x-2'
+                >
+                  {savingCacheDir ? (
+                    <>
+                      <Loader2 className='w-4 h-4 animate-spin' />
+                      <span>{t('common.saving')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Settings className='w-4 h-4' />
+                      <span>{t('batchTranscode.saveAndContinue', '保存并继续')}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
