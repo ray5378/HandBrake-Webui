@@ -1726,22 +1726,25 @@ function Presets() {
                     <span className='text-gray-400'>
                       {t('video.crf')} ({t('video.quality')})
                     </span>
-                    <span className='text-white'>
-                      {preset.settings.video?.crf as number}
-                    </span>
+                    <span className='text-white'>{preset.settings.video?.crf as number}</span>
                   </div>
                 )}
                 <div className='flex items-center justify-between'>
                   <span className='text-gray-400'>{t('common.audio')}</span>
                   <span className='text-white'>
-                    {getCodecLabel((preset.settings.audio?.default as Record<string, unknown>)?.codec as string)}
+                    {getCodecLabel(
+                      (preset.settings.audio?.default as Record<string, unknown>)?.codec as string
+                    )}
                   </span>
                 </div>
                 {!!(preset.settings.audio?.default as Record<string, unknown>)?.bitrate && (
                   <div className='flex items-center justify-between'>
                     <span className='text-gray-400'>{t('common.audioBitrate')}</span>
                     <span className='text-white'>
-                      {(preset.settings.audio?.default as Record<string, unknown>)?.bitrate as number}{' '}
+                      {
+                        (preset.settings.audio?.default as Record<string, unknown>)
+                          ?.bitrate as number
+                      }{' '}
                       kbps
                     </span>
                   </div>

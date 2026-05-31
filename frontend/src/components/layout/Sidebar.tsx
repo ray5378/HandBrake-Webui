@@ -73,7 +73,10 @@ function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </div>
           </div>
 
-          <nav className='flex-1 p-4 space-y-1' aria-label={t('nav.mainNavigation', 'Main navigation')}>
+          <nav
+            className='flex-1 p-4 space-y-1'
+            aria-label={t('nav.mainNavigation', 'Main navigation')}
+          >
             {navItems.map(item => (
               <NavLink
                 key={item.path}
