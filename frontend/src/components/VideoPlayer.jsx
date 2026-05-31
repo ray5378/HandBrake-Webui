@@ -8,7 +8,12 @@ export default function VideoPlayer({ file, onClose }) {
   const dpRef = useRef(null);
   const roRef = useRef(null);
   const token = useAuthStore(s => s.token);
-  const [containerStyle, setContainerStyle] = useState({});
+  const [containerStyle, setContainerStyle] = useState({
+    width: '100%',
+    maxWidth: 'calc(100vw - 2rem)',
+    height: 'calc(100vh - 6rem)',
+    maxHeight: 'calc(100vh - 6rem)'
+  });
 
   const updateContainerSize = useCallback(videoEl => {
     if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) return;
@@ -21,14 +26,14 @@ export default function VideoPlayer({ file, onClose }) {
 
     let w, h;
     if (vw >= vh) {
-      w = Math.min(vw, maxW);
+      w = maxW;
       h = w * (vh / vw);
       if (h > maxH) {
         h = maxH;
         w = h * (vw / vh);
       }
     } else {
-      h = Math.min(vh, maxH);
+      h = maxH;
       w = h * (vw / vh);
       if (w > maxW) {
         w = maxW;
