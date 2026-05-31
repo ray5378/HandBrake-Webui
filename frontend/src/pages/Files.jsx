@@ -10,8 +10,10 @@ import {
   ChevronRight,
   PlayCircle,
   X,
-  MousePointer2
+  MousePointer2,
+  Settings
 } from 'lucide-react';
+import VideoPlayer from '../components/VideoPlayer';
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
@@ -27,6 +29,22 @@ function Files() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState(null);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+
+  const VIDEO_EXTENSIONS = [
+    '.mp4',
+    '.mkv',
+    '.webm',
+    '.avi',
+    '.mov',
+    '.wmv',
+    '.flv',
+    '.ts',
+    '.mts',
+    '.m2ts',
+    '.m4v'
+  ];
+  const [selectedVideoFile, setSelectedVideoFile] = useState(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState(null);
   const [searchResults, setSearchResults] = useState({ files: [], directories: [] });
@@ -69,17 +87,37 @@ function Files() {
     setSearchTerm('');
   };
 
-  const handleContextMenu = (e, directory) => {
+  const handleContextMenu = (e, path) => {
     e.preventDefault();
+    const isFile = filteredFiles.some(f => f.path === path);
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
-      directory
+      directory: path,
+      isFile
     });
   };
 
   const closeContextMenu = () => {
     setContextMenu(null);
+  };
+
+  const handleFileClick = file => {
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (VIDEO_EXTENSIONS.includes(ext)) {
+      setSelectedVideoFile(file);
+      setShowVideoPlayer(true);
+    }
+  };
+
+  const handlePlayVideo = () => {
+    if (contextMenu && contextMenu.directory) {
+      const parts = contextMenu.directory.split('/');
+      const name = parts[parts.length - 1];
+      setSelectedVideoFile({ path: contextMenu.directory, name });
+      setShowVideoPlayer(true);
+    }
+    closeContextMenu();
   };
 
   const handleBatchTranscode = () => {
@@ -340,6 +378,10 @@ function Files() {
                   key={file.path}
                   className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
                   onContextMenu={e => handleContextMenu(e, file.path)}
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleFileClick(file);
+                  }}
                 >
                   {viewMode === 'grid' ? (
                     <>
@@ -380,13 +422,24 @@ function Files() {
             top: Math.min(contextMenu.y, window.innerHeight - 200)
           }}
         >
-          <button
-            onClick={handleBatchTranscode}
-            className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
-          >
-            <PlayCircle className='w-4 h-4 text-primary' />
-            <span>{t('nav.transcode')}</span>
-          </button>
+          <div className='py-1'>
+            {contextMenu.isFile && (
+              <button
+                onClick={handlePlayVideo}
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+              >
+                <PlayCircle className='w-4 h-4 text-primary' />
+                <span>{t('nav.play')}</span>
+              </button>
+            )}
+            <button
+              onClick={handleBatchTranscode}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Settings className='w-4 h-4 text-primary' />
+              <span>{t('nav.transcode')}</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -398,6 +451,16 @@ function Files() {
             setSelectedDirectory(null);
           }}
           onSuccess={() => navigate('/jobs')}
+        />
+      )}
+
+      {showVideoPlayer && selectedVideoFile && (
+        <VideoPlayer
+          file={selectedVideoFile}
+          onClose={() => {
+            setShowVideoPlayer(false);
+            setSelectedVideoFile(null);
+          }}
         />
       )}
     </div>

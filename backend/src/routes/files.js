@@ -2,9 +2,11 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
+const jwt = require('jsonwebtoken');
 const { body, query } = require('express-validator');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
+const config = require('../config');
 
 const router = express.Router();
 
@@ -389,6 +391,36 @@ router.post('/mkdir', authenticateToken, body('path').notEmpty(), validate, (req
     }
     fs.mkdirSync(dir, { recursive: true });
     res.json({ success: true, data: { path: dir } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/stream', query('path').notEmpty(), validate, (req, res, next) => {
+  try {
+    const token = req.query.token;
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Access token required' });
+    }
+
+    try {
+      jwt.verify(token, config.jwtSecret);
+    } catch (err) {
+      return res.status(403).json({ success: false, error: 'Invalid token' });
+    }
+
+    const { path: filePath } = req.query;
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, error: 'File not found' });
+    }
+
+    const stats = fs.statSync(filePath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ success: false, error: 'Not a file' });
+    }
+
+    res.sendFile(filePath);
   } catch (error) {
     next(error);
   }

@@ -42,13 +42,16 @@
   },
   "nav": {
     "dashboard": "仪表盘",
+    "home": "首页",
     "jobs": "任务",
     "files": "文件",
     "presets": "预设",
     "transcode": "转码",
+    "play": "播放",
     "settings": "设置",
     "logout": "退出登录",
-    "more": "更多"
+    "more": "更多",
+    "preview": "预览"
   },
   "app": {
     "name": "HandBrake",

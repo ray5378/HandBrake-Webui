@@ -41,14 +41,17 @@
     "quickActions": "Quick Actions"
   },
   "nav": {
+    "home": "Home",
     "dashboard": "Dashboard",
-    "jobs": "Jobs",
     "files": "Files",
+    "jobs": "Jobs",
     "presets": "Presets",
-    "transcode": "Transcode",
     "settings": "Settings",
+    "transcode": "Transcode",
+    "play": "Play",
     "logout": "Logout",
-    "more": "More"
+    "more": "More",
+    "preview": "Preview"
   },
   "app": {
     "name": "HandBrake",
