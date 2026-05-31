@@ -70,10 +70,10 @@ export default function VideoPlayer({ file, onClose }) {
             ✕
           </button>
         </div>
-        <div 
-          ref={containerRef} 
+        <div
+          ref={containerRef}
           className='flex-shrink-1 min-h-0 overflow-hidden'
-          style={{ 
+          style={{
             maxHeight: 'calc(100vh - 3rem)',
             width: '100%'
           }}
