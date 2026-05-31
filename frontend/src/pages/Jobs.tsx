@@ -66,28 +66,33 @@ function Jobs() {
     }
   }, []);
 
-  const fetchJobs = useCallback(async (signal?: AbortSignal) => {
-    try {
-      const params: Record<string, string | number> = { page, limit: PAGE_SIZE };
-      if (filter === 'active') {
-        params.status = 'processing,queued';
-      } else if (filter === 'completed') {
-        params.status = 'completed,skipped';
-      } else if (filter !== 'all') {
-        params.status = filter;
-      }
+  const fetchJobs = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        const params: Record<string, string | number> = { page, limit: PAGE_SIZE };
+        if (filter === 'active') {
+          params.status = 'processing,queued';
+        } else if (filter === 'completed') {
+          params.status = 'completed,skipped';
+        } else if (filter !== 'all') {
+          params.status = filter;
+        }
 
-      const response = await api.get('/jobs', { params, signal });
-      const data = response.data.data;
-      setJobs(data.jobs || []);
-      const pagination = data.pagination || {};
-      setTotalPages(Math.max(1, pagination.totalPages || Math.ceil((pagination.total || 0) / PAGE_SIZE)));
-    } catch (error) {
-      console.error('Failed to fetch jobs:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, page]);
+        const response = await api.get('/jobs', { params, signal });
+        const data = response.data.data;
+        setJobs(data.jobs || []);
+        const pagination = data.pagination || {};
+        setTotalPages(
+          Math.max(1, pagination.totalPages || Math.ceil((pagination.total || 0) / PAGE_SIZE))
+        );
+      } catch (error) {
+        console.error('Failed to fetch jobs:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filter, page]
+  );
 
   const fetchAll = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
