@@ -132,27 +132,37 @@ router.post('/cache-clear', authenticateToken, async (req, res, next) => {
       });
     }
 
-    const tempDir = path.join(config.cacheDir, 'handbrake-temp');
+    const { type } = req.body;
+    const messages = [];
 
-    if (!fs.existsSync(tempDir)) {
-      return res.json({
-        success: true,
-        message: '缓存目录已为空'
-      });
+    const clearDir = dirPath => {
+      if (fs.existsSync(dirPath)) {
+        fs.rmSync(dirPath, { recursive: true, force: true });
+      }
+    };
+
+    if (type === 'transcode' || type === 'all') {
+      const tempDir = path.join(config.cacheDir, 'handbrake-temp');
+      clearDir(tempDir);
+      messages.push('转码缓存已清理');
     }
 
-    try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
-    } catch (e) {
-      return res.status(500).json({
+    if (type === 'preview' || type === 'all') {
+      const thumbnailDir = path.join(config.cacheDir, 'thumbnails');
+      clearDir(thumbnailDir);
+      messages.push('预览图片缓存已清理');
+    }
+
+    if (messages.length === 0) {
+      return res.status(400).json({
         success: false,
-        error: `清理缓存失败: ${e.message}`
+        error: '无效的缓存类型'
       });
     }
 
     res.json({
       success: true,
-      message: '缓存已清理完成'
+      message: messages.join('，')
     });
   } catch (error) {
     next(error);

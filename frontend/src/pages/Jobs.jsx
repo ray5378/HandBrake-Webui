@@ -167,9 +167,9 @@ function Jobs() {
     setConfirmAction(null);
   };
 
-  const handleClearCache = async () => {
+  const handleClearCache = async type => {
     try {
-      const res = await api.post('/system/cache-clear');
+      const res = await api.post('/system/cache-clear', { type });
       console.log(res.data.message);
     } catch (error) {
       console.error('Failed to clear cache:', error);
@@ -253,7 +253,7 @@ function Jobs() {
             className='btn btn-danger inline-flex items-center space-x-2'
           >
             <Trash className='w-4 h-4' />
-            <span>{t('jobs.clearCache') || '清空转码缓存'}</span>
+            <span>{t('jobs.clearCache') || '清除缓存'}</span>
           </button>
         </div>
       </div>
@@ -468,19 +468,41 @@ function Jobs() {
         onCancel={() => setConfirmAction(null)}
         danger
       />
-      <ConfirmDialog
-        open={confirmAction === 'clearCache'}
-        title={t('jobs.confirmClearCacheTitle') || '清空转码缓存'}
-        message={
-          t('jobs.confirmClearCache') ||
-          '确定要清空转码缓存目录吗？正在进行的转码任务可能会受到影响。'
-        }
-        confirmText={t('common.confirm') || '确认清空'}
-        cancelText={t('common.cancel') || '取消'}
-        onConfirm={handleClearCache}
-        onCancel={() => setConfirmAction(null)}
-        danger
-      />
+      {confirmAction === 'clearCache' && (
+        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4'>
+          <div className='bg-dark-800 rounded-xl max-w-md w-full p-6'>
+            <div className='flex items-start justify-between mb-4'>
+              <div className='flex items-center space-x-3'>
+                <Trash className='w-6 h-6 text-error' />
+                <h3 className='text-lg font-bold text-white'>
+                  {t('jobs.confirmClearCacheTitle', '清除缓存')}
+                </h3>
+              </div>
+              <button
+                onClick={() => setConfirmAction(null)}
+                className='p-1 hover:bg-dark-700 rounded-lg transition-colors'
+              >
+                <X className='w-5 h-5 text-gray-400' />
+              </button>
+            </div>
+            <p className='text-gray-400 mb-5'>{t('jobs.confirmClearCache', '请选择要清除的缓存类型：')}</p>
+            <div className='space-y-3'>
+              <button onClick={() => handleClearCache('transcode')} className='w-full btn btn-danger'>
+                {t('jobs.clearTranscodeCache', '清除转码缓存')}
+              </button>
+              <button onClick={() => handleClearCache('preview')} className='w-full btn btn-primary'>
+                {t('jobs.clearPreviewCache', '清除预览图片缓存')}
+              </button>
+              <button onClick={() => handleClearCache('all')} className='w-full btn btn-danger'>
+                {t('jobs.clearAllCache', '清除转码和预览图片缓存')}
+              </button>
+              <button onClick={() => setConfirmAction(null)} className='w-full btn btn-secondary'>
+                {t('common.cancel', '取消')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ConfirmDialog
         open={confirmJobAction !== null}
         title={
