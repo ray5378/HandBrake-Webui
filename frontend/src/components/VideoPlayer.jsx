@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import DPlayer from 'dplayer';
 import { useAuthStore } from '../stores/authStore';
@@ -8,6 +8,41 @@ export default function VideoPlayer({ file, onClose }) {
   const dpRef = useRef(null);
   const roRef = useRef(null);
   const token = useAuthStore(s => s.token);
+  const [containerStyle, setContainerStyle] = useState({});
+
+  const updateContainerSize = useCallback(videoEl => {
+    if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) return;
+    const vw = videoEl.videoWidth;
+    const vh = videoEl.videoHeight;
+    const gap = 16;
+    const headerH = 40;
+    const maxW = window.innerWidth - gap * 2;
+    const maxH = window.innerHeight - headerH - gap * 2;
+
+    let w, h;
+    if (vw >= vh) {
+      w = Math.min(vw, maxW);
+      h = w * (vh / vw);
+      if (h > maxH) {
+        h = maxH;
+        w = h * (vw / vh);
+      }
+    } else {
+      h = Math.min(vh, maxH);
+      w = h * (vw / vh);
+      if (w > maxW) {
+        w = maxW;
+        h = w * (vh / vw);
+      }
+    }
+
+    setContainerStyle({
+      width: `${Math.round(w)}px`,
+      height: `${Math.round(h)}px`,
+      maxWidth: `${maxW}px`,
+      maxHeight: `${maxH}px`
+    });
+  }, []);
 
   useEffect(() => {
     const videoUrl = `/api/files/stream?path=${encodeURIComponent(file.path)}&token=${encodeURIComponent(token)}`;
@@ -43,16 +78,17 @@ export default function VideoPlayer({ file, onClose }) {
     const container = containerRef.current;
     if (!container) return;
 
-    const forceFitInBounds = () => {
-      const dpEl = container.querySelector('.dplayer') || container.firstChild;
-      const videoEl = dpRef.current?.video;
-      const videoWrap = dpEl?.querySelector('.dplayer-video-wrap');
+    const videoEl = dpRef.current.video;
 
+    const onMetadata = () => {
+      updateContainerSize(videoEl);
+      const dpEl = container.querySelector('.dplayer') || container.firstChild;
+      const videoWrap = dpEl?.querySelector('.dplayer-video-wrap');
       if (dpEl) {
-        dpEl.style.setProperty('max-width', '100%', 'important');
-        dpEl.style.setProperty('max-height', '100%', 'important');
         dpEl.style.setProperty('width', '100%', 'important');
         dpEl.style.setProperty('height', '100%', 'important');
+        dpEl.style.setProperty('max-width', '100%', 'important');
+        dpEl.style.setProperty('max-height', '100%', 'important');
         dpEl.style.setProperty('position', 'relative', 'important');
       }
       if (videoWrap) {
@@ -74,14 +110,31 @@ export default function VideoPlayer({ file, onClose }) {
       }
     };
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(forceFitInBounds);
-    });
+    if (videoEl.readyState >= 2) {
+      onMetadata();
+    } else {
+      videoEl.addEventListener('loadedmetadata', onMetadata, { once: true });
+    }
 
-    roRef.current = new ResizeObserver(forceFitInBounds);
+    const onResize = () => {
+      const v = dpRef.current?.video;
+      if (v && v.videoWidth) updateContainerSize(v);
+    };
+
+    window.addEventListener('resize', onResize);
+
+    roRef.current = new ResizeObserver(() => {
+      const dpEl = container.querySelector('.dplayer') || container.firstChild;
+      const videoWrap = dpEl?.querySelector('.dplayer-video-wrap');
+      if (videoWrap) {
+        videoWrap.style.setProperty('position', 'absolute', 'important');
+        videoWrap.style.setProperty('inset', '0', 'important');
+      }
+    });
     roRef.current.observe(container);
 
     return () => {
+      window.removeEventListener('resize', onResize);
       if (roRef.current) {
         roRef.current.disconnect();
       }
@@ -89,7 +142,7 @@ export default function VideoPlayer({ file, onClose }) {
         dpRef.current.destroy();
       }
     };
-  }, [file, token]);
+  }, [file, token, updateContainerSize]);
 
   return (
     <div
@@ -97,28 +150,20 @@ export default function VideoPlayer({ file, onClose }) {
       onClick={onClose}
     >
       <div
-        className='w-full h-full flex items-center justify-center'
-        style={{ maxHeight: '100vh', maxWidth: '100vw' }}
+        className='flex flex-col items-center justify-center'
+        style={{ maxWidth: '100vw', maxHeight: '100vh' }}
         onClick={e => e.stopPropagation()}
       >
-        <div className='absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none'>
+        <div className='flex justify-between items-center mb-2 w-full px-4'>
           <span className='text-white text-sm truncate'>{file.name}</span>
           <button
             onClick={onClose}
-            className='text-white/60 hover:text-white transition-colors text-xl leading-none ml-4 pointer-events-auto'
+            className='text-white/60 hover:text-white transition-colors text-xl leading-none ml-4'
           >
             ✕
           </button>
         </div>
-        <div
-          ref={containerRef}
-          className='flex-shrink-1 min-h-0 overflow-hidden'
-          style={{
-            maxHeight: 'calc(100vh - 5rem)',
-            maxWidth: 'calc(100vw - 2rem)',
-            width: '100%'
-          }}
-        />
+        <div ref={containerRef} className='overflow-hidden' style={containerStyle} />
       </div>
       <style>{`
         .dplayer {
