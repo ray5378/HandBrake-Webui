@@ -9,8 +9,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
+
+# Copy package files and install all dependencies (including devDeps for tsc)
 COPY backend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci
+
+# Copy backend source and compile TypeScript to JavaScript
+COPY backend/tsconfig.json ./
+COPY backend/server.ts ./
+COPY backend/src ./src
+RUN npx tsc
+
+# Install production dependencies only
+RUN npm ci --omit=dev
 
 # === Runtime stage ===
 FROM node:20-bookworm-slim
@@ -38,9 +49,10 @@ WORKDIR /app
 # Copy compiled Node.js modules from builder stage
 COPY --from=builder /build/node_modules ./backend/node_modules
 
-# Copy application code
-COPY backend/src ./backend/src
-COPY backend/server.js ./backend/
+# Copy compiled TypeScript output (dist/)
+COPY --from=builder /build/dist ./backend/dist
+
+# Copy frontend build output
 COPY frontend/dist ./frontend/dist
 
 ENV NODE_ENV=production
@@ -52,7 +64,7 @@ RUN mkdir -p /config /drive /drive/转码/转码后
 EXPOSE 52389
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["node", "/app/backend/server.js"]
+CMD ["node", "/app/backend/dist/server.js"]
 
 ARG VITE_GIT_COMMIT=unknown
 ENV VITE_GIT_COMMIT=${VITE_GIT_COMMIT}

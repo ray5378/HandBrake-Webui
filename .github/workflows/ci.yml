@@ -21,27 +21,32 @@ jobs:
       - name: Install Backend Dependencies
         run: |
           cd backend
-          npm install --ignore-scripts
+          npm ci --ignore-scripts
+
+      - name: Run Backend Linting
+        run: |
+          cd backend
+          ./node_modules/.bin/eslint . --ext .ts --format stylish
+
+      - name: Check Backend Formatting
+        run: |
+          cd backend
+          ./node_modules/.bin/prettier --check 'src/**/*.ts' '*.ts'
+
+      - name: Backend Type Check
+        run: |
+          cd backend
+          npx tsc --noEmit
 
       - name: Install Frontend Dependencies
         run: |
           cd frontend
           npm install
 
-      - name: Run Backend Linting
-        run: |
-          cd backend
-          ./node_modules/.bin/eslint src/ --format stylish
-
-      - name: Check Backend Formatting
-        run: |
-          cd backend
-          ./node_modules/.bin/prettier --check src/
-
       - name: Run Frontend Linting
         run: |
           cd frontend
-          ./node_modules/.bin/eslint src/ --format stylish
+          ./node_modules/.bin/eslint src/ --ext .ts,.tsx --format stylish
 
       - name: Check Frontend Hardcoded Text
         run: |
@@ -56,7 +61,12 @@ jobs:
       - name: Check Frontend Formatting
         run: |
           cd frontend
-          ./node_modules/.bin/prettier --check src/
+          ./node_modules/.bin/prettier --check 'src/**/*.{ts,tsx}'
+
+      - name: Frontend Type Check
+        run: |
+          cd frontend
+          npx tsc --noEmit
 
   build:
     runs-on: ubuntu-latest
@@ -76,7 +86,8 @@ jobs:
           npm install
           npm run build
 
-      - name: Install Backend Dependencies
+      - name: Install Backend Dependencies & Build
         run: |
           cd backend
-          npm install --production
+          npm ci
+          npm run build
