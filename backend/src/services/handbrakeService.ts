@@ -108,45 +108,42 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
     args.push('--crop', '0:0:0:0');
   }
 
-  const filterArgs: string[] = [];
-
   const deinterlace = filters.deinterlace as Record<string, unknown> | undefined;
   if (deinterlace?.enabled) {
-    let deinterlaceArgs = 'deinterlace';
+    let deintStr = '';
     if (deinterlace.mode) {
-      deinterlaceArgs += `=mode=${deinterlace.mode}`;
+      deintStr = `mode=${deinterlace.mode}`;
       if (deinterlace.parity) {
-        deinterlaceArgs += `:parity=${deinterlace.parity}`;
+        deintStr += `:parity=${deinterlace.parity}`;
       }
     }
-    filterArgs.push(deinterlaceArgs);
+    args.push('--deinterlace' + (deintStr ? `=${deintStr}` : ''));
   }
 
   const decomb = filters.decomb as Record<string, unknown> | undefined;
   if (decomb?.enabled) {
-    let decombArgs = 'decomb';
+    let decombStr = '';
     if (decomb.mode) {
-      decombArgs += `=mode=${decomb.mode}`;
+      decombStr = `mode=${decomb.mode}`;
     }
-    filterArgs.push(decombArgs);
+    args.push('--decomb' + (decombStr ? `=${decombStr}` : ''));
   }
 
   const detelecine = filters.detelecine as Record<string, unknown> | undefined;
   if (detelecine?.enabled) {
-    let detelecineArgs = 'detelecine';
+    let detelStr = '';
     if (detelecine.pattern) {
-      detelecineArgs += `=pattern=${detelecine.pattern}`;
+      detelStr = `pattern=${detelecine.pattern}`;
     }
     if (detelecine.startFrame) {
-      detelecineArgs += `:start=${detelecine.startFrame}`;
+      detelStr += (detelStr ? ':' : '') + `start=${detelecine.startFrame}`;
     }
-    filterArgs.push(detelecineArgs);
+    args.push('--detelecine' + (detelStr ? `=${detelStr}` : ''));
   }
 
   const denoise = filters.denoise as Record<string, unknown> | undefined;
   if (denoise?.enabled) {
     if (denoise.method === 'hqdn3d') {
-      let hqdn3dArgs = 'hqdn3d';
       const hqdn3d = (denoise.hqdn3d || {}) as Record<string, number>;
       const params = [
         hqdn3d.lightSpatial ?? 4,
@@ -154,114 +151,107 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
         hqdn3d.heavySpatial ?? 6,
         hqdn3d.heavyTemporal ?? 16
       ].join(':');
-      hqdn3dArgs += `=${params}`;
-      filterArgs.push(hqdn3dArgs);
+      args.push(`--hqdn3d=${params}`);
     } else if (denoise.method === 'nlmeans') {
-      let nlmeansArgs = 'nlmeans';
+      let nlmeansStr = '';
       if (denoise.preset) {
-        nlmeansArgs += `=preset=${denoise.preset}`;
+        nlmeansStr = `preset=${denoise.preset}`;
       }
       if (denoise.tune && denoise.tune !== 'none') {
-        nlmeansArgs += `:tune=${denoise.tune}`;
+        nlmeansStr += (nlmeansStr ? ':' : '') + `tune=${denoise.tune}`;
       }
-      filterArgs.push(nlmeansArgs);
+      args.push('--nlmeans' + (nlmeansStr ? `=${nlmeansStr}` : ''));
     }
   }
 
   const deblock = filters.deblock as Record<string, unknown> | undefined;
   if (deblock?.enabled) {
-    filterArgs.push(
-      `deblock=strength=${deblock.strength ?? 4}:threshold=${deblock.threshold ?? 4}`
-    );
+    args.push(`--deblock=strength=${deblock.strength ?? 4}:threshold=${deblock.threshold ?? 4}`);
   }
 
   const sharpen = filters.sharpen as Record<string, unknown> | undefined;
   if (sharpen?.enabled) {
     if (sharpen.method === 'unsharp') {
       const unsharp = (sharpen.unsharp || {}) as Record<string, string | undefined>;
-      let unsharpArgs = 'unsharp';
+      let unsharpStr = '';
       if (unsharp.lumaMatrix) {
-        unsharpArgs += `=${unsharp.lumaMatrix}`;
+        unsharpStr = unsharp.lumaMatrix;
         if (unsharp.chromaMatrix) {
-          unsharpArgs += `:${unsharp.chromaMatrix}`;
+          unsharpStr += `:${unsharp.chromaMatrix}`;
         }
       }
-      filterArgs.push(unsharpArgs);
+      args.push('--unsharp' + (unsharpStr ? `=${unsharpStr}` : ''));
     } else if (sharpen.method === 'lapsharp') {
       const lapsharp = (sharpen.lapsharp || {}) as Record<string, number>;
-      filterArgs.push(`lapsharp=${lapsharp.sigma ?? 0.5}`);
+      args.push(`--lapsharp=${lapsharp.sigma ?? 0.5}`);
     }
   }
 
   const chromaSmooth = filters.chromaSmooth as Record<string, unknown> | undefined;
   if (chromaSmooth?.enabled) {
-    filterArgs.push(
-      `chroma-smooth=tu=${chromaSmooth.tuSize ?? 2}:strength=${chromaSmooth.strength ?? 2}`
+    args.push(
+      `--chroma-smooth=tu=${chromaSmooth.tuSize ?? 2}:strength=${chromaSmooth.strength ?? 2}`
     );
   }
 
   const colorspace = filters.colorspace as Record<string, unknown> | undefined;
   if (colorspace?.enabled) {
-    let formatArgs = 'format';
+    let formatStr = '';
     if (colorspace.matrix) {
-      formatArgs += `=colormatrix=${colorspace.matrix}`;
+      formatStr = `colormatrix=${colorspace.matrix}`;
     }
     if (colorspace.primaries) {
-      formatArgs += `:colorprim=${colorspace.primaries}`;
+      formatStr += (formatStr ? ':' : '') + `colorprim=${colorspace.primaries}`;
     }
     if (colorspace.transfer) {
-      formatArgs += `:transfer=${colorspace.transfer}`;
+      formatStr += (formatStr ? ':' : '') + `transfer=${colorspace.transfer}`;
     }
     if (colorspace.range) {
-      formatArgs += `:range=${colorspace.range}`;
+      formatStr += (formatStr ? ':' : '') + `range=${colorspace.range}`;
     }
-    if (formatArgs !== 'format') {
-      filterArgs.push(formatArgs);
+    if (formatStr) {
+      args.push(`--colorspace=${formatStr}`);
     }
   }
 
   const rotate = filters.rotate as Record<string, unknown> | undefined;
   if (rotate?.enabled) {
-    let rotateArgs = 'rotate';
+    let rotateStr = '';
     if (rotate.angle) {
-      rotateArgs += `=angle=${rotate.angle}`;
+      rotateStr += `angle=${rotate.angle}`;
     }
     if (rotate.hFlip) {
-      rotateArgs += ':hflip';
+      rotateStr += (rotateStr ? ':' : '') + 'hflip';
     }
     if (rotate.vFlip) {
-      rotateArgs += ':vflip';
+      rotateStr += (rotateStr ? ':' : '') + 'vflip';
     }
-    if (rotateArgs !== 'rotate') {
-      filterArgs.push(rotateArgs);
+    if (rotateStr) {
+      args.push(`--rotate=${rotateStr}`);
     }
   }
 
   const pad = filters.pad as Record<string, unknown> | undefined;
   if (pad?.enabled) {
-    let padArgs = 'pad';
+    let padStr = '';
     if (pad.width) {
-      padArgs += `=width=${pad.width}`;
+      padStr = `width=${pad.width}`;
     }
     if (pad.height) {
-      padArgs += `:height=${pad.height}`;
+      padStr += (padStr ? ':' : '') + `height=${pad.height}`;
     }
     if (pad.x !== null && pad.x !== undefined) {
-      padArgs += `:x=${pad.x}`;
+      padStr += (padStr ? ':' : '') + `x=${pad.x}`;
     }
     if (pad.y !== null && pad.y !== undefined) {
-      padArgs += `:y=${pad.y}`;
+      padStr += (padStr ? ':' : '') + `y=${pad.y}`;
     }
     if (pad.color) {
-      padArgs += `:color=${pad.color}`;
+      padStr += (padStr ? ':' : '') + `color=${pad.color}`;
     }
-    if (padArgs !== 'pad') {
-      filterArgs.push(padArgs);
+    if (padStr) {
+      args.push(`--pad=${padStr}`);
     }
-  }
-
-  if (filterArgs.length > 0) {
-    args.push('--vfilter', filterArgs.join(','));
   }
 
   if (audioDefault.codec) {
