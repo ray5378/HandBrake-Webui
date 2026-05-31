@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import DPlayer from 'dplayer';
-import 'dplayer/dist/DPlayer.min.css';
 import { useAuthStore } from '../stores/authStore';
 
 export default function VideoPlayer({ file, onClose }) {
