@@ -13,12 +13,12 @@ import {
   MousePointer2,
   Settings
 } from 'lucide-react';
-import VideoPlayer from '../components/VideoPlayer';
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
 import { formatFileSize } from '../utils/format';
 import { FileItem, SearchResult } from '../types';
+import { useVideoPlayerStore } from '../stores/videoPlayerStore';
 
 const VIDEO_EXTENSIONS = [
   '.mp4',
@@ -49,6 +49,7 @@ interface ContextMenuState {
 function Files() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const openVideo = useVideoPlayerStore(s => s.open);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<FileDirectory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,10 +57,8 @@ function Files() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 
-  const [selectedVideoFile, setSelectedVideoFile] = useState<FileItem | null>(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<{
@@ -152,8 +151,7 @@ function Files() {
   const handleFileClick = (file: FileItem) => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     if (VIDEO_EXTENSIONS.includes(ext)) {
-      setSelectedVideoFile(file);
-      setShowVideoPlayer(true);
+      openVideo({ path: file.path, name: file.name });
     }
   };
 
@@ -161,14 +159,7 @@ function Files() {
     if (contextMenu && contextMenu.directory) {
       const parts = contextMenu.directory.split('/');
       const name = parts[parts.length - 1];
-      setSelectedVideoFile({
-        path: contextMenu.directory,
-        name,
-        size: 0,
-        extension: '',
-        modified: ''
-      });
-      setShowVideoPlayer(true);
+      openVideo({ path: contextMenu.directory, name });
     }
     closeContextMenu();
   };
@@ -530,16 +521,6 @@ function Files() {
             setSelectedDirectory(null);
           }}
           onSuccess={() => navigate('/jobs')}
-        />
-      )}
-
-      {showVideoPlayer && selectedVideoFile && (
-        <VideoPlayer
-          file={selectedVideoFile}
-          onClose={() => {
-            setShowVideoPlayer(false);
-            setSelectedVideoFile(null);
-          }}
         />
       )}
     </div>

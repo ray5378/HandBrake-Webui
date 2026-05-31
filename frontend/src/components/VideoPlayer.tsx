@@ -1,16 +1,14 @@
-import { useEffect, useRef, useState, memo } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import DPlayer from 'dplayer';
 import { useAuthStore } from '../stores/authStore';
+import { useVideoPlayerStore } from '../stores/videoPlayerStore';
 
-interface VideoPlayerProps {
-  file: {
-    path: string;
-    name: string;
-  };
-  onClose: () => void;
-}
+function VideoPlayer() {
+  const isOpen = useVideoPlayerStore(s => s.isOpen);
+  const file = useVideoPlayerStore(s => s.file);
+  const close = useVideoPlayerStore(s => s.close);
 
-const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dpRef = useRef<DPlayer | null>(null);
   const token = useAuthStore(s => s.token);
@@ -26,12 +24,16 @@ const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProp
   });
 
   useEffect(() => {
+    if (!isOpen || !file || !containerRef.current) {
+      return;
+    }
+
     const videoUrl = `/api/files/stream?path=${encodeURIComponent(file.path)}&token=${encodeURIComponent(token || '')}`;
 
     const lang = navigator.language.startsWith('zh') ? 'zh-cn' : 'en';
 
     dpRef.current = new DPlayer({
-      container: containerRef.current!,
+      container: containerRef.current,
       video: {
         url: videoUrl,
         type: 'auto'
@@ -168,14 +170,19 @@ const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProp
       window.removeEventListener('resize', onResize);
       if (dpRef.current) {
         dpRef.current.destroy();
+        dpRef.current = null;
       }
     };
-  }, [file, token]);
+  }, [isOpen, file, token]);
 
-  return (
+  if (!isOpen || !file) {
+    return null;
+  }
+
+  return createPortal(
     <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-black/80'
-      onClick={onClose}
+      onClick={close}
     >
       <div
         className='flex flex-col items-center'
@@ -185,7 +192,7 @@ const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProp
         <div className='flex justify-between items-center w-full px-4'>
           <span className='text-white text-sm truncate'>{file.name}</span>
           <button
-            onClick={onClose}
+            onClick={close}
             className='text-white/60 hover:text-white transition-colors text-xl leading-none ml-4'
           >
             ✕
@@ -222,8 +229,9 @@ const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProp
           right: 0 !important;
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
-});
+}
 
 export default VideoPlayer;

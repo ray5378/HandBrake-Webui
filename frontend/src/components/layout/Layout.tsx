@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import Toast from '../common/Toast';
-import { useState } from 'react';
+import VideoPlayer from '../VideoPlayer';
 
-function Layout() {
+export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -21,8 +22,7 @@ function Layout() {
       </div>
 
       <MobileNav onMenuClick={() => setSidebarOpen(true)} />
+      <VideoPlayer />
     </div>
   );
 }
-
-export default Layout;
