@@ -1,5 +1,8 @@
 # HandBrake Web UI
+
 基于 HandBrake 的 Web 视频转码管理界面
+
+[English Documentation](README_EN.md)
 
 ## 特性
 
