@@ -13,7 +13,8 @@ const {
   startTranscode,
   cancelTranscode,
   pauseTranscode,
-  resumeTranscode
+  resumeTranscode,
+  killAllJobs
 } = require('../services/handbrakeService');
 
 const router = express.Router();
@@ -205,11 +206,7 @@ router.delete('/all-force', authenticateToken, async (req, res, next) => {
   try {
     const db = getDatabase();
 
-    const processingJobs = db.prepare("SELECT id FROM jobs WHERE status = 'processing'").all();
-
-    for (const job of processingJobs) {
-      await cancelTranscode(job.id);
-    }
+    killAllJobs();
 
     const result = db.prepare('DELETE FROM jobs').run();
 
