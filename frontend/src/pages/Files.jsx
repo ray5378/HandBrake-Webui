@@ -338,7 +338,7 @@ function Files() {
               {filteredFiles.map(file => (
                 <div
                   key={file.path}
-                  className='card hover:border-primary/50 transition-colors cursor-context-menu'
+                  className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
                   onContextMenu={e => handleContextMenu(e, file.path)}
                 >
                   {viewMode === 'grid' ? (
