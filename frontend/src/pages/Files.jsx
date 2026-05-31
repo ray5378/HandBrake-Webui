@@ -1,7 +1,17 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Video, Grid, List, Search, ChevronRight, PlayCircle, X } from 'lucide-react';
+import {
+  FolderOpen,
+  Video,
+  Grid,
+  List,
+  Search,
+  ChevronRight,
+  PlayCircle,
+  X,
+  MousePointer2
+} from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
@@ -278,6 +288,13 @@ function Files() {
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
         <>
+          {(directories.length > 0 || files.length > 0) && (
+            <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
+              <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
+              <span>{t('files.rightClickHint')}</span>
+            </div>
+          )}
+
           {directories.length > 0 && (
             <div className='mb-6'>
               <h2 className='text-sm font-medium text-gray-400 mb-3'>
