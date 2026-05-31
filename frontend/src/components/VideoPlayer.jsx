@@ -11,6 +11,8 @@ export default function VideoPlayer({ file, onClose }) {
   useEffect(() => {
     const videoUrl = `/api/files/stream?path=${encodeURIComponent(file.path)}&token=${encodeURIComponent(token)}`;
 
+    const lang = navigator.language.startsWith('zh') ? 'zh-cn' : 'en';
+
     dpRef.current = new DPlayer({
       container: containerRef.current,
       video: {
@@ -18,8 +20,23 @@ export default function VideoPlayer({ file, onClose }) {
         type: 'auto'
       },
       autoplay: true,
-      screenshot: false,
-      lang: navigator.language.startsWith('zh') ? 'zh-cn' : 'en'
+      screenshot: true,
+      hotkey: true,
+      lang,
+      contextmenu: [
+        {
+          text: lang === 'zh-cn' ? '画中画' : 'Picture in Picture',
+          click: () => {
+            const video = dpRef.current?.video;
+            if (!video) return;
+            if (document.pictureInPictureElement) {
+              document.exitPictureInPicture();
+            } else {
+              video.requestPictureInPicture();
+            }
+          }
+        }
+      ]
     });
 
     return () => {
