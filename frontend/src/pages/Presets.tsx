@@ -1007,7 +1007,379 @@ function Presets() {
         );
 
       case 'filters':
-        return <div className='space-y-6'>{/* ... preserved filters content */}</div>;
+        return (
+          <div className='space-y-6'>
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='deinterlace'
+                  checked={(formData.settings.filters?.deinterlace?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.deinterlace.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='deinterlace' className='text-gray-200'>
+                  {t('filters.deinterlace')}
+                </label>
+              </div>
+              {formData.settings.filters?.deinterlace?.enabled && (
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <select
+                    value={(formData.settings.filters?.deinterlace?.mode as string) || 'slower'}
+                    onChange={e => updateSettings('filters.deinterlace.mode', e.target.value)}
+                    className='input'
+                  >
+                    <option value='fast'>{t('filters.fast')}</option>
+                    <option value='slow'>{t('filters.slow')}</option>
+                    <option value='slower'>{t('filters.slower')}</option>
+                    <option value='bob'>{t('filters.bob')}</option>
+                  </select>
+                  <select
+                    value={(formData.settings.filters?.deinterlace?.parity as string) || 'auto'}
+                    onChange={e => updateSettings('filters.deinterlace.parity', e.target.value)}
+                    className='input'
+                  >
+                    <option value='auto'>{t('deinterlaceParity.auto')}</option>
+                    <option value='tff'>{t('deinterlaceParity.tff')}</option>
+                    <option value='bff'>{t('deinterlaceParity.bff')}</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='decomb'
+                  checked={(formData.settings.filters?.decomb?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.decomb.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='decomb' className='text-gray-200'>
+                  {t('filters.decomb')}
+                </label>
+              </div>
+              {formData.settings.filters?.decomb?.enabled && (
+                <div className='pl-6'>
+                  <select
+                    value={(formData.settings.filters?.decomb?.mode as string) || 'default'}
+                    onChange={e => updateSettings('filters.decomb.mode', e.target.value)}
+                    className='input'
+                  >
+                    <option value='default'>{t('decombModes.default')}</option>
+                    <option value='bob'>{t('decombModes.bob')}</option>
+                    <option value='custom'>{t('decombModes.custom')}</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='detelecine'
+                  checked={(formData.settings.filters?.detelecine?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.detelecine.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='detelecine' className='text-gray-200'>
+                  {t('filters.detelecine')}
+                </label>
+              </div>
+              {formData.settings.filters?.detelecine?.enabled && (
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <select
+                    value={(formData.settings.filters?.detelecine?.pattern as string) || '23.976'}
+                    onChange={e => updateSettings('filters.detelecine.pattern', e.target.value)}
+                    className='input'
+                  >
+                    <option value='23.976'>23.976</option>
+                    <option value='24'>24</option>
+                    <option value='25'>25</option>
+                    <option value='29.97'>29.97</option>
+                    <option value='30'>30</option>
+                    <option value='custom'>{t('detelecinePatterns.custom')}</option>
+                  </select>
+                  <input
+                    type='number'
+                    value={(formData.settings.filters?.detelecine?.startFrame as number) || ''}
+                    onChange={e =>
+                      updateSettings(
+                        'filters.detelecine.startFrame',
+                        e.target.value ? parseInt(e.target.value) : null
+                      )
+                    }
+                    className='input'
+                    placeholder={t('common.placeholder.startFrame')}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='denoise'
+                  checked={(formData.settings.filters?.denoise?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.denoise.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='denoise' className='text-gray-200'>
+                  {t('filters.denoise')}
+                </label>
+              </div>
+              {formData.settings.filters?.denoise?.enabled && (
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <select
+                    value={(formData.settings.filters?.denoise?.method as string) || 'nlmeans'}
+                    onChange={e => updateSettings('filters.denoise.method', e.target.value)}
+                    className='input'
+                  >
+                    <option value='hqdn3d'>{t('filters.hqdn3d')}</option>
+                    <option value='nlmeans'>{t('filters.nlmeans')}</option>
+                  </select>
+                  <select
+                    value={(formData.settings.filters?.denoise?.preset as string) || 'medium'}
+                    onChange={e => updateSettings('filters.denoise.preset', e.target.value)}
+                    className='input'
+                  >
+                    <option value='ultralight'>{t('filters.ultralight')}</option>
+                    <option value='light'>{t('filters.light')}</option>
+                    <option value='medium'>{t('filters.medium')}</option>
+                    <option value='strong'>{t('filters.strong')}</option>
+                  </select>
+                  <select
+                    value={(formData.settings.filters?.denoise?.tune as string) || 'none'}
+                    onChange={e => updateSettings('filters.denoise.tune', e.target.value)}
+                    className='input'
+                  >
+                    <option value='none'>{t('common.none')}</option>
+                    <option value='film'>{t('filters.film')}</option>
+                    <option value='grain'>{t('filters.grain')}</option>
+                    <option value='psnr'>{t('tunes.psnr', 'PSNR')}</option>
+                    <option value='ssim'>{t('tunes.ssim', 'SSIM')}</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='deblock'
+                  checked={(formData.settings.filters?.deblock?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.deblock.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='deblock' className='text-gray-200'>
+                  {t('filters.deblock')}
+                </label>
+              </div>
+              {formData.settings.filters?.deblock?.enabled && (
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div>
+                    <label className='label'>{t('filters.strength')}</label>
+                    <input
+                      type='number'
+                      min='0'
+                      max='10'
+                      value={(formData.settings.filters?.deblock?.strength as number) || 4}
+                      onChange={e =>
+                        updateSettings('filters.deblock.strength', parseInt(e.target.value))
+                      }
+                      className='input'
+                    />
+                  </div>
+                  <div>
+                    <label className='label'>{t('filters.threshold')}</label>
+                    <input
+                      type='number'
+                      min='0'
+                      max='10'
+                      value={(formData.settings.filters?.deblock?.threshold as number) || 4}
+                      onChange={e =>
+                        updateSettings('filters.deblock.threshold', parseInt(e.target.value))
+                      }
+                      className='input'
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='sharpen'
+                  checked={(formData.settings.filters?.sharpen?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.sharpen.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='sharpen' className='text-gray-200'>
+                  {t('filters.sharpen')}
+                </label>
+              </div>
+              {formData.settings.filters?.sharpen?.enabled && (
+                <div className='pl-6'>
+                  <select
+                    value={(formData.settings.filters?.sharpen?.method as string) || 'unsharp'}
+                    onChange={e => updateSettings('filters.sharpen.method', e.target.value)}
+                    className='input'
+                  >
+                    <option value='unsharp'>{t('filters.unsharp')}</option>
+                    <option value='lapsharp'>{t('filters.lapsharp')}</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='chromaSmooth'
+                  checked={(formData.settings.filters?.chromaSmooth?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.chromaSmooth.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='chromaSmooth' className='text-gray-200'>
+                  {t('filters.chromaSmooth')}
+                </label>
+              </div>
+              {formData.settings.filters?.chromaSmooth?.enabled && (
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div>
+                    <label className='label'>{t('filters.tuSize')}</label>
+                    <input
+                      type='number'
+                      min='2'
+                      max='6'
+                      value={(formData.settings.filters?.chromaSmooth?.tuSize as number) || 2}
+                      onChange={e =>
+                        updateSettings('filters.chromaSmooth.tuSize', parseInt(e.target.value))
+                      }
+                      className='input'
+                    />
+                  </div>
+                  <div>
+                    <label className='label'>{t('filters.strength')}</label>
+                    <input
+                      type='number'
+                      min='1'
+                      max='10'
+                      value={(formData.settings.filters?.chromaSmooth?.strength as number) || 2}
+                      onChange={e =>
+                        updateSettings('filters.chromaSmooth.strength', parseInt(e.target.value))
+                      }
+                      className='input'
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='colorspace'
+                  checked={(formData.settings.filters?.colorspace?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.colorspace.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='colorspace' className='text-gray-200'>
+                  {t('filters.colorspace')}
+                </label>
+              </div>
+              {formData.settings.filters?.colorspace?.enabled && (
+                <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <select
+                    value={(formData.settings.filters?.colorspace?.matrix as string) || ''}
+                    onChange={e =>
+                      updateSettings('filters.colorspace.matrix', e.target.value || null)
+                    }
+                    className='input'
+                  >
+                    <option value=''>{t('common.auto')}</option>
+                    <option value='bt709'>{t('colorspaceMatrices.bt709')}</option>
+                    <option value='bt470bg'>{t('colorspaceMatrices.bt470bg')}</option>
+                    <option value='smpte170m'>{t('colorspaceMatrices.smpte170m')}</option>
+                    <option value='bt2020nc'>{t('colorspaceMatrices.bt2020nc')}</option>
+                  </select>
+                  <select
+                    value={(formData.settings.filters?.colorspace?.range as string) || 'auto'}
+                    onChange={e => updateSettings('filters.colorspace.range', e.target.value)}
+                    className='input'
+                  >
+                    <option value='auto'>{t('colorspaceRanges.auto')}</option>
+                    <option value='limited'>{t('colorspaceRanges.limited')}</option>
+                    <option value='full'>{t('colorspaceRanges.full')}</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  id='rotate'
+                  checked={(formData.settings.filters?.rotate?.enabled as boolean) || false}
+                  onChange={e => updateSettings('filters.rotate.enabled', e.target.checked)}
+                  className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                />
+                <label htmlFor='rotate' className='text-gray-200'>
+                  {t('filters.rotate')}
+                </label>
+              </div>
+              {formData.settings.filters?.rotate?.enabled && (
+                <div className='pl-6 space-y-4'>
+                  <select
+                    value={(formData.settings.filters?.rotate?.angle as number) || 0}
+                    onChange={e => updateSettings('filters.rotate.angle', parseInt(e.target.value))}
+                    className='input'
+                  >
+                    <option value={0}>0°</option>
+                    <option value={90}>90°</option>
+                    <option value={180}>180°</option>
+                    <option value={270}>270°</option>
+                  </select>
+                  <div className='flex items-center space-x-4'>
+                    <div className='flex items-center space-x-2'>
+                      <input
+                        type='checkbox'
+                        id='hflip'
+                        checked={(formData.settings.filters?.rotate?.hFlip as boolean) || false}
+                        onChange={e => updateSettings('filters.rotate.hFlip', e.target.checked)}
+                        className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                      />
+                      <label htmlFor='hflip' className='text-gray-200'>
+                        {t('filters.hFlip')}
+                      </label>
+                    </div>
+                    <div className='flex items-center space-x-2'>
+                      <input
+                        type='checkbox'
+                        id='vflip'
+                        checked={(formData.settings.filters?.rotate?.vFlip as boolean) || false}
+                        onChange={e => updateSettings('filters.rotate.vFlip', e.target.checked)}
+                        className='w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary focus:ring-primary'
+                      />
+                      <label htmlFor='vflip' className='text-gray-200'>
+                        {t('filters.vFlip')}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
 
       case 'subtitles':
         return (
