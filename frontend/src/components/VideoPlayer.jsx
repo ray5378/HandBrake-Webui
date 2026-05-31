@@ -75,18 +75,30 @@ export default function VideoPlayer({ file, onClose }) {
           className='flex-shrink-1 min-h-0 overflow-hidden'
           style={{
             maxHeight: 'calc(100vh - 3rem)',
-            width: '100%'
+            width: '100%',
+            height: 'calc(100vh - 3rem)'
           }}
         />
       </div>
       <style>{`
         .dplayer {
-          max-height: 100%;
-          height: auto;
+          height: 100% !important;
+          width: 100% !important;
+        }
+        .dplayer-container {
+          height: 100% !important;
+        }
+        .dplayer-video-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .dplayer video {
-          max-height: 100%;
-          object-fit: contain;
+          max-height: 100% !important;
+          max-width: 100% !important;
+          width: auto !important;
+          height: auto !important;
+          object-fit: contain !important;
         }
       `}</style>
     </div>
