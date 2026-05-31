@@ -1342,7 +1342,9 @@ function Presets() {
                   <div className='flex items-center space-x-3'>
                     <select
                       value={(formData.settings.filters?.rotate?.angle as number) || 0}
-                      onChange={e => updateSettings('filters.rotate.angle', parseInt(e.target.value))}
+                      onChange={e =>
+                        updateSettings('filters.rotate.angle', parseInt(e.target.value))
+                      }
                       className='input'
                     >
                       <option value={0}>0°</option>
