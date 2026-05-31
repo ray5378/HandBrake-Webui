@@ -840,7 +840,10 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                   {t('batchTranscode.selectCacheDir', '选择缓存目录')}
                 </h3>
                 <p className='text-gray-500 text-xs mb-3'>
-                  {t('batchTranscode.cacheDirDesc', '转码时中间文件会先写入此目录，完成后移动到输出目录')}
+                  {t(
+                    'batchTranscode.cacheDirDesc',
+                    '转码时中间文件会先写入此目录，完成后移动到输出目录'
+                  )}
                 </p>
 
                 <div className='mb-4'>
@@ -886,7 +889,9 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }) {
                                   type='button'
                                   onClick={() => handleCacheBrowse(fullPath)}
                                   className={`hover:underline truncate max-w-[100px] ${
-                                    cacheBrowsePath === fullPath ? 'text-white font-medium' : 'text-primary'
+                                    cacheBrowsePath === fullPath
+                                      ? 'text-white font-medium'
+                                      : 'text-primary'
                                   }`}
                                 >
                                   {part}
