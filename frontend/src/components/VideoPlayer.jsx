@@ -39,6 +39,15 @@ export default function VideoPlayer({ file, onClose }) {
       ]
     });
 
+    // 确保 DPlayer 容器正确适应高度
+    if (containerRef.current) {
+      const dplayerWrapper = containerRef.current.firstChild;
+      if (dplayerWrapper) {
+        dplayerWrapper.style.maxHeight = '100%';
+        dplayerWrapper.style.height = 'auto';
+      }
+    }
+
     return () => {
       if (dpRef.current) {
         dpRef.current.destroy();
@@ -48,11 +57,11 @@ export default function VideoPlayer({ file, onClose }) {
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/80'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4'
       onClick={onClose}
     >
-      <div className='w-full max-w-5xl mx-4' onClick={e => e.stopPropagation()}>
-        <div className='flex justify-between items-center mb-2'>
+      <div className='w-full max-h-full flex flex-col max-w-5xl' onClick={e => e.stopPropagation()}>
+        <div className='flex justify-between items-center mb-2 flex-shrink-0'>
           <span className='text-white text-sm truncate'>{file.name}</span>
           <button
             onClick={onClose}
@@ -61,8 +70,25 @@ export default function VideoPlayer({ file, onClose }) {
             ✕
           </button>
         </div>
-        <div ref={containerRef} />
+        <div 
+          ref={containerRef} 
+          className='flex-shrink-1 min-h-0 overflow-hidden'
+          style={{ 
+            maxHeight: 'calc(100vh - 3rem)',
+            width: '100%'
+          }}
+        />
       </div>
+      <style>{`
+        .dplayer {
+          max-height: 100%;
+          height: auto;
+        }
+        .dplayer video {
+          max-height: 100%;
+          object-fit: contain;
+        }
+      `}</style>
     </div>
   );
 }
