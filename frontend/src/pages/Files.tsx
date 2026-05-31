@@ -501,11 +501,11 @@ function Files() {
             top: Math.min(contextMenu.y, window.innerHeight - 200)
           }}
         >
-          <div className='py-1'>
+          <div>
             {contextMenu.isFile && (
               <button
                 onClick={handlePlayVideo}
-                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3 first:rounded-t-lg last:rounded-b-lg'
               >
                 <PlayCircle className='w-4 h-4 text-primary' />
                 <span>{t('nav.play')}</span>
@@ -513,7 +513,7 @@ function Files() {
             )}
             <button
               onClick={handleBatchTranscode}
-              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3 first:rounded-t-lg last:rounded-b-lg'
             >
               <Settings className='w-4 h-4 text-primary' />
               <span>{t('nav.transcode')}</span>
