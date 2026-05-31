@@ -93,6 +93,14 @@ const server: http.Server = app.listen(config.port, '0.0.0.0', () => {
   console.log(`HandBrake Web UI server running on port ${config.port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
+  if (global.gc) {
+    console.log('GC monitoring: enabled (--expose-gc active)');
+  } else {
+    console.warn(
+      'GC monitoring: disabled (start with --expose-gc to enable automatic garbage collection)'
+    );
+  }
+
   if (config.cacheDir) {
     const { startThumbnailCleanup } = require('./src/services/thumbnailService');
     startThumbnailCleanup();

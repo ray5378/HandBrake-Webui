@@ -64,7 +64,7 @@ RUN mkdir -p /config /drive /drive/转码/转码后
 EXPOSE 52389
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["node", "/app/backend/dist/server.js"]
+CMD ["node", "--expose-gc", "/app/backend/dist/server.js"]
 
 ARG VITE_GIT_COMMIT=unknown
 ENV VITE_GIT_COMMIT=${VITE_GIT_COMMIT}

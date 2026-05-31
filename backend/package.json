@@ -4,8 +4,8 @@
   "description": "HandBrake Web UI Backend API",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "nodemon --exec ts-node server.ts",
+    "start": "node --expose-gc dist/server.js",
+    "dev": "NODE_OPTIONS=--expose-gc nodemon --exec ts-node server.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
