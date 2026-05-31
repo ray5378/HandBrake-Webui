@@ -1104,7 +1104,7 @@ function Presets() {
                   </select>
                   <input
                     type='number'
-                    value={(formData.settings.filters?.detelecine?.startFrame as number) || ''}
+                    value={formData.settings.filters?.detelecine?.startFrame ?? ''}
                     onChange={e =>
                       updateSettings(
                         'filters.detelecine.startFrame',
@@ -1299,7 +1299,7 @@ function Presets() {
               {formData.settings.filters?.colorspace?.enabled && (
                 <div className='pl-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <select
-                    value={(formData.settings.filters?.colorspace?.matrix as string) || ''}
+                    value={formData.settings.filters?.colorspace?.matrix ?? ''}
                     onChange={e =>
                       updateSettings('filters.colorspace.matrix', e.target.value || null)
                     }
