@@ -9,6 +9,7 @@ Web-based video transcoding management interface powered by HandBrake
 - 🌐 Responsive Web UI — desktop and mobile friendly
 - 🔐 JWT Authentication — multi-user management
 - 🎬 Video Transcoding — supports multiple codec formats
+- 🎥 Video Playback — built-in video player with online preview
 - 📊 Live Progress — real-time transcoding progress monitoring
 - 🐳 Docker Deployment — one-click setup, ready to use
 - 📁 File Management — intuitive file browser
