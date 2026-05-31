@@ -16,12 +16,23 @@ const MAX_STALE_COUNT = 5;
 function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string[] {
   const args: string[] = ['-i', job.source_file, '-o', job.output_file, '--json'];
 
-  args.push('--format', (settings.format as string) || 'mp4');
+  let formatValue = (settings.format as string) || 'mp4';
+  if (formatValue === 'mp4') {
+    formatValue = 'av_mp4';
+  }
+  if (formatValue === 'mkv') {
+    formatValue = 'av_mkv';
+  }
+  if (formatValue === 'webm') {
+    formatValue = 'av_webm';
+  }
+  args.push('--format', formatValue);
 
   if (settings.optimize === 'fast-start') {
     args.push('--optimize');
-  } else if (settings.optimize === 'fragmented') {
-    args.push('--fragmentation', '2');
+  }
+  if (settings.optimize === 'fragmented') {
+    args.push('--optimize');
   }
 
   const video = (settings.video || {}) as Record<string, unknown>;
@@ -68,7 +79,7 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
     } else if (video.rateControl === 'vbr' && video.bitrate) {
       args.push('--vb', `${video.bitrate}`);
     } else if (video.rateControl === 'cqp' && video.qp) {
-      args.push('--qp', String(video.qp));
+      args.push('--encopts', `qp=${video.qp}`);
     } else if (video.crf !== undefined) {
       args.push('--quality', String(video.crf));
     }
@@ -85,6 +96,18 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
     }
   }
 
+  if (video.multiPass) {
+    args.push('--multi-pass');
+  }
+
+  if (video.colorRange && video.colorRange !== 'auto') {
+    args.push('--color-range', video.colorRange as string);
+  }
+
+  if (video.useAdvancedOptions && video.advancedOptions) {
+    args.push('--encopts', video.advancedOptions as string);
+  }
+
   if (dimensions.width) {
     args.push('--width', String(dimensions.width));
   }
@@ -93,19 +116,51 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
   }
 
   const scaling = dimensions.scaling as Record<string, unknown> | undefined;
-  if (scaling?.modulus) {
-    args.push('--modulus', String(scaling.modulus));
+  if (scaling) {
+    if (scaling.maxWidth) {
+      args.push('--maxWidth', String(scaling.maxWidth));
+    }
+    if (scaling.maxHeight) {
+      args.push('--maxHeight', String(scaling.maxHeight));
+    }
+    if (scaling.modulus) {
+      args.push('--modulus', String(scaling.modulus));
+    }
+
+    const anamorphic = scaling.anamorphic as string | undefined;
+    if (anamorphic === 'none') {
+      args.push('--non-anamorphic');
+    } else if (anamorphic === 'auto') {
+      args.push('--auto-anamorphic');
+    } else if (anamorphic === 'loose') {
+      args.push('--loose-anamorphic');
+    } else if (anamorphic === 'custom') {
+      args.push('--custom-anamorphic');
+    }
+
+    if (scaling.keepDisplayAspect) {
+      args.push('--keep-display-aspect');
+    }
+
+    if (scaling.pixelAspectX && scaling.pixelAspectY) {
+      args.push('--pixel-aspect', `${scaling.pixelAspectX}:${scaling.pixelAspectY}`);
+    }
+  }
+
+  if (dimensions.displayWidth) {
+    args.push('--display-width', String(dimensions.displayWidth));
   }
 
   const cropping = dimensions.cropping as Record<string, unknown> | undefined;
   if (cropping?.enabled) {
-    if (cropping.autocrop) {
-      args.push('--autocrop');
-    } else {
-      args.push('--crop', `${cropping.top}:${cropping.bottom}:${cropping.left}:${cropping.right}`);
+    if (!cropping.autocrop) {
+      args.push(
+        '--crop',
+        `${cropping.top ?? 0}:${cropping.bottom ?? 0}:${cropping.left ?? 0}:${cropping.right ?? 0}`
+      );
     }
   } else {
-    args.push('--crop', '0:0:0:0');
+    args.push('--crop-mode', 'none');
   }
 
   const deinterlace = filters.deinterlace as Record<string, unknown> | undefined;
@@ -255,11 +310,7 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
   }
 
   if (audioDefault.codec) {
-    let aencoder = audioDefault.codec as string;
-    if (aencoder === 'flac24') {
-      aencoder = 'flac16';
-    }
-    args.push('--aencoder', aencoder);
+    args.push('--aencoder', audioDefault.codec as string);
   }
 
   if (audioDefault.bitrate) {
@@ -275,15 +326,21 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
   }
 
   if (audioDefault.drc && audioDefault.drc !== 'none') {
-    args.push('--drc', audioDefault.drc as string);
+    const drcMap: Record<string, string> = { light: '1.5', medium: '2.0', heavy: '2.5' };
+    const drcValue = drcMap[audioDefault.drc as string] || audioDefault.drc;
+    args.push('--drc', drcValue as string);
   }
 
   if (audioDefault.gain) {
     args.push('--gain', String(audioDefault.gain));
   }
 
+  if (audioDefault.normalizeMixLevel) {
+    args.push('--normalize-mix', '1');
+  }
+
   if (subtitles.scanForced) {
-    args.push('--subtitle-scan-forced');
+    args.push('--subtitle-forced');
   }
 
   if (chapters.enabled !== false) {
