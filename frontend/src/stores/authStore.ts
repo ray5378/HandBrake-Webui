@@ -131,7 +131,7 @@ export const useAuthStore = create<AuthState>()(
             user: response.data.data,
             isAuthenticated: true
           });
-        } catch (error) {
+        } catch (_error) {
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
             try {
@@ -147,7 +147,7 @@ export const useAuthStore = create<AuthState>()(
                 user: userResponse.data.data,
                 isAuthenticated: true
               });
-            } catch (refreshError) {
+            } catch (_refreshError) {
               localStorage.removeItem('refreshToken');
               set({
                 user: null,

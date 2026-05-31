@@ -35,7 +35,7 @@ export function sleep(ms: number): Promise<void> {
 export function safeJsonParse<T = unknown>(str: string, defaultValue: T | null = null): T | null {
   try {
     return JSON.parse(str) as T;
-  } catch (error) {
+  } catch (_error) {
     return defaultValue;
   }
 }

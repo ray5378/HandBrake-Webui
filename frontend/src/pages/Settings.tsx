@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, Fragment } from 'react';
+import { useEffect, useState, useRef, Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderOpen, Save, Loader2, AlertCircle, CheckCircle, ChevronRight } from 'lucide-react';
 import api from '../services/api';
@@ -21,14 +21,7 @@ function Settings() {
   const [savingCacheDir, setSavingCacheDir] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    fetchCacheDir();
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, []);
-
-  const fetchCacheDir = async () => {
+  const fetchCacheDir = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
     try {
@@ -48,7 +41,14 @@ function Settings() {
     } catch (err) {
       console.error('Failed to fetch cache dir:', err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCacheDir();
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [fetchCacheDir]);
 
   const fetchBrowseDirs = async (path: string) => {
     if (abortRef.current) abortRef.current.abort();

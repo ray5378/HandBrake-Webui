@@ -317,7 +317,7 @@ export async function startTranscode(job: Job): Promise<void> {
     let outputFileSize: number | null = null;
     try {
       outputFileSize = fs.statSync(job.output_file).size;
-    } catch (e) {
+    } catch (_e) {
       // 忽略 stat 错误
     }
     db.prepare(
@@ -414,7 +414,7 @@ export async function startTranscode(job: Job): Promise<void> {
     }
     try {
       fs.rmSync(jobTempDir, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // ignore cleanup error
     }
   };
@@ -422,7 +422,7 @@ export async function startTranscode(job: Job): Promise<void> {
   const cleanupJob = () => {
     try {
       fs.rmSync(jobTempDir, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e2) {
       // ignore cleanup error
     }
   };
@@ -594,7 +594,7 @@ function tryParseJsonProgress(data: string): JsonProgress | null {
         } else if (json.State === 'WORKDONE') {
           lastResult = { progress: 100, etaSeconds: 0 };
         }
-      } catch (e) {
+      } catch (_e) {
         // skip malformed blocks
       }
     }
@@ -624,7 +624,7 @@ export async function cancelTranscode(jobId: string): Promise<void> {
     const tempDir = path.join(config.cacheDir, 'handbrake-temp', jobId);
     try {
       fs.rmSync(tempDir, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
   }
@@ -681,7 +681,7 @@ export function killAllJobs(): void {
   for (const [jobId, proc] of activeJobs) {
     try {
       proc.kill('SIGTERM');
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
     activeJobs.delete(jobId);
@@ -722,7 +722,7 @@ function checkStaleJobs(): void {
           entry.staleCount++;
         }
       }
-    } catch (e) {
+    } catch (_e) {
       entry.staleCount++;
     }
 
@@ -736,13 +736,13 @@ function checkStaleJobs(): void {
           activeJobs.delete(job.id);
           processingCount = Math.max(0, processingCount - 1);
         }
-      } catch (e) {
+      } catch (_e2) {
         // ignore
       }
 
       try {
         fs.rmSync(tempDir, { recursive: true, force: true });
-      } catch (e) {
+      } catch (_e3) {
         // ignore
       }
 

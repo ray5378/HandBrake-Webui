@@ -43,19 +43,21 @@ graph TB
 | 层级 | 技术选型 | 版本 |
 |------|---------|------|
 | 前端框架 | React | 18.x |
+| 前端语言 | TypeScript | 5.x |
 | 前端路由 | React Router | 6.x |
 | 状态管理 | Zustand | 4.x |
 | UI 组件 | Headless UI | 2.x |
 | CSS 框架 | Tailwind CSS | 3.x |
 | 构建工具 | Vite | 5.x |
 | 后端框架 | Express | 4.x |
+| 后端语言 | TypeScript | 5.x |
 | 数据库 | SQLite | 3.x |
 | ORM | better-sqlite3 | 9.x |
 | 认证 | jsonwebtoken | 9.x |
 | 密码加密 | bcryptjs | 2.x |
 | 文件上传 | multer | 1.x |
 | 容器化 | Docker | 24.x |
-| 基础镜像 | Alpine Linux | 3.x |
+| 基础镜像 | Debian Bookworm | 12.x |
 
 ## 2. 项目结构
 
@@ -67,65 +69,70 @@ handbrake-webui/
 │   └── nginx.conf
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/
-│   │   │   ├── authController.js
-│   │   │   ├── jobController.js
-│   │   │   ├── fileController.js
-│   │   │   ├── presetController.js
-│   │   │   └── userController.js
-│   │   ├── middleware/
-│   │   │   ├── auth.js
-│   │   │   ├── errorHandler.js
-│   │   │   └── validator.js
-│   │   ├── services/
-│   │   │   ├── handbrakeService.js
-│   │   │   ├── queueService.js
-│   │   │   ├── fileService.js
-│   │   │   └── presetService.js
-│   │   ├── models/
-│   │   │   ├── database.js
-│   │   │   └── schemas.js
 │   │   ├── routes/
-│   │   │   ├── auth.js
-│   │   │   ├── jobs.js
-│   │   │   ├── files.js
-│   │   │   ├── presets.js
-│   │   │   └── users.js
-│   │   ├── utils/
-│   │   │   ├── logger.js
-│   │   │   └── helpers.js
+│   │   │   ├── auth.ts
+│   │   │   ├── jobs.ts
+│   │   │   ├── files.ts
+│   │   │   ├── presets.ts
+│   │   │   ├── system.ts
+│   │   │   └── users.ts
+│   │   ├── middleware/
+│   │   │   ├── auth.ts
+│   │   │   ├── errorHandler.ts
+│   │   │   └── validator.ts
+│   │   ├── services/
+│   │   │   ├── handbrakeService.ts
+│   │   │   └── thumbnailService.ts
+│   │   ├── models/
+│   │   │   └── database.ts
 │   │   ├── config/
-│   │   │   └── index.js
-│   │   └── app.js
+│   │   │   └── index.ts
+│   │   ├── constants/
+│   │   │   ├── index.ts
+│   │   │   └── presets.ts
+│   │   ├── utils/
+│   │   │   ├── logger.ts
+│   │   │   └── helpers.ts
+│   │   └── types/
+│   │       └── index.ts
+│   ├── dist/              # TypeScript 编译输出
+│   ├── tsconfig.json
 │   ├── package.json
-│   └── server.js
+│   └── server.ts
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── common/
 │   │   │   ├── layout/
-│   │   │   ├── auth/
 │   │   │   ├── files/
-│   │   │   ├── jobs/
-│   │   │   └── settings/
+│   │   │   └── BatchTranscodeModal.tsx
 │   │   ├── pages/
-│   │   │   ├── Login.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Files.jsx
-│   │   │   ├── Transcode.jsx
-│   │   │   ├── Jobs.jsx
-│   │   │   ├── JobDetail.jsx
-│   │   │   ├── Presets.jsx
-│   │   │   └── Settings.jsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Files.tsx
+│   │   │   ├── Transcode.tsx
+│   │   │   ├── Jobs.tsx
+│   │   │   ├── JobDetail.tsx
+│   │   │   ├── Presets.tsx
+│   │   │   └── Settings.tsx
 │   │   ├── hooks/
+│   │   │   └── index.ts
 │   │   ├── stores/
+│   │   │   ├── authStore.ts
+│   │   │   └── toastStore.ts
 │   │   ├── services/
+│   │   │   └── api.ts
 │   │   ├── utils/
-│   │   ├── App.jsx
-│   │   ├── main.jsx
+│   │   ├── i18n/
+│   │   ├── types.ts
+│   │   ├── vite-env.d.ts
+│   │   ├── App.tsx
+│   │   ├── main.tsx
 │   │   └── index.css
+│   ├── dist/              # Vite 构建输出
+│   ├── tsconfig.json
 │   ├── package.json
-│   ├── vite.config.js
+│   ├── vite.config.ts
 │   └── tailwind.config.js
 ├── package.json (workspace)
 └── README.md
@@ -497,16 +504,24 @@ CREATE TABLE presets (
 ## 5. HandBrake CLI 集成
 
 ### 5.1 转码命令构建
-```javascript
-function buildHandBrakeCommand(job, preset) {
-  const args = [
-    '-i', job.sourceFile,
-    '-o', job.outputFile,
-    '--preset', preset.name,
+```typescript
+function buildHandBrakeArgs(job: Job, preset: Preset): string[] {
+  const args: string[] = [
+    '-i', job.source_file,
+    '-o', job.output_file,
     '--json'
   ];
   
-  return `HandBrakeCLI ${args.join(' ')}`;
+  // 应用预设设置
+  if (preset.settings) {
+    const settings = preset.settings;
+    if (settings.format) args.push('--format', `av_${settings.format}`);
+    if (settings.videoCodec) args.push('--encoder', settings.videoCodec);
+    if (settings.quality) args.push('--quality', String(settings.quality));
+    // ...
+  }
+  
+  return args;
 }
 ```
 
@@ -524,7 +539,9 @@ Encoding: task 1 of 1, 45.234567 %
 ## 6. Docker 配置
 
 ### 6.1 Dockerfile
-详见 [docker/Dockerfile](../docker/Dockerfile)，基于 Debian Bookworm 构建，包含 HandBrake CLI、Intel VA-API 驱动支持。
+详见 [docker/Dockerfile](../docker/Dockerfile)，采用两阶段构建：
+- **Builder 阶段**: 编译 TypeScript 后端代码 (tsc → dist/)，安装 Node.js 依赖
+- **Runtime 阶段**: 基于 Debian Bookworm，包含 HandBrake CLI、Intel VA-API 驱动，运行编译后的 JavaScript
 
 ### 6.2 docker-compose.yml
 ```yaml
@@ -537,11 +554,6 @@ services:
     volumes:
       - ./config:/config
       - ./drive:/drive
-    environment:
-      - NODE_ENV=production
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - PORT=52389
-      - MAX_CONCURRENT_JOBS=2
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri
@@ -590,7 +602,8 @@ services:
 - **缩进**: 使用 2 个空格
 - **行宽**: 最大 100 字符
 - **换行**: 每条语句单独一行
-- **引号**: 字符串使用单引号
+- **引号**: 字符串使用单引号，SQL 语句含内部单引号时使用双引号并添加 eslint-disable 注释
+- **文件扩展名**: 后端 `.ts`，前端 `.tsx`/`.ts`
 
 #### 9.1.2 命名约定
 
@@ -599,9 +612,10 @@ services:
 | 变量 | camelCase | `userName`, `filePath` |
 | 常量 | UPPER_SNAKE_CASE | `MAX_CONCURRENT_JOBS` |
 | 函数 | camelCase (动词开头) | `getUserById`, `handleUpload` |
+| 接口/类型 | PascalCase | `HandBrakeJob`, `AuthRequest` |
 | 类名 | PascalCase | `HandBrakeService` |
 | 组件 | PascalCase | `UserProfile`, `JobCard` |
-| 文件名 | kebab-case | `user-service.js`, `job-card.jsx` |
+| 文件名 | kebab-case | `user-service.ts`, `job-card.tsx` |
 | 数据库表 | snake_case (复数) | `users`, `job_tasks` |
 | API 路由 | kebab-case (名词复数) | `/api/user-accounts` |
 
@@ -619,79 +633,67 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-### 9.2 JavaScript/Node.js 规范
+### 9.2 TypeScript/Node.js 规范
 
 #### 9.2.1 模块导入顺序
-```javascript
+```typescript
 // 1. Node.js 内置模块
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // 2. 第三方模块
-const express = require('express');
-const jwt = require('jsonwebtoken');
+import express from 'express';
+import jwt from 'jsonwebtoken';
 
 // 3. 本地模块 (使用相对路径)
-const config = require('../config');
-const { authenticateToken } = require('../middleware/auth');
+import config from '../config';
+import { authenticateToken } from '../middleware/auth';
 
-// 4. 类型定义 (如果有)
-const UserModel = require('../models/user');
+// 4. 类型定义
+import { AuthRequest, User } from '../types';
 
 // 排序规则: 按字母顺序排列同一级别的导入
-const { validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
+import { body, validationResult } from 'express-validator';
 ```
 
 #### 9.2.2 错误处理
-```javascript
+```typescript
 // ✅ 正确: 统一错误处理格式
-async function createUser(userData) {
+async function createUser(userData: Omit<User, 'id'>): Promise<ApiResponse<User>> {
   try {
     // 业务逻辑
     const user = await db.insert('users', userData);
     return { success: true, data: user };
   } catch (error) {
-    console.error('Failed to create user:', error);
+    logger.error('Failed to create user:', error);
     return {
       success: false,
-      error: error.message || '创建用户失败'
+      error: (error as Error).message || '创建用户失败'
     };
   }
 }
 
-// ❌ 错误: 吞掉错误
-function badFunction() {
-  try {
-    doSomething();
-  } catch (e) {
-    // 什么都不做
-  }
-}
-
-// ✅ 正确: 自定义错误类型
-class ValidationError extends Error {
-  constructor(message, field) {
-    super(message);
-    this.name = 'ValidationError';
-    this.field = field;
-  }
+// ✅ 正确: 使用 _ 前缀忽略未使用的 catch 变量
+try {
+  fs.statSync(path);
+} catch (_e) {
+  // 文件不存在时忽略
 }
 ```
 
 #### 9.2.3 异步编程
-```javascript
-// ✅ 正确: 使用 async/await
-async function getUserById(id) {
-  const user = await database.query(
-    'SELECT * FROM users WHERE id = ?',
-    [id]
-  );
+```typescript
+// ✅ 正确: 使用 async/await，带类型标注
+async function getUserById(id: string): Promise<User | undefined> {
+  const user = await database.prepare(
+    'SELECT * FROM users WHERE id = ?'
+  ).get(id) as User | undefined;
   return user;
 }
 
 // ❌ 错误: 回调地狱
-function getUserById(id, callback) {
+function getUserById(id: string, callback: (err: Error | null, user?: User) => void) {
   database.query('SELECT * FROM users WHERE id = ?', [id], (err, user) => {
     if (err) return callback(err);
     callback(null, user);
@@ -699,37 +701,40 @@ function getUserById(id, callback) {
 }
 ```
 
-#### 9.2.4 变量声明
-```javascript
-// ✅ 正确: 使用 const 和 let
+#### 9.2.4 变量声明与类型
+```typescript
+// ✅ 正确: 使用 const/let + TypeScript 类型标注
 const MAX_RETRY = 3;
 let currentCount = 0;
+const user: User | null = null;
 
 // ❌ 错误: 使用 var
 var oldStyle = 'avoid this';
+
+// ✅ 正确: 接口定义
+interface JobResult {
+  id: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  progress: number;
+}
 ```
 
-#### 9.2.5 函数设计
-```javascript
-// ✅ 正确: 函数保持简洁，单一职责
-function validateUserInput(data) {
-  const errors = [];
-  
-  if (!data.username) {
-    errors.push({ field: 'username', message: '用户名不能为空' });
-  }
-  
-  if (data.password && data.password.length < 6) {
-    errors.push({ field: 'password', message: '密码至少6位' });
-  }
-  
-  return errors;
-}
+#### 9.2.5 类型使用规范
+```typescript
+// ✅ 正确: 使用 TypeScript 类型系统
+import { AuthRequest } from '../types';
 
-// ❌ 错误: 函数过长，职责不清
-function doEverything(data) {
-  // 100+ 行代码
-}
+router.get('/jobs', authenticateToken, (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
+  // ...
+});
+
+// ✅ 正确: SQL 查询结果类型断言
+const jobs = db.prepare('SELECT * FROM jobs WHERE status = ?')
+  .all(status) as Job[];
+
+// ⚠️ 使用 as any 仅在必要时（如 JWT expiresIn 类型兼容）
+const token = jwt.sign(payload, secret, { expiresIn: '24h' } as any);
 ```
 
 ### 9.3 React/前端规范
@@ -775,57 +780,63 @@ function BadComponent() {
 ```
 
 #### 9.3.2 Props 规范
-```jsx
-// ✅ 正确: 使用 PropTypes 或 TypeScript
-import PropTypes from 'prop-types';
+```tsx
+// ✅ 正确: 使用 TypeScript 接口定义 Props
+interface JobCardProps {
+  job: Job;
+  onCancel: (id: string) => void;
+  onDelete: (id: string) => void;
+}
 
-function JobCard({ job, onCancel, onDelete }) {
-  JobCard.propTypes = {
-    job: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      status: PropTypes.oneOf(['queued', 'processing', 'completed']).isRequired,
-      progress: PropTypes.number
-    }).isRequired,
-    onCancel: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
-  };
-  
+function JobCard({ job, onCancel, onDelete }: JobCardProps) {
   return <div className="job-card">{/* ... */}</div>;
 }
 
-// ✅ 正确: 解构 props
-function Component({ title, description, onSubmit, disabled = false }) {
+// ✅ 正确: 解构 props 带默认值
+function Component({ title, description, onSubmit, disabled = false }: {
+  title: string;
+  description?: string;
+  onSubmit: () => void;
+  disabled?: boolean;
+}) {
   return <div>{/* ... */}</div>;
 }
 
-// ❌ 错误: 不使用 defaultProps 或默认值
+// ❌ 错误: 不使用 TypeScript 类型
 function Component(props) {
-  // 假设 disabled 默认为 false
+  // 假设 props.disabled 默认为 false
 }
 ```
 
 #### 9.3.3 状态管理
-```javascript
-// ✅ 正确: Zustand store 结构
+```typescript
+// ✅ 正确: Zustand store TypeScript 结构
 import { create } from 'zustand';
 
-const useAuthStore = create((set, get) => ({
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (credentials: { username: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+}
+
+const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
   
   login: async (credentials) => {
     try {
-      const response = await api.post('/auth/login', credentials);
+      const response = await api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', credentials);
       set({
-        user: response.data.user,
-        token: response.data.token,
+        user: response.data.data.user,
+        token: response.data.data.token,
         isAuthenticated: true
       });
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: (error as Error).message };
     }
   },
   
@@ -1069,31 +1080,42 @@ MyBranch
 
 ### 9.6 代码检查配置
 
-#### 9.6.1 ESLint (后端)
+#### 9.6.1 ESLint (后端 TypeScript)
 ```json
 {
   "env": {
     "node": true,
     "es2021": true
   },
-  "extends": ["eslint:recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2021,
     "sourceType": "module"
   },
+  "plugins": ["@typescript-eslint"],
   "rules": {
-    "indent": ["error", 2],
-    "quotes": ["error", "single"],
+    "quotes": ["error", "single", { "allowTemplateLiterals": true }],
     "semi": ["error", "always"],
-    "no-unused-vars": "warn",
-    "no-console": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "caughtErrorsIgnorePattern": "^_"
+    }],
     "prefer-const": "error",
-    "no-var": "error"
-  }
+    "no-var": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-require-imports": "off",
+    "curly": ["error", "all"]
+  },
+  "ignorePatterns": ["node_modules/", "dist/", "build/"]
 }
 ```
 
-#### 9.6.2 ESLint (前端 React)
+#### 9.6.2 ESLint (前端 React TypeScript)
 ```json
 {
   "env": {
@@ -1102,28 +1124,46 @@ MyBranch
   },
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
+    "ecmaFeatures": { "jsx": true },
     "ecmaVersion": 2021,
     "sourceType": "module"
   },
-  "plugins": ["react"],
+  "plugins": ["react", "react-hooks", "@typescript-eslint"],
   "rules": {
     "react/react-in-jsx-scope": "off",
-    "react/prop-types": "warn",
-    "indent": ["error", 2],
-    "quotes": ["error", "single"],
-    "semi": ["error", "always"]
+    "react/prop-types": "off",
+    "quotes": ["error", "single", { "allowTemplateLiterals": true }],
+    "semi": ["error", "always"],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "caughtErrorsIgnorePattern": "^_"
+    }],
+    "prefer-const": "error",
+    "no-var": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "jsx-quotes": ["error", "prefer-single"],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "no-restricted-globals": ["error", {
+      "name": "alert",
+      "message": "禁止使用 alert()，请使用自定义 Toast 组件替代"
+    }, {
+      "name": "confirm",
+      "message": "禁止使用 confirm()，请使用 ConfirmDialog 组件替代"
+    }, {
+      "name": "prompt",
+      "message": "禁止使用 prompt()，请使用自定义 Modal 对话框组件替代"
+    }]
   },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
+  "settings": { "react": { "version": "detect" } },
+  "ignorePatterns": ["node_modules/", "dist/", "build/"]
 }
 ```
 
@@ -1144,13 +1184,15 @@ MyBranch
 
 #### 9.7.1 PR 提交前自检
 - [ ] 代码符合格式化规范
-- [ ] ESLint 检查通过
+- [ ] ESLint 检查通过（0 errors）
+- [ ] TypeScript 类型检查通过（tsc --noEmit）
 - [ ] 所有测试通过
 - [ ] 导入了必要的依赖
 - [ ] 没有硬编码的敏感信息
+- [ ] 没有使用 `alert()`/`confirm()`/`prompt()`
 - [ ] API 响应格式一致
 - [ ] 错误处理完整
-- [ ] 注释清晰（必要时）
+- [ ] 类型标注完整（避免 any）
 - [ ] 提交信息符合规范
 
 #### 9.7.2 Code Review 重点

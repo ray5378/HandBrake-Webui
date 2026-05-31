@@ -621,7 +621,7 @@ router.post(
           let entries: fs.Dirent[];
           try {
             entries = await fsPromises.readdir(src, { withFileTypes: true });
-          } catch (e) {
+          } catch (_e) {
             return;
           }
           for (const entry of entries) {
@@ -632,7 +632,7 @@ router.post(
               await moveNonVideoRecursive(srcPath, destPath, depth + 1);
               try {
                 await fsPromises.rmdir(srcPath);
-              } catch (e) {
+              } catch (_e2) {
                 /* 非空目录保留，忽略错误 */
               }
             } else {

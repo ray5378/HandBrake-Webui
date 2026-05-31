@@ -109,14 +109,14 @@ const shutdown = async (signal: string) => {
   try {
     const { closeDatabase } = require('./src/models/database');
     closeDatabase();
-  } catch (e) {
+  } catch (_e) {
     // ignore
   }
 
   try {
     const { killAllJobs } = require('./src/services/handbrakeService');
     killAllJobs();
-  } catch (e) {
+  } catch (_e2) {
     // ignore
   }
 

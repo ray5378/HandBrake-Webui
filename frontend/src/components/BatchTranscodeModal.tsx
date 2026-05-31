@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Loader2, Settings, X, ChevronRight, FileText } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
-import { useAuthStore } from '../stores/authStore';
 import { useToastStore } from '../stores/toastStore';
 import { Preset, ApiResponse, FileItem } from '../types';
 
@@ -17,14 +16,7 @@ import {
   VCE_PRESETS,
   X264_TUNES,
   X265_TUNES,
-  RATE_CONTROLS,
-  AUDIO_CODECS,
-  AUDIO_SAMPLERATES,
-  MIXDOWN_MODES,
-  DRC_MODES,
   COLOR_RANGES,
-  RESOLUTION_LIMITS,
-  ANAMORPHIC_MODES,
   FRAMERATES,
   getRateControlForCodec,
   getAllowedRateControls,
@@ -41,7 +33,6 @@ interface BatchTranscodeModalProps {
 
 function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeModalProps) {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -51,7 +42,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
 
   const [selectedPresetId, setSelectedPresetId] = useState('');
   const [presets, setPresets] = useState<Preset[]>([]);
-  const [showPresetModal, setShowPresetModal] = useState(false);
+  const [, setShowPresetModal] = useState(false);
   const [quickSettings, setQuickSettings] = useState(getDefaultPresetSettings());
   const [activeTab, setActiveTab] = useState('summary');
   const [editingPreset, setEditingPreset] = useState(false);
@@ -66,29 +57,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
 
   const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('lastUsedPresetId');
-    if (stored) setSelectedPresetId(stored);
-    fetchPresets();
-    fetchSourceFiles();
-    browseOutputDirs('/drive');
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, [directory]);
-
-  useEffect(() => {
-    if (selectedPresetId && presets.length > 0) {
-      const preset = presets.find(p => p.id === selectedPresetId);
-      if (preset) {
-        setQuickSettings({
-          ...getDefaultPresetSettings(),
-          ...preset.settings
-        } as typeof quickSettings);
-      }
-    }
-  }, [selectedPresetId, presets]);
-
   const fetchPresets = async () => {
     try {
       const response = await api.get('/presets');
@@ -98,7 +66,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
     }
   };
 
-  const fetchSourceFiles = async () => {
+  const fetchSourceFiles = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
     setLoading(true);
@@ -131,7 +99,30 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
     } finally {
       setLoading(false);
     }
-  };
+  }, [directory, limit, page]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('lastUsedPresetId');
+    if (stored) setSelectedPresetId(stored);
+    fetchPresets();
+    fetchSourceFiles();
+    browseOutputDirs('/drive');
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [directory, fetchSourceFiles]);
+
+  useEffect(() => {
+    if (selectedPresetId && presets.length > 0) {
+      const preset = presets.find(p => p.id === selectedPresetId);
+      if (preset) {
+        setQuickSettings({
+          ...getDefaultPresetSettings(),
+          ...preset.settings
+        } as typeof quickSettings);
+      }
+    }
+  }, [selectedPresetId, presets]);
 
   const browseOutputDirs = async (path: string) => {
     setBrowseLoading(true);
@@ -256,10 +247,6 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
     } catch (error) {
       console.error('Failed to save preset:', error);
     }
-  };
-
-  const handleRefreshPresets = async () => {
-    await fetchPresets();
   };
 
   const tabs: Array<{ id: string; label: string; icon: LucideIcon }> = [
