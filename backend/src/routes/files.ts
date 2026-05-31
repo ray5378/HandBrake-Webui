@@ -303,7 +303,7 @@ router.get(
                 }
               });
             }
-          } catch (parseError) {
+          } catch (_parseError) {
             fallbackResponse();
           }
         }
@@ -397,7 +397,7 @@ router.get(
         let items: fs.Dirent[];
         try {
           items = await fsPromises.readdir(base, { withFileTypes: true });
-        } catch (e) {
+        } catch (_e) {
           return [];
         }
         for (const item of items) {
@@ -453,7 +453,7 @@ router.get(
 
       try {
         jwt.verify(token, config.jwtSecret);
-      } catch (err) {
+      } catch (_err) {
         res.status(403).json({ success: false, error: 'Invalid token' });
         return;
       }

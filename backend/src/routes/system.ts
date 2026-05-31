@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -96,7 +96,7 @@ router.post(
 
         try {
           fs.accessSync(cachePath, fs.constants.W_OK);
-        } catch (e) {
+        } catch (_e) {
           res.status(400).json({
             success: false,
             error: '目录不可写'

@@ -321,6 +321,7 @@ export async function startTranscode(job: Job): Promise<void> {
       // 忽略 stat 错误
     }
     db.prepare(
+      // eslint-disable-next-line quotes
       "UPDATE jobs SET status = 'skipped', completed_at = datetime('now'), output_file_size = ? WHERE id = ?"
     ).run(outputFileSize, job.id);
     logger.info('Job skipped - output file already exists', {
@@ -695,6 +696,7 @@ function checkStaleJobs(): void {
 
   const db = getDatabase();
   const processingJobs = db
+    // eslint-disable-next-line quotes
     .prepare("SELECT id, started_at, progress FROM jobs WHERE status = 'processing'")
     .all() as { id: string; started_at: string; progress: number }[];
 
@@ -745,6 +747,7 @@ function checkStaleJobs(): void {
       }
 
       db.prepare(
+        // eslint-disable-next-line quotes
         "UPDATE jobs SET status = 'failed', error_log = ?, completed_at = datetime('now') WHERE id = ?"
       ).run('转码进程已无响应 - 临时文件超过5分钟未更新', job.id);
       jobStaleness.delete(job.id);

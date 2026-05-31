@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { body } from 'express-validator';
 import { getDatabase } from '../models/database';

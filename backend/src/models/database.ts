@@ -1,11 +1,8 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 import config from '../config';
 import logger from '../utils/logger';
-import { PASSWORD_CONFIG } from '../constants';
 import { getFullDefaultPresets } from '../constants/presets';
 
 let db: Database.Database | null = null;
@@ -97,7 +94,7 @@ function runMigrations(): void {
     try {
       db!.exec(sql);
       logger.info('Migration applied', { sql });
-    } catch (e) {
+    } catch (_e) {
       // 字段已存在时静默跳过
     }
   }

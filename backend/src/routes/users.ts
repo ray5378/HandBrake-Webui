@@ -1,7 +1,6 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 import { getDatabase } from '../models/database';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
 import { validate } from '../middleware/validator';

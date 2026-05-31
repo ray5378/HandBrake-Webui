@@ -200,6 +200,7 @@ router.delete(
       const db = getDatabase();
 
       const result = db
+        // eslint-disable-next-line quotes
         .prepare("DELETE FROM jobs WHERE status IN ('completed', 'failed', 'cancelled', 'skipped')")
         .run();
 
@@ -244,6 +245,7 @@ router.delete(
       const db = getDatabase();
 
       const result = db
+        // eslint-disable-next-line quotes
         .prepare("DELETE FROM jobs WHERE status = 'queued' AND user_id = ?")
         .run(req.user!.userId);
 
@@ -477,7 +479,7 @@ router.post(
         let items: fs.Dirent[];
         try {
           items = await fsPromises.readdir(dir, { withFileTypes: true });
-        } catch (e) {
+        } catch (_e) {
           return [];
         }
 
@@ -540,7 +542,7 @@ router.post(
         try {
           const stats = fs.statSync(sourceFile);
           sourceFileSize = stats.size;
-        } catch (e) {
+        } catch (_e) {
           // 无法获取文件大小时忽略
         }
 
@@ -586,7 +588,7 @@ router.post(
           let entries: fs.Dirent[];
           try {
             entries = await fsPromises.readdir(src, { withFileTypes: true });
-          } catch (e) {
+          } catch (_e) {
             return;
           }
           for (const entry of entries) {
