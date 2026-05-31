@@ -92,7 +92,7 @@ export default function VideoPlayer({ file, onClose }: VideoPlayerProps) {
 
       const container = containerRef.current;
       if (!container) return;
-      const dpEl = container.querySelector('.dplayer') as HTMLElement | null;
+      const dpEl = (container.querySelector('.dplayer') || container.firstChild) as HTMLElement | null;
       const videoWrap = dpEl?.querySelector('.dplayer-video-wrap') as HTMLElement | null;
       if (dpEl) {
         dpEl.style.setProperty('width', '100%', 'important');
