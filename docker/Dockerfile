@@ -53,7 +53,7 @@ COPY --from=builder /build/node_modules ./backend/node_modules
 COPY --from=builder /build/dist ./backend/dist
 
 # Copy frontend build output
-COPY frontend/dist ./frontend/dist
+COPY frontend/dist ./backend/frontend/dist
 
 ENV NODE_ENV=production
 ENV PORT=52389
