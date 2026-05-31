@@ -485,12 +485,20 @@ function Jobs() {
                 <X className='w-5 h-5 text-gray-400' />
               </button>
             </div>
-            <p className='text-gray-400 mb-5'>{t('jobs.confirmClearCache', '请选择要清除的缓存类型：')}</p>
+            <p className='text-gray-400 mb-5'>
+              {t('jobs.confirmClearCache', '请选择要清除的缓存类型：')}
+            </p>
             <div className='space-y-3'>
-              <button onClick={() => handleClearCache('transcode')} className='w-full btn btn-danger'>
+              <button
+                onClick={() => handleClearCache('transcode')}
+                className='w-full btn btn-danger'
+              >
                 {t('jobs.clearTranscodeCache', '清除转码缓存')}
               </button>
-              <button onClick={() => handleClearCache('preview')} className='w-full btn btn-primary'>
+              <button
+                onClick={() => handleClearCache('preview')}
+                className='w-full btn btn-primary'
+              >
                 {t('jobs.clearPreviewCache', '清除预览图片缓存')}
               </button>
               <button onClick={() => handleClearCache('all')} className='w-full btn btn-danger'>

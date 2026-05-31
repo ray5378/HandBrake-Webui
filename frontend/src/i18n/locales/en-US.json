@@ -114,6 +114,7 @@
     "confirmClearCacheTitle": "Clear Cache",
     "clearAllWithProcessing": "Clear All (Including Running)",
     "clearAllQueuedOnly": "Clear Queued Only",
+    "confirmClearAllTitle": "Clear Queue",
     "confirmClearHistoryTitle": "Clear Job History",
     "skipped": "Skipped",
     "outputExists": "Output file already exists, task skipped automatically",
