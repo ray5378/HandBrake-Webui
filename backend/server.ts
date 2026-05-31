@@ -63,8 +63,8 @@ app.use('/api/auth/login', authStrictLimiter);
 app.use('/api/auth/setup-admin', authStrictLimiter);
 app.use('/api/auth/logout', authStrictLimiter);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
@@ -100,8 +100,33 @@ const server: http.Server = app.listen(config.port, '0.0.0.0', () => {
   }
 });
 
+server.keepAliveTimeout = 61000;
+server.headersTimeout = 62000;
+server.requestTimeout = 120000;
+
+let gcTimer: ReturnType<typeof setInterval> | null = null;
+if (global.gc) {
+  gcTimer = setInterval(() => {
+    const mem = process.memoryUsage();
+    const heapUsedMB = Math.round(mem.heapUsed / 1024 / 1024);
+    const heapTotalMB = Math.round(mem.heapTotal / 1024 / 1024);
+    const rssMB = Math.round(mem.rss / 1024 / 1024);
+
+    if (heapUsedMB > heapTotalMB * 0.7 || rssMB > 512) {
+      global.gc!();
+      console.log(`GC triggered: heap ${heapUsedMB}/${heapTotalMB}MB, rss ${rssMB}MB`);
+    }
+  }, 60000);
+}
+
 const shutdown = async (signal: string) => {
   console.log(`${signal} received, shutting down gracefully...`);
+
+  if (gcTimer) {
+    clearInterval(gcTimer);
+    gcTimer = null;
+  }
+
   server.close(() => {
     console.log('HTTP server closed');
   });

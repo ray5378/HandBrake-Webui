@@ -93,6 +93,9 @@ router.get(
       await searchDir(baseDir);
 
       res.json({ success: true, data: results });
+      if (global.gc) {
+        global.gc();
+      }
     } catch (error) {
       next(error);
     }
@@ -243,7 +246,7 @@ router.get(
       ffprobeProcess = execFile(
         'ffprobe',
         ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', filePath],
-        { timeout: 10000 },
+        { timeout: 10000, maxBuffer: 10 * 1024 * 1024 },
         (error: Error | null, stdout: string) => {
           clearTimeout(timeoutId);
 
@@ -413,6 +416,9 @@ router.get(
 
       const directories = await scanTree(dir);
       res.json({ success: true, data: { directories } });
+      if (global.gc) {
+        global.gc();
+      }
     } catch (error) {
       next(error);
     }

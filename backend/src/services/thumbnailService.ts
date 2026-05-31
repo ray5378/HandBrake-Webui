@@ -6,6 +6,8 @@ import config from '../config';
 import logger from '../utils/logger';
 
 const THUMBNAIL_TTL_MS = 24 * 60 * 60 * 1000;
+const MAX_STDERR_SIZE = 100000;
+const MAX_CONCURRENT_THUMBNAILS = 4;
 
 interface ThumbnailResult {
   success: boolean;
@@ -92,7 +94,9 @@ export async function generateThumbnail(videoPath: string): Promise<ThumbnailRes
     let stderr = '';
 
     ffmpeg.stderr.on('data', (data: Buffer) => {
-      stderr += data.toString();
+      if (stderr.length < MAX_STDERR_SIZE) {
+        stderr += data.toString();
+      }
     });
 
     const timeout = setTimeout(() => {
@@ -120,10 +124,18 @@ export async function generateThumbnail(videoPath: string): Promise<ThumbnailRes
 
 export async function generateThumbnails(videoPaths: string[]): Promise<ThumbnailBatchResult[]> {
   const results: ThumbnailBatchResult[] = [];
-  for (const videoPath of videoPaths) {
-    const result = await generateThumbnail(videoPath);
-    results.push({ path: videoPath, ...result });
+
+  for (let i = 0; i < videoPaths.length; i += MAX_CONCURRENT_THUMBNAILS) {
+    const batch = videoPaths.slice(i, i + MAX_CONCURRENT_THUMBNAILS);
+    const batchResults = await Promise.all(batch.map(p => generateThumbnail(p)));
+    for (let j = 0; j < batch.length; j++) {
+      results.push({ path: batch[j], ...batchResults[j] });
+    }
+    if (global.gc && i % (MAX_CONCURRENT_THUMBNAILS * 4) === 0) {
+      global.gc();
+    }
   }
+
   return results;
 }
 
