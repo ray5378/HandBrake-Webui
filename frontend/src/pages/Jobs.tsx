@@ -15,6 +15,7 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import VideoPlayer from '../components/VideoPlayer';
 import { formatFileSize, formatETA } from '../utils/format';
 import { Job } from '../types';
 
@@ -33,6 +34,12 @@ function Jobs() {
   const [confirmJobAction, setConfirmJobAction] = useState<JobAction | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [selectedVideoFile, setSelectedVideoFile] = useState<{
+    path: string;
+    name: string;
+  } | null>(null);
 
   const fetchJobs = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -178,6 +185,12 @@ function Jobs() {
     setConfirmAction(null);
   };
 
+  const handlePlayFile = (filePath: string) => {
+    const name = filePath.split('/').pop() || filePath;
+    setSelectedVideoFile({ path: filePath, name });
+    setShowVideoPlayer(true);
+  };
+
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
       queued: t('jobs.queue'),
@@ -272,9 +285,14 @@ function Jobs() {
                 <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
                   <div className='flex-1 min-w-0'>
                     <div className='space-y-1 mb-2'>
-                      <div className='text-gray-400 font-mono text-sm' title={job.source_file}>
+                      <div className='text-gray-400 font-mono text-sm'>
                         <span className='text-gray-400'>{t('jobs.sourceFile', '源文件')}: </span>
-                        <span className='text-white break-all'>{job.source_file}</span>
+                        <span
+                          className='text-white break-all underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary hover:decoration-primary transition-colors'
+                          onClick={() => handlePlayFile(job.source_file)}
+                        >
+                          {job.source_file}
+                        </span>
                         {job.source_file_size != null && (
                           <span className='text-gray-400 ml-3'>
                             {t('jobs.originalSize', '原体积')}：
@@ -282,9 +300,18 @@ function Jobs() {
                           </span>
                         )}
                       </div>
-                      <div className='text-gray-400 font-mono text-sm' title={job.output_file}>
+                      <div className='text-gray-400 font-mono text-sm'>
                         <span className='text-gray-400'>{t('jobs.outputFile', '输出文件')}: </span>
-                        <span className='text-white break-all'>{job.output_file}</span>
+                        {job.status === 'completed' || job.status === 'skipped' ? (
+                          <span
+                            className='text-white break-all underline decoration-dotted underline-offset-2 cursor-pointer hover:text-primary hover:decoration-primary transition-colors'
+                            onClick={() => handlePlayFile(job.output_file)}
+                          >
+                            {job.output_file}
+                          </span>
+                        ) : (
+                          <span className='text-white break-all'>{job.output_file}</span>
+                        )}
                         {(job.status === 'completed' || job.status === 'skipped') &&
                           job.output_file_size != null && (
                             <span className='text-gray-400 ml-3'>
@@ -530,6 +557,15 @@ function Jobs() {
         onCancel={() => setConfirmJobAction(null)}
         danger
       />
+      {showVideoPlayer && selectedVideoFile && (
+        <VideoPlayer
+          file={selectedVideoFile}
+          onClose={() => {
+            setShowVideoPlayer(false);
+            setSelectedVideoFile(null);
+          }}
+        />
+      )}
     </div>
   );
 }
