@@ -559,7 +559,6 @@ function Jobs() {
       />
       {showVideoPlayer && selectedVideoFile && (
         <VideoPlayer
-          key={selectedVideoFile.path}
           file={selectedVideoFile}
           onClose={() => {
             setShowVideoPlayer(false);
