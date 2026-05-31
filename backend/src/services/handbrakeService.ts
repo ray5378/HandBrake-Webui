@@ -59,6 +59,10 @@ function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string
 
     if (video.rateControl === 'crf') {
       args.push('--quality', String((video.crf as number) ?? 22));
+    } else if (video.rateControl === 'cq') {
+      args.push('--quality', String((video.cq as number) ?? 30));
+    } else if (video.rateControl === 'icq') {
+      args.push('--quality', String((video.icq as number) ?? 22));
     } else if (video.rateControl === 'cbr' && video.bitrate) {
       args.push('--vb', `${video.bitrate}`);
     } else if (video.rateControl === 'vbr' && video.bitrate) {
