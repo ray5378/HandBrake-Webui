@@ -374,7 +374,7 @@ function Files() {
       {contextMenu && (
         <div
           ref={contextMenuRef}
-          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 py-1 min-w-[200px]'
+          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 min-w-[200px] overflow-hidden'
           style={{
             left: Math.min(contextMenu.x, window.innerWidth - 220),
             top: Math.min(contextMenu.y, window.innerHeight - 200)
