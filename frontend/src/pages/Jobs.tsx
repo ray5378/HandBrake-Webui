@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -24,6 +24,8 @@ interface JobAction {
   jobId: string;
 }
 
+const PAGE_SIZE = 10;
+
 function Jobs() {
   const { t } = useTranslation();
   const openVideo = useVideoPlayerStore(s => s.open);
@@ -31,77 +33,75 @@ function Jobs() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('active');
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({
+    all: 0,
+    active: 0,
+    completed: 0,
+    failed: 0,
+    skipped: 0
+  });
+  const [hasProcessing, setHasProcessing] = useState(false);
+  const [hasQueued, setHasQueued] = useState(false);
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [confirmJobAction, setConfirmJobAction] = useState<JobAction | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchJobs = useCallback(async () => {
-    if (abortRef.current) abortRef.current.abort();
-    abortRef.current = new AbortController();
+  const fetchStats = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await api.get('/jobs', {
-        params: { limit: 9999 },
-        signal: abortRef.current.signal
+      const response = await api.get('/jobs/stats', { signal });
+      const { counts, hasProcessing: hp, hasQueued: hq } = response.data.data;
+      setStatusCounts({
+        all: counts.all,
+        active: counts.active,
+        completed: counts.completed,
+        failed: counts.failed,
+        skipped: counts.skipped
       });
-      setJobs(response.data.data.jobs);
+      setHasProcessing(hp);
+      setHasQueued(hq);
+    } catch (error) {
+      console.error('Failed to fetch job stats:', error);
+    }
+  }, []);
+
+  const fetchJobs = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const params: Record<string, string | number> = { page, limit: PAGE_SIZE };
+      if (filter === 'active') {
+        params.status = 'processing,queued';
+      } else if (filter === 'completed') {
+        params.status = 'completed,skipped';
+      } else if (filter !== 'all') {
+        params.status = filter;
+      }
+
+      const response = await api.get('/jobs', { params, signal });
+      const data = response.data.data;
+      setJobs(data.jobs || []);
+      const pagination = data.pagination || {};
+      setTotalPages(Math.max(1, pagination.totalPages || Math.ceil((pagination.total || 0) / PAGE_SIZE)));
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filter, page]);
 
-  const filteredJobs = useMemo(() => {
-    if (filter === 'all') return jobs;
-    if (filter === 'active')
-      return jobs
-        .filter(job => job.status === 'processing' || job.status === 'queued')
-        .sort((a, b) => {
-          if (a.status === 'processing' && b.status !== 'processing') return -1;
-          if (a.status !== 'processing' && b.status === 'processing') return 1;
-          return 0;
-        });
-    if (filter === 'completed')
-      return jobs.filter(job => job.status === 'completed' || job.status === 'skipped');
-    return jobs.filter(job => job.status === filter);
-  }, [jobs, filter]);
-
-  const limit = 10;
-  const totalPages = Math.ceil(filteredJobs.length / limit);
-  const paginatedJobs = filteredJobs.slice((page - 1) * limit, page * limit);
+  const fetchAll = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+    await Promise.all([fetchStats(signal), fetchJobs(signal)]);
+  }, [fetchStats, fetchJobs]);
 
   useEffect(() => {
-    if (page > totalPages && totalPages > 0) setPage(1);
-  }, [page, totalPages]);
-
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      all: jobs.length,
-      active: 0,
-      completed: 0,
-      failed: 0,
-      skipped: 0
-    };
-    for (const job of jobs) {
-      if (Object.hasOwn(counts, job.status)) counts[job.status]++;
-      if (job.status === 'queued' || job.status === 'processing') counts.active++;
-      if (job.status === 'skipped') counts.completed++;
-    }
-    return counts;
-  }, [jobs]);
-
-  const hasProcessing = useMemo(() => {
-    return jobs.some(job => job.status === 'processing');
-  }, [jobs]);
-
-  const hasQueued = useMemo(() => {
-    return jobs.some(job => job.status === 'queued');
-  }, [jobs]);
+    setLoading(true);
+    fetchAll();
+  }, [fetchAll]);
 
   useEffect(() => {
-    fetchJobs();
-
     let intervalTime = 60000;
     if (hasProcessing) {
       intervalTime = 2000;
@@ -109,13 +109,13 @@ function Jobs() {
       intervalTime = 10000;
     }
 
-    intervalRef.current = setInterval(fetchJobs, intervalTime);
+    intervalRef.current = setInterval(fetchAll, intervalTime);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [fetchJobs, hasProcessing, hasQueued]);
+  }, [fetchAll, hasProcessing, hasQueued]);
 
   const handleCancel = async (jobId: string) => {
     setConfirmJobAction({ type: 'cancel', jobId });
@@ -133,7 +133,7 @@ function Jobs() {
       } else {
         await api.delete(`/jobs/${confirmJobAction.jobId}`);
       }
-      fetchJobs();
+      fetchAll();
     } catch (error) {
       console.error('Failed to perform job action:', error);
     }
@@ -143,7 +143,7 @@ function Jobs() {
   const handleClearHistory = async () => {
     try {
       await api.delete('/jobs/all');
-      fetchJobs();
+      fetchAll();
     } catch (error) {
       console.error('Failed to clear history:', error);
     }
@@ -153,7 +153,7 @@ function Jobs() {
   const handleClearAll = async () => {
     try {
       await api.delete('/jobs/queue');
-      fetchJobs();
+      fetchAll();
     } catch (error) {
       console.error('Failed to clear queued jobs:', error);
     }
@@ -163,7 +163,7 @@ function Jobs() {
   const handleClearAllForce = async () => {
     try {
       await api.delete('/jobs/all-force');
-      fetchJobs();
+      fetchAll();
     } catch (error) {
       console.error('Failed to force clear all jobs:', error);
     }
@@ -268,10 +268,10 @@ function Jobs() {
 
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
-      ) : filteredJobs.length > 0 ? (
+      ) : jobs.length > 0 ? (
         <>
           <div className='card space-y-3'>
-            {paginatedJobs.map(job => (
+            {jobs.map(job => (
               <div
                 key={job.id}
                 className={`p-4 rounded-lg transition-colors font-mono ${job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700 hover:bg-dark-600'}`}
