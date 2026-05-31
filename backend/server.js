@@ -90,6 +90,12 @@ app.use(errorHandler);
 const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(`HandBrake Web UI server running on port ${config.port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  if (config.cacheDir) {
+    const { startThumbnailCleanup } = require('./src/services/thumbnailService');
+    startThumbnailCleanup();
+    console.log('Thumbnail cleanup service started');
+  }
 });
 
 const shutdown = async signal => {

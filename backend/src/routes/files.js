@@ -7,6 +7,7 @@ const { body, query } = require('express-validator');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
 const config = require('../config');
+const { generateThumbnails, getThumbnailFilePath } = require('../services/thumbnailService');
 
 const router = express.Router();
 
@@ -420,6 +421,38 @@ router.get('/stream', query('path').notEmpty(), validate, (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Not a file' });
     }
 
+    res.sendFile(filePath);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post(
+  '/thumbnails',
+  authenticateToken,
+  body('paths').isArray(),
+  validate,
+  async (req, res, next) => {
+    try {
+      const { paths } = req.body;
+      if (!paths || paths.length === 0) {
+        return res.json({ success: true, thumbnails: [] });
+      }
+      const results = await generateThumbnails(paths);
+      res.json({ success: true, thumbnails: results });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get('/thumbnail/:filename', (req, res, next) => {
+  try {
+    const { filename } = req.params;
+    const filePath = getThumbnailFilePath(filename);
+    if (!filePath || !fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, error: 'Thumbnail not found' });
+    }
     res.sendFile(filePath);
   } catch (error) {
     next(error);

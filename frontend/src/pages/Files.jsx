@@ -30,6 +30,7 @@ function Files() {
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState(null);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [thumbnails, setThumbnails] = useState({});
 
   const VIDEO_EXTENSIONS = [
     '.mp4',
@@ -78,6 +79,36 @@ function Files() {
       if (abortRef.current) abortRef.current.abort();
     };
   }, [fetchFiles]);
+
+  const fetchThumbnails = useCallback(async () => {
+    const videoFiles = files.filter(file => {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      return VIDEO_EXTENSIONS.includes(ext);
+    });
+    if (videoFiles.length === 0) return;
+    try {
+      const res = await api.post('/files/thumbnails', {
+        paths: videoFiles.map(f => f.path)
+      });
+      if (res.data.success && res.data.thumbnails) {
+        const newThumbnails = {};
+        res.data.thumbnails.forEach(item => {
+          if (item.thumbnail) {
+            newThumbnails[item.path] = item.thumbnail;
+          }
+        });
+        setThumbnails(prev => ({ ...prev, ...newThumbnails }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch thumbnails:', error);
+    }
+  }, [files, VIDEO_EXTENSIONS]);
+
+  useEffect(() => {
+    if (files.length > 0) {
+      fetchThumbnails();
+    }
+  }, [files, fetchThumbnails]);
 
   // formatSize 已弃用，请使用 formatFileSize
   const formatSize = formatFileSize;
@@ -373,41 +404,65 @@ function Files() {
                   : 'grid-cols-1'
               )}
             >
-              {filteredFiles.map(file => (
-                <div
-                  key={file.path}
-                  className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
-                  onContextMenu={e => handleContextMenu(e, file.path)}
-                  onClick={e => {
-                    e.stopPropagation();
-                    handleFileClick(file);
-                  }}
-                >
-                  {viewMode === 'grid' ? (
-                    <>
-                      <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
-                        <Video className='w-12 h-12 text-gray-600' />
-                      </div>
-                      <h3 className='font-medium text-white break-all whitespace-normal mb-2'>
-                        {file.name}
-                      </h3>
-                      <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
-                    </>
-                  ) : (
-                    <div className='flex items-center space-x-3'>
-                      <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
-                      <div className='flex-1 min-w-0'>
-                        <p className='text-white font-medium break-all whitespace-normal'>
+              {filteredFiles.map(file => {
+                const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+                const isVideo = VIDEO_EXTENSIONS.includes(ext);
+                const thumbnail = isVideo ? thumbnails[file.path] : null;
+
+                return (
+                  <div
+                    key={file.path}
+                    className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
+                    onContextMenu={e => handleContextMenu(e, file.path)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleFileClick(file);
+                    }}
+                  >
+                    {viewMode === 'grid' ? (
+                      <>
+                        <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
+                          {thumbnail ? (
+                            <img
+                              src={thumbnail}
+                              alt={file.name}
+                              className='w-full h-full object-cover'
+                            />
+                          ) : isVideo ? (
+                            <Video className='w-12 h-12 text-gray-600' />
+                          ) : (
+                            <Video className='w-12 h-12 text-gray-600' />
+                          )}
+                        </div>
+                        <h3 className='font-medium text-white break-all whitespace-normal mb-2'>
                           {file.name}
-                        </p>
-                        <p className='text-sm text-gray-400'>
-                          {formatSize(file.size)} · {file.extension}
-                        </p>
+                        </h3>
+                        <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
+                      </>
+                    ) : (
+                      <div className='flex items-center space-x-3'>
+                        {thumbnail ? (
+                          <img
+                            src={thumbnail}
+                            alt={file.name}
+                            className='w-12 h-8 object-cover rounded flex-shrink-0'
+                          />
+                        ) : (
+                          <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
+                        )}
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-white font-medium break-all whitespace-normal'>
+                            {file.name}
+                          </p>
+                          <p className='text-sm text-gray-400'>
+                            {formatSize(file.size)} · {file.extension}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : null}
         </>
