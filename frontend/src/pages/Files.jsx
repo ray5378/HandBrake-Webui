@@ -1,17 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  FolderOpen,
-  Video,
-  Grid,
-  List,
-  Search,
-  ChevronRight,
-  PlayCircle,
-  Settings,
-  X
-} from 'lucide-react';
+import { FolderOpen, Video, Grid, List, Search, ChevronRight, PlayCircle, X } from 'lucide-react';
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
@@ -329,7 +319,11 @@ function Files() {
               )}
             >
               {filteredFiles.map(file => (
-                <div key={file.path} className='card hover:border-primary/50 transition-colors'>
+                <div
+                  key={file.path}
+                  className='card hover:border-primary/50 transition-colors cursor-context-menu'
+                  onContextMenu={e => handleContextMenu(e, file.path)}
+                >
                   {viewMode === 'grid' ? (
                     <>
                       <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
@@ -339,42 +333,18 @@ function Files() {
                         {file.name}
                       </h3>
                       <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
-                      <div className='flex items-center justify-center space-x-2'>
-                        <button
-                          onClick={() => {
-                            setSelectedDirectory(file.path);
-                            setShowBatchModal(true);
-                          }}
-                          className='btn btn-primary text-xs py-2 px-3'
-                        >
-                          <Settings className='w-3 h-3' />
-                          <span className='ml-1'>{t('nav.transcode')}</span>
-                        </button>
-                      </div>
                     </>
                   ) : (
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center space-x-3 flex-1 min-w-0'>
-                        <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
-                        <div className='flex-1 min-w-0'>
-                          <p className='text-white font-medium break-all whitespace-normal'>
-                            {file.name}
-                          </p>
-                          <p className='text-sm text-gray-400'>
-                            {formatSize(file.size)} · {file.extension}
-                          </p>
-                        </div>
+                    <div className='flex items-center space-x-3'>
+                      <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-white font-medium break-all whitespace-normal'>
+                          {file.name}
+                        </p>
+                        <p className='text-sm text-gray-400'>
+                          {formatSize(file.size)} · {file.extension}
+                        </p>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedDirectory(file.path);
-                          setShowBatchModal(true);
-                        }}
-                        className='btn btn-primary text-xs min-h-[44px]'
-                      >
-                        <Settings className='w-4 h-4' />
-                        <span className='ml-1 hidden sm:inline'>{t('nav.transcode')}</span>
-                      </button>
                     </div>
                   )}
                 </div>
