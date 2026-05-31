@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
+import { execFile } from 'child_process';
 import { body, query } from 'express-validator';
 import { authenticateToken } from '../middleware/auth';
 import { validate } from '../middleware/validator';
@@ -11,6 +12,19 @@ import { AuthRequest } from '../types';
 
 const router = Router();
 const fsPromises = fs.promises;
+
+const VIDEO_EXTENSIONS = [
+  '.mp4',
+  '.mkv',
+  '.avi',
+  '.mov',
+  '.wmv',
+  '.flv',
+  '.webm',
+  '.m4v',
+  '.mpg',
+  '.mpeg'
+];
 
 router.get(
   '/search',
@@ -24,19 +38,6 @@ router.get(
       const results: { files: Record<string, unknown>[]; directories: Record<string, unknown>[] } =
         { files: [], directories: [] };
       const maxResults = 50;
-
-      const videoExtensions = [
-        '.mp4',
-        '.mkv',
-        '.avi',
-        '.mov',
-        '.wmv',
-        '.flv',
-        '.webm',
-        '.m4v',
-        '.mpg',
-        '.mpeg'
-      ];
 
       const searchDir = async (dirPath: string, depth = 0): Promise<void> => {
         if (depth > 5) {
@@ -71,7 +72,7 @@ router.get(
             await searchDir(itemPath, depth + 1);
           } else {
             const ext = path.extname(item.name).toLowerCase();
-            if (videoExtensions.includes(ext) && item.name.toLowerCase().includes(searchQuery)) {
+            if (VIDEO_EXTENSIONS.includes(ext) && item.name.toLowerCase().includes(searchQuery)) {
               let stats: fs.Stats;
               try {
                 stats = fs.statSync(itemPath);
@@ -132,20 +133,16 @@ router.get(
       }
 
       const items = fs.readdirSync(absolutePath, { withFileTypes: true });
-      const videoExtensions = [
-        '.mp4',
-        '.mkv',
-        '.avi',
-        '.mov',
-        '.wmv',
-        '.flv',
-        '.webm',
-        '.m4v',
-        '.mpg',
-        '.mpeg'
-      ];
 
-      const files: Record<string, unknown>[] = [];
+      const files: {
+        name: string;
+        path: string;
+        size: number;
+        type: string;
+        extension: string;
+        modifiedAt: string;
+        modifiedAtMs: number;
+      }[] = [];
       const directories: Record<string, unknown>[] = [];
 
       for (const item of items) {
@@ -159,7 +156,7 @@ router.get(
           });
         } else {
           const ext = path.extname(item.name).toLowerCase();
-          if (videoExtensions.includes(ext)) {
+          if (VIDEO_EXTENSIONS.includes(ext)) {
             const stats = fs.statSync(itemPath);
             files.push({
               name: item.name,
@@ -167,25 +164,23 @@ router.get(
               size: stats.size,
               type: 'video',
               extension: ext,
-              createdAt: stats.birthtime.toISOString(),
-              modifiedAt: stats.mtime.toISOString()
+              modifiedAt: stats.mtime.toISOString(),
+              modifiedAtMs: stats.mtime.getTime()
             });
           }
         }
       }
 
-      files.sort(
-        (a, b) =>
-          new Date(b.modifiedAt as string).getTime() - new Date(a.modifiedAt as string).getTime()
-      );
+      files.sort((a, b) => b.modifiedAtMs - a.modifiedAtMs);
 
       const total = files.length;
       const paginatedFiles = files.slice(offset, offset + limit);
+      const cleanFiles = paginatedFiles.map(({ modifiedAtMs: _, ...rest }) => rest);
 
       res.json({
         success: true,
         data: {
-          files: paginatedFiles,
+          files: cleanFiles,
           directories,
           pagination: {
             total,
@@ -219,7 +214,6 @@ router.get(
       }
 
       const stats = fs.statSync(filePath);
-      const { execFile } = await import('child_process');
 
       let ffprobeProcess: ReturnType<typeof execFile> | null = null;
       // eslint-disable-next-line prefer-const

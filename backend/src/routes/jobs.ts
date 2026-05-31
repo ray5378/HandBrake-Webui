@@ -20,6 +20,19 @@ import { AuthRequest, Job } from '../types';
 const router = Router();
 const fsPromises = fs.promises;
 
+const VIDEO_EXTENSIONS = [
+  '.mp4',
+  '.mkv',
+  '.avi',
+  '.mov',
+  '.wmv',
+  '.flv',
+  '.webm',
+  '.m4v',
+  '.mpg',
+  '.mpeg'
+];
+
 router.get(
   '/',
   authenticateToken,
@@ -450,19 +463,6 @@ router.post(
       } = req.body;
       const db = getDatabase();
 
-      const videoExtensions = [
-        '.mp4',
-        '.mkv',
-        '.avi',
-        '.mov',
-        '.wmv',
-        '.flv',
-        '.webm',
-        '.m4v',
-        '.mpg',
-        '.mpeg'
-      ];
-
       if (!fs.existsSync(sourceDirectory)) {
         res.status(400).json({
           success: false,
@@ -490,7 +490,7 @@ router.post(
             videoFiles.push(...sub);
           } else {
             const ext = path.extname(item.name).toLowerCase();
-            if (videoExtensions.includes(ext)) {
+            if (VIDEO_EXTENSIONS.includes(ext)) {
               videoFiles.push(itemPath);
             }
           }
@@ -599,7 +599,7 @@ router.post(
               await copyNonVideoRecursive(srcPath, destPath, depth + 1);
             } else {
               const ext = path.extname(entry.name).toLowerCase();
-              if (!videoExtensions.includes(ext)) {
+              if (!VIDEO_EXTENSIONS.includes(ext)) {
                 await fsPromises.mkdir(path.dirname(destPath), { recursive: true });
                 await fsPromises.copyFile(srcPath, destPath);
               }
@@ -637,7 +637,7 @@ router.post(
               }
             } else {
               const ext = path.extname(entry.name).toLowerCase();
-              if (!videoExtensions.includes(ext)) {
+              if (!VIDEO_EXTENSIONS.includes(ext)) {
                 await fsPromises.mkdir(path.dirname(destPath), { recursive: true });
                 await fsPromises.rename(srcPath, destPath);
               }

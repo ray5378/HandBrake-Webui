@@ -13,6 +13,11 @@ const jobStaleness = new Map<string, { lastMtime: number; staleCount: number }>(
 const STALE_CHECK_INTERVAL = 60 * 1000;
 const MAX_STALE_COUNT = 5;
 
+const RE_BRACE_OPEN = /\{/g;
+const RE_BRACE_CLOSE = /\}/g;
+const RE_TEXT_PROGRESS = /Encoding:.*?(\d+\.?\d*)\s*%/g;
+const RE_JSON_LINE = /^(\w+):\s*\{/;
+
 function buildHandBrakeArgs(job: Job, settings: Record<string, unknown>): string[] {
   const args: string[] = ['-i', job.source_file, '-o', job.output_file, '--json'];
 
@@ -581,7 +586,7 @@ function parseProgress(jobId: string, data: string): number | null {
   if (progress !== null) {
     const now = Date.now();
     const last = lastProgressWrite.get(jobId) || 0;
-    if (now - last >= 1000) {
+    if (now - last >= 2000) {
       lastProgressWrite.set(jobId, now);
       db.prepare('UPDATE jobs SET progress = ?, eta_seconds = ? WHERE id = ?').run(
         progress,
@@ -605,7 +610,7 @@ function tryParseJsonProgress(data: string): JsonProgress | null {
   let i = 0;
 
   while (i < lines.length) {
-    const match = lines[i].match(/^(\w+):\s*\{/);
+    const match = lines[i].match(RE_JSON_LINE);
     if (!match) {
       i++;
       continue;
@@ -616,8 +621,8 @@ function tryParseJsonProgress(data: string): JsonProgress | null {
     let blockEnd = -1;
 
     for (let j = i + 1; j < lines.length; j++) {
-      depth += (lines[j].match(/\{/g) || []).length;
-      depth -= (lines[j].match(/\}/g) || []).length;
+      depth += (lines[j].match(RE_BRACE_OPEN) || []).length;
+      depth -= (lines[j].match(RE_BRACE_CLOSE) || []).length;
       if (depth === 0) {
         blockEnd = j;
         break;
@@ -657,7 +662,8 @@ function tryParseJsonProgress(data: string): JsonProgress | null {
 }
 
 function tryParseTextProgress(data: string): number | null {
-  const matches = [...data.matchAll(/Encoding:.*?(\d+\.?\d*)\s*%/g)];
+  RE_TEXT_PROGRESS.lastIndex = 0;
+  const matches = [...data.matchAll(RE_TEXT_PROGRESS)];
   if (matches.length > 0) {
     return parseFloat(matches[matches.length - 1][1]);
   }
