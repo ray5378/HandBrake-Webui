@@ -96,28 +96,36 @@ function Files() {
     };
   }, [fetchFiles]);
 
+  const THUMBNAIL_BATCH_SIZE = 20;
+
   const fetchThumbnails = useCallback(async () => {
     const videoFiles = files.filter(file => {
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       return VIDEO_EXTENSIONS.includes(ext);
     });
     if (videoFiles.length === 0) return;
-    try {
-      const res = await api.post('/files/thumbnails', {
-        paths: videoFiles.map(f => f.path)
-      });
-      if (res.data.success && res.data.thumbnails) {
-        const newThumbnails: Record<string, string> = {};
-        res.data.thumbnails.forEach((item: { path: string; thumbnail?: string }) => {
-          if (item.thumbnail) {
-            newThumbnails[item.path] = item.thumbnail;
-          }
-        });
-        setThumbnails(prev => ({ ...prev, ...newThumbnails }));
+
+    const allPaths = videoFiles.map(f => f.path);
+
+    const newThumbnails: Record<string, string> = {};
+
+    for (let i = 0; i < allPaths.length; i += THUMBNAIL_BATCH_SIZE) {
+      const batch = allPaths.slice(i, i + THUMBNAIL_BATCH_SIZE);
+      try {
+        const res = await api.post('/files/thumbnails', { paths: batch });
+        if (res.data.success && res.data.thumbnails) {
+          res.data.thumbnails.forEach((item: { path: string; thumbnail?: string }) => {
+            if (item.thumbnail) {
+              newThumbnails[item.path] = item.thumbnail;
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch thumbnails batch:', error);
       }
-    } catch (error) {
-      console.error('Failed to fetch thumbnails:', error);
     }
+
+    setThumbnails(prev => ({ ...prev, ...newThumbnails }));
   }, [files]);
 
   useEffect(() => {
