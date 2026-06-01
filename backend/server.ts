@@ -69,7 +69,7 @@ app.use('/api/auth/logout', authStrictLimiter);
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
-  skip: req => req.path.startsWith('/api/files/thumbnail/'),
+  skip: req => req.path.startsWith('/api/files/thumbnail/') || req.path === '/api/files/thumbnails',
   message: { success: false, error: 'Too many requests, please try again later.' }
 });
 
