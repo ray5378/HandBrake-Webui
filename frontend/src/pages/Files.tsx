@@ -96,7 +96,7 @@ function Files() {
     };
   }, [fetchFiles]);
 
-  const THUMBNAIL_BATCH_SIZE = 20;
+  const THUMBNAIL_BATCH_SIZE = 1;
 
   const fetchThumbnails = useCallback(async () => {
     const videoFiles = files.filter(file => {
