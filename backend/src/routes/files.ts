@@ -483,7 +483,7 @@ router.get(
         return;
       }
 
-      res.sendFile(filePath);
+      res.sendFile(filePath, { root: '/drive' });
     } catch (error) {
       next(error);
     }

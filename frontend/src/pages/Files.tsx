@@ -13,12 +13,12 @@ import {
   MousePointer2,
   Settings
 } from 'lucide-react';
+import VideoPlayer from '../components/VideoPlayer';
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
 import { formatFileSize } from '../utils/format';
 import { FileItem, SearchResult } from '../types';
-import { useVideoPlayerStore } from '../stores/videoPlayerStore';
 
 const VIDEO_EXTENSIONS = [
   '.mp4',
@@ -49,7 +49,6 @@ interface ContextMenuState {
 function Files() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const openVideo = useVideoPlayerStore(s => s.open);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<FileDirectory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +56,10 @@ function Files() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 
+  const [selectedVideoFile, setSelectedVideoFile] = useState<FileItem | null>(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<{
@@ -70,6 +71,11 @@ function Files() {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+
+  const parentPath =
+    currentPath === '/drive' ? null : currentPath.substring(0, currentPath.lastIndexOf('/'));
 
   const fetchFiles = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -148,10 +154,25 @@ function Files() {
     setContextMenu(null);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!parentPath) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+      navigateToPath(parentPath);
+    }
+  };
+
   const handleFileClick = (file: FileItem) => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     if (VIDEO_EXTENSIONS.includes(ext)) {
-      openVideo({ path: file.path, name: file.name });
+      setSelectedVideoFile(file);
+      setShowVideoPlayer(true);
     }
   };
 
@@ -159,7 +180,14 @@ function Files() {
     if (contextMenu && contextMenu.directory) {
       const parts = contextMenu.directory.split('/');
       const name = parts[parts.length - 1];
-      openVideo({ path: contextMenu.directory, name });
+      setSelectedVideoFile({
+        path: contextMenu.directory,
+        name,
+        size: 0,
+        extension: '',
+        modified: ''
+      });
+      setShowVideoPlayer(true);
     }
     closeContextMenu();
   };
@@ -371,7 +399,7 @@ function Files() {
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
-        <>
+        <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {(directories.length > 0 || files.length > 0) && (
             <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
               <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
@@ -480,7 +508,7 @@ function Files() {
               })}
             </div>
           ) : null}
-        </>
+        </div>
       )}
 
       {contextMenu && (
@@ -521,6 +549,16 @@ function Files() {
             setSelectedDirectory(null);
           }}
           onSuccess={() => navigate('/jobs')}
+        />
+      )}
+
+      {showVideoPlayer && selectedVideoFile && (
+        <VideoPlayer
+          file={selectedVideoFile}
+          onClose={() => {
+            setShowVideoPlayer(false);
+            setSelectedVideoFile(null);
+          }}
         />
       )}
     </div>

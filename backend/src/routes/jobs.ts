@@ -50,7 +50,7 @@ router.get(
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const statusParam = req.query.status as string | undefined;
+      const { status } = req.query;
       const page = parseInt((req.query.page as string) || '1');
       const limit = parseInt((req.query.limit as string) || '20');
       const offset = (page - 1) * limit;
@@ -59,19 +59,9 @@ router.get(
       let whereClause = 'WHERE user_id = ?';
       const params: unknown[] = [req.user!.userId];
 
-      if (statusParam) {
-        const statuses = statusParam
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean);
-        if (statuses.length === 1) {
-          whereClause += ' AND status = ?';
-          params.push(statuses[0]);
-        } else if (statuses.length > 1) {
-          const placeholders = statuses.map(() => '?').join(', ');
-          whereClause += ` AND status IN (${placeholders})`;
-          params.push(...statuses);
-        }
+      if (status) {
+        whereClause += ' AND status = ?';
+        params.push(status);
       }
 
       const total = (
@@ -110,55 +100,6 @@ router.get(
     }
   }
 );
-
-router.get('/stats', authenticateToken, (_req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const db = getDatabase();
-
-    const rows = db
-      .prepare('SELECT status, COUNT(*) as count FROM jobs WHERE user_id = ? GROUP BY status')
-      .all(_req.user!.userId) as { status: string; count: number }[];
-
-    const counts: Record<string, number> = {
-      all: 0,
-      active: 0,
-      completed: 0,
-      failed: 0,
-      skipped: 0,
-      processing: 0,
-      queued: 0
-    };
-
-    for (const row of rows) {
-      counts.all += row.count;
-      if (row.status === 'processing') {
-        counts.processing = row.count;
-        counts.active += row.count;
-      } else if (row.status === 'queued') {
-        counts.queued = row.count;
-        counts.active += row.count;
-      } else if (row.status === 'completed') {
-        counts.completed += row.count;
-      } else if (row.status === 'failed') {
-        counts.failed = row.count;
-      } else if (row.status === 'skipped') {
-        counts.skipped = row.count;
-        counts.completed += row.count;
-      }
-    }
-
-    res.json({
-      success: true,
-      data: {
-        counts,
-        hasProcessing: counts.processing > 0,
-        hasQueued: counts.queued > 0
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
 
 router.get('/:id', authenticateToken, (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

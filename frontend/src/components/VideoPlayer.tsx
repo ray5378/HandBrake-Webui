@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState, memo } from 'react';
 import DPlayer from 'dplayer';
 import { useAuthStore } from '../stores/authStore';
-import { useVideoPlayerStore } from '../stores/videoPlayerStore';
 
-function VideoPlayer() {
-  const isOpen = useVideoPlayerStore(s => s.isOpen);
-  const file = useVideoPlayerStore(s => s.file);
-  const close = useVideoPlayerStore(s => s.close);
+interface VideoPlayerProps {
+  file: {
+    path: string;
+    name: string;
+  };
+  onClose: () => void;
+}
 
+const VideoPlayer = memo(function VideoPlayer({ file, onClose }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dpRef = useRef<DPlayer | null>(null);
   const token = useAuthStore(s => s.token);
@@ -24,16 +26,12 @@ function VideoPlayer() {
   });
 
   useEffect(() => {
-    if (!isOpen || !file || !containerRef.current) {
-      return;
-    }
-
     const videoUrl = `/api/files/stream?path=${encodeURIComponent(file.path)}&token=${encodeURIComponent(token || '')}`;
 
     const lang = navigator.language.startsWith('zh') ? 'zh-cn' : 'en';
 
     dpRef.current = new DPlayer({
-      container: containerRef.current,
+      container: containerRef.current!,
       video: {
         url: videoUrl,
         type: 'auto'
@@ -170,19 +168,14 @@ function VideoPlayer() {
       window.removeEventListener('resize', onResize);
       if (dpRef.current) {
         dpRef.current.destroy();
-        dpRef.current = null;
       }
     };
-  }, [isOpen, file, token]);
+  }, [file, token]);
 
-  if (!isOpen || !file) {
-    return null;
-  }
-
-  return createPortal(
+  return (
     <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-black/80'
-      onClick={close}
+      onClick={onClose}
     >
       <div
         className='flex flex-col items-center'
@@ -192,7 +185,7 @@ function VideoPlayer() {
         <div className='flex justify-between items-center w-full px-4'>
           <span className='text-white text-sm truncate'>{file.name}</span>
           <button
-            onClick={close}
+            onClick={onClose}
             className='text-white/60 hover:text-white transition-colors text-xl leading-none ml-4'
           >
             ✕
@@ -229,9 +222,8 @@ function VideoPlayer() {
           right: 0 !important;
         }
       `}</style>
-    </div>,
-    document.body
+    </div>
   );
-}
+});
 
 export default VideoPlayer;
