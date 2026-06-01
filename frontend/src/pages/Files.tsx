@@ -367,12 +367,10 @@ function Files() {
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
         <div>
-          {(directories.length > 0 || files.length > 0) && (
-            <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
-              <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
-              <span>{t('files.rightClickHint')}</span>
-            </div>
-          )}
+          <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
+            <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
+            <span>{t('files.rightClickHint')}</span>
+          </div>
 
           <div className='mb-6'>
             <div className='flex flex-wrap items-center gap-1 mb-4'>
