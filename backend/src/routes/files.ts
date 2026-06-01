@@ -325,21 +325,187 @@ router.delete(
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const fileToDelete = resolveSafePath((req.query.path as string) || '');
+      const targetPath = resolveSafePath((req.query.path as string) || '');
 
-      if (!fs.existsSync(fileToDelete)) {
+      if (!fs.existsSync(targetPath)) {
         res.status(404).json({
           success: false,
-          error: 'File not found'
+          error: 'File or directory not found'
         });
         return;
       }
 
-      fs.unlinkSync(fileToDelete);
+      const stats = fs.statSync(targetPath);
+      if (stats.isDirectory()) {
+        fs.rmSync(targetPath, { recursive: true, force: true });
+      } else {
+        fs.unlinkSync(targetPath);
+      }
 
       res.json({
         success: true,
-        message: 'File deleted successfully'
+        message: 'Deleted successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/copy',
+  authenticateToken,
+  body('sourcePaths').isArray({ min: 1 }),
+  body('destinationDir').notEmpty(),
+  validate,
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const destinationDir = resolveSafePath(req.body.destinationDir);
+      const sourcePaths: string[] = req.body.sourcePaths;
+
+      if (!fs.existsSync(destinationDir)) {
+        fs.mkdirSync(destinationDir, { recursive: true });
+      }
+
+      const results: { path: string; success: boolean; error?: string }[] = [];
+
+      for (const srcPath of sourcePaths) {
+        const safeSrc = resolveSafePath(srcPath);
+        try {
+          if (!fs.existsSync(safeSrc)) {
+            results.push({ path: srcPath, success: false, error: 'Source not found' });
+            continue;
+          }
+
+          const baseName = path.basename(safeSrc);
+          const destPath = path.join(destinationDir, baseName);
+
+          const stat = fs.statSync(safeSrc);
+          if (stat.isDirectory()) {
+            fs.cpSync(safeSrc, destPath, { recursive: true });
+          } else {
+            fs.copyFileSync(safeSrc, destPath);
+          }
+
+          results.push({ path: srcPath, success: true });
+        } catch (err: unknown) {
+          const error = err as Error;
+          results.push({ path: srcPath, success: false, error: error.message });
+        }
+      }
+
+      res.json({
+        success: true,
+        data: { results }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/move',
+  authenticateToken,
+  body('sourcePaths').isArray({ min: 1 }),
+  body('destinationDir').notEmpty(),
+  validate,
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const destinationDir = resolveSafePath(req.body.destinationDir);
+      const sourcePaths: string[] = req.body.sourcePaths;
+
+      if (!fs.existsSync(destinationDir)) {
+        fs.mkdirSync(destinationDir, { recursive: true });
+      }
+
+      const results: { path: string; success: boolean; error?: string }[] = [];
+
+      for (const srcPath of sourcePaths) {
+        const safeSrc = resolveSafePath(srcPath);
+        try {
+          if (!fs.existsSync(safeSrc)) {
+            results.push({ path: srcPath, success: false, error: 'Source not found' });
+            continue;
+          }
+
+          const baseName = path.basename(safeSrc);
+          const destPath = path.join(destinationDir, baseName);
+
+          fs.renameSync(safeSrc, destPath);
+
+          results.push({ path: srcPath, success: true });
+        } catch (err: unknown) {
+          const error = err as Error;
+          if (error.message?.includes('EXDEV')) {
+            const stat = fs.statSync(resolveSafePath(srcPath));
+            const safeSrc2 = resolveSafePath(srcPath);
+            const baseName = path.basename(safeSrc2);
+            const destPath = path.join(destinationDir, baseName);
+            try {
+              if (stat.isDirectory()) {
+                fs.cpSync(safeSrc2, destPath, { recursive: true });
+                fs.rmSync(safeSrc2, { recursive: true, force: true });
+              } else {
+                fs.copyFileSync(safeSrc2, destPath);
+                fs.unlinkSync(safeSrc2);
+              }
+              results.push({ path: srcPath, success: true });
+            } catch (err2: unknown) {
+              const error2 = err2 as Error;
+              results.push({ path: srcPath, success: false, error: error2.message });
+            }
+          } else {
+            results.push({ path: srcPath, success: false, error: error.message });
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        data: { results }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put(
+  '/rename',
+  authenticateToken,
+  body('path').notEmpty(),
+  body('newName').notEmpty(),
+  validate,
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const oldPath = resolveSafePath(req.body.path);
+      const newName = req.body.newName as string;
+
+      if (!fs.existsSync(oldPath)) {
+        res.status(404).json({
+          success: false,
+          error: 'File or directory not found'
+        });
+        return;
+      }
+
+      const dirName = path.dirname(oldPath);
+      const newPath = path.join(dirName, newName);
+
+      if (fs.existsSync(newPath)) {
+        res.status(400).json({
+          success: false,
+          error: '目标名称已存在'
+        });
+        return;
+      }
+
+      fs.renameSync(oldPath, newPath);
+
+      res.json({
+        success: true,
+        data: { newPath }
       });
     } catch (error) {
       next(error);

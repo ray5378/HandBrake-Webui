@@ -132,7 +132,17 @@
     "title": "文件",
     "subtitle": "管理源文件和输出文件",
     "noSearchResults": "未找到匹配的结果",
-    "rightClickHint": "右键点击文件或文件夹，选择「转码」"
+    "rightClickHint": "右键点击文件或文件夹，选择「转码」",
+    "copy": "复制",
+    "cut": "剪切",
+    "paste": "粘贴",
+    "delete": "删除",
+    "rename": "重命名",
+    "confirmDeleteTitle": "确认删除",
+    "confirmDeleteMessage": "确定要删除「{name}」吗？此操作不可撤销。",
+    "confirmDeleteDirectory": "该目录及其所有内容将被删除。",
+    "renameTitle": "重命名",
+    "renamePlaceholder": "请输入新名称"
   },
   "presets": {
     "title": "转码预设",

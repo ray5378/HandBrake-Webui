@@ -132,7 +132,17 @@
     "title": "Files",
     "subtitle": "Manage source and output files",
     "noSearchResults": "No matching results found",
-    "rightClickHint": "Right-click a file or folder, then select \"Transcode\""
+    "rightClickHint": "Right-click a file or folder, then select \"Transcode\"",
+    "copy": "Copy",
+    "cut": "Cut",
+    "paste": "Paste",
+    "delete": "Delete",
+    "rename": "Rename",
+    "confirmDeleteTitle": "Confirm Delete",
+    "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "confirmDeleteDirectory": "The directory and all its contents will be deleted.",
+    "renameTitle": "Rename",
+    "renamePlaceholder": "Enter a new name"
   },
   "presets": {
     "title": "Transcode Presets",

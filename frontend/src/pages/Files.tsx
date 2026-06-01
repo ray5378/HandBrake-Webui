@@ -12,12 +12,18 @@ import {
   MousePointer2,
   Settings,
   ArrowUpDown,
-  Check
+  Check,
+  Copy,
+  Scissors,
+  Clipboard,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import VideoPlayer from '../components/VideoPlayer';
 import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import { formatFileSize } from '../utils/format';
 import { FileItem, SearchResult } from '../types';
 
@@ -45,6 +51,12 @@ interface ContextMenuState {
   y: number;
   directory: string;
   isFile: boolean;
+  name: string;
+}
+
+interface EmptyContextMenuState {
+  x: number;
+  y: number;
 }
 
 function Files() {
@@ -57,8 +69,18 @@ function Files() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [emptyContextMenu, setEmptyContextMenu] = useState<EmptyContextMenuState | null>(null);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
+  const [clipboard, setClipboard] = useState<{ type: 'copy' | 'cut'; paths: string[] } | null>(
+    null
+  );
+  const [renameTarget, setRenameTarget] = useState<{ path: string; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    path: string;
+    name: string;
+    isDirectory: boolean;
+  } | null>(null);
 
   const [selectedVideoFile, setSelectedVideoFile] = useState<FileItem | null>(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -71,6 +93,7 @@ function Files() {
   const [searchLoading, setSearchLoading] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const emptyContextMenuRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sortPopupRef = useRef<HTMLDivElement>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
@@ -161,17 +184,113 @@ function Files() {
 
   const handleContextMenu = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
+    e.stopPropagation();
     const isFile = filteredFiles.some(f => f.path === path);
+    const parts = path.split('/');
+    const name = parts[parts.length - 1];
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
       directory: path,
-      isFile
+      isFile,
+      name
     });
   };
 
   const closeContextMenu = () => {
     setContextMenu(null);
+    setEmptyContextMenu(null);
+  };
+
+  const handleEmptyContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setEmptyContextMenu({
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
+  const handleCopy = () => {
+    if (!contextMenu) return;
+    setClipboard({ type: 'copy', paths: [contextMenu.directory] });
+    closeContextMenu();
+  };
+
+  const handleCut = () => {
+    if (!contextMenu) return;
+    setClipboard({ type: 'cut', paths: [contextMenu.directory] });
+    closeContextMenu();
+  };
+
+  const handlePaste = async () => {
+    if (!clipboard || !currentPath) return;
+    try {
+      const destinationDir = currentPath;
+      if (clipboard.type === 'copy') {
+        await api.post('/files/copy', {
+          sourcePaths: clipboard.paths,
+          destinationDir
+        });
+      } else {
+        await api.post('/files/move', {
+          sourcePaths: clipboard.paths,
+          destinationDir
+        });
+      }
+      setClipboard(null);
+      closeContextMenu();
+      fetchFiles();
+    } catch (error) {
+      console.error('Failed to paste:', error);
+    }
+  };
+
+  const handleRenameClick = () => {
+    if (!contextMenu) return;
+    setRenameTarget({
+      path: contextMenu.directory,
+      name: contextMenu.name
+    });
+    closeContextMenu();
+  };
+
+  const handleRenameConfirm = async (newName: string) => {
+    if (!renameTarget) return;
+    try {
+      await api.put('/files/rename', {
+        path: renameTarget.path,
+        newName
+      });
+      setRenameTarget(null);
+      fetchFiles();
+    } catch (error) {
+      console.error('Failed to rename:', error);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    if (!contextMenu) return;
+    const parts = contextMenu.directory.split('/');
+    const name = parts[parts.length - 1];
+    setDeleteTarget({
+      path: contextMenu.directory,
+      name,
+      isDirectory: !contextMenu.isFile
+    });
+    closeContextMenu();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await api.delete('/files', {
+        params: { path: deleteTarget.path }
+      });
+      setDeleteTarget(null);
+      fetchFiles();
+    } catch (error) {
+      console.error('Failed to delete:', error);
+    }
   };
 
   const handleFileClick = (file: FileItem) => {
@@ -237,6 +356,9 @@ function Files() {
     const handleClickOutside = (e: MouseEvent) => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
         closeContextMenu();
+      }
+      if (emptyContextMenuRef.current && !emptyContextMenuRef.current.contains(e.target as Node)) {
+        setEmptyContextMenu(null);
       }
       if (
         sortPopupRef.current &&
@@ -523,6 +645,7 @@ function Files() {
             </div>
             {directories.length > 0 && (
               <div
+                onContextMenu={handleEmptyContextMenu}
                 className={clsx(
                   'grid gap-4',
                   viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
@@ -531,6 +654,8 @@ function Files() {
                 {directories.map(dir => (
                   <button
                     key={dir.path}
+                    data-item-type='directory'
+                    data-path={dir.path}
                     onClick={() => navigateToPath(dir.path)}
                     onContextMenu={e => handleContextMenu(e, dir.path)}
                     className={clsx(
@@ -549,6 +674,7 @@ function Files() {
           </div>
 
           <div
+            onContextMenu={handleEmptyContextMenu}
             className={clsx(
               'grid gap-4',
               viewMode === 'grid'
@@ -564,6 +690,8 @@ function Files() {
               return (
                 <div
                   key={file.path}
+                  data-item-type='file'
+                  data-path={file.path}
                   className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
                   onContextMenu={e => handleContextMenu(e, file.path)}
                   onClick={e => {
@@ -622,17 +750,17 @@ function Files() {
       {contextMenu && (
         <div
           ref={contextMenuRef}
-          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 min-w-[200px] overflow-hidden'
+          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 min-w-[180px] overflow-hidden'
           style={{
             left: Math.min(contextMenu.x, window.innerWidth - 220),
-            top: Math.min(contextMenu.y, window.innerHeight - 200)
+            top: Math.min(contextMenu.y, window.innerHeight - 320)
           }}
         >
           <div>
             {contextMenu.isFile && (
               <button
                 onClick={handlePlayVideo}
-                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3 first:rounded-t-lg last:rounded-b-lg'
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
               >
                 <PlayCircle className='w-4 h-4 text-primary' />
                 <span>{t('nav.play')}</span>
@@ -640,13 +768,94 @@ function Files() {
             )}
             <button
               onClick={handleBatchTranscode}
-              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3 first:rounded-t-lg last:rounded-b-lg'
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
             >
               <Settings className='w-4 h-4 text-primary' />
               <span>{t('nav.transcode')}</span>
             </button>
+            <div className='border-t border-dark-700' />
+            <button
+              onClick={handleCopy}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Copy className='w-4 h-4 text-gray-400' />
+              <span>{t('files.copy')}</span>
+            </button>
+            <button
+              onClick={handleCut}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Scissors className='w-4 h-4 text-gray-400' />
+              <span>{t('files.cut')}</span>
+            </button>
+            <button
+              onClick={handleDeleteClick}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Trash2 className='w-4 h-4 text-error' />
+              <span>{t('files.delete')}</span>
+            </button>
+            <button
+              onClick={handleRenameClick}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Pencil className='w-4 h-4 text-gray-400' />
+              <span>{t('files.rename')}</span>
+            </button>
           </div>
         </div>
+      )}
+
+      {emptyContextMenu && (
+        <div
+          ref={emptyContextMenuRef}
+          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 min-w-[180px] overflow-hidden'
+          style={{
+            left: Math.min(emptyContextMenu.x, window.innerWidth - 220),
+            top: Math.min(emptyContextMenu.y, window.innerHeight - 100)
+          }}
+        >
+          {clipboard ? (
+            <button
+              onClick={handlePaste}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Clipboard className='w-4 h-4 text-primary' />
+              <span>
+                {t('files.paste')}
+                {clipboard.type === 'cut' ? ` (${t('files.cut')})` : ''}
+              </span>
+            </button>
+          ) : (
+            <div className='px-4 py-3 text-gray-500 text-sm text-center'>
+              {t('common.noContent', '无操作')}
+            </div>
+          )}
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={t('files.confirmDeleteTitle')}
+        message={
+          deleteTarget
+            ? t('files.confirmDeleteMessage', { name: deleteTarget.name }) +
+              (deleteTarget.isDirectory ? '\n' + t('files.confirmDeleteDirectory') : '')
+            : ''
+        }
+        confirmText={t('common.confirm') || '确认'}
+        cancelText={t('common.cancel') || '取消'}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+        danger
+      />
+
+      {renameTarget && (
+        <RenameModal
+          currentName={renameTarget.name}
+          onConfirm={handleRenameConfirm}
+          onCancel={() => setRenameTarget(null)}
+        />
       )}
 
       {showBatchModal && selectedDirectory && (
@@ -669,6 +878,62 @@ function Files() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+interface RenameModalProps {
+  currentName: string;
+  onConfirm: (newName: string) => void;
+  onCancel: () => void;
+}
+
+function RenameModal({ currentName, onConfirm, onCancel }: RenameModalProps) {
+  const { t } = useTranslation();
+  const [value, setValue] = useState(currentName);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      const dotIndex = currentName.lastIndexOf('.');
+      if (dotIndex > 0) {
+        inputRef.current.setSelectionRange(0, dotIndex);
+      } else {
+        inputRef.current.select();
+      }
+    }
+  }, [currentName]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onConfirm(value);
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  return (
+    <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4'>
+      <div className='bg-dark-800 rounded-xl max-w-md w-full p-6'>
+        <h3 className='text-lg font-bold text-white mb-4'>{t('files.renameTitle')}</h3>
+        <input
+          ref={inputRef}
+          className='input w-full mb-4'
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={t('files.renamePlaceholder')}
+        />
+        <div className='flex space-x-3'>
+          <button onClick={onCancel} className='btn btn-secondary flex-1'>
+            {t('common.cancel', '取消')}
+          </button>
+          <button onClick={() => onConfirm(value)} className='btn btn-primary flex-1'>
+            {t('common.confirm', '确认')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
