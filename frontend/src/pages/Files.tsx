@@ -925,13 +925,15 @@ function Files() {
                 <span>{t('nav.play')}</span>
               </button>
             )}
-            <button
-              onClick={handleBatchTranscode}
-              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
-            >
-              <Settings className='w-4 h-4 text-primary' />
-              <span>{t('nav.transcode')}</span>
-            </button>
+            {selectedPaths.length <= 1 && (
+              <button
+                onClick={handleBatchTranscode}
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+              >
+                <Settings className='w-4 h-4 text-primary' />
+                <span>{t('nav.transcode')}</span>
+              </button>
+            )}
             <div className='border-t border-dark-700' />
             <button
               onClick={handleCopy}
