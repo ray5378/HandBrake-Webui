@@ -119,7 +119,7 @@ function Files() {
   const THUMBNAIL_BATCH_SIZE = 1;
 
   const fetchThumbnails = useCallback(async () => {
-    const videoFiles = files.filter(file => {
+    const videoFiles = filteredFiles.filter(file => {
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       return VIDEO_EXTENSIONS.includes(ext);
     });
