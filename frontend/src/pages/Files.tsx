@@ -974,7 +974,7 @@ function Files() {
           className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 min-w-[180px] overflow-hidden'
           style={{
             left: Math.min(emptyContextMenu.x, window.innerWidth - 220),
-            top: Math.min(emptyContextMenu.y, window.innerHeight - 140)
+            top: Math.min(emptyContextMenu.y, window.innerHeight - 180)
           }}
         >
           <button
@@ -986,6 +986,16 @@ function Files() {
           >
             <FolderOpen className='w-4 h-4 text-warning' />
             <span>{t('files.newFolder')}</span>
+          </button>
+          <button
+            onClick={() => {
+              setShowSortPopup(true);
+              setEmptyContextMenu(null);
+            }}
+            className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+          >
+            <ArrowUpDown className='w-4 h-4 text-gray-400' />
+            <span>排序方式</span>
           </button>
           {clipboard && (
             <>
