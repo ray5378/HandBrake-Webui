@@ -73,6 +73,7 @@ function Files() {
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sortPopupRef = useRef<HTMLDivElement>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
 
   const [sortField, setSortField] = useState<'name' | 'modified' | 'size'>('modified');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -225,7 +226,12 @@ function Files() {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
         closeContextMenu();
       }
-      if (sortPopupRef.current && !sortPopupRef.current.contains(e.target as Node)) {
+      if (
+        sortPopupRef.current &&
+        !sortPopupRef.current.contains(e.target as Node) &&
+        sortButtonRef.current &&
+        !sortButtonRef.current.contains(e.target as Node)
+      ) {
         setShowSortPopup(false);
       }
     };
@@ -371,6 +377,7 @@ function Files() {
 
           <div className='relative shrink-0'>
             <button
+              ref={sortButtonRef}
               onClick={() => setShowSortPopup(prev => !prev)}
               className={clsx(
                 'p-2 rounded-lg transition-colors',
