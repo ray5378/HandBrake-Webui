@@ -142,7 +142,9 @@
     "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
     "confirmDeleteDirectory": "The directory and all its contents will be deleted.",
     "renameTitle": "Rename",
-    "renamePlaceholder": "Enter a new name"
+    "renamePlaceholder": "Enter a new name",
+    "newFolder": "New Folder",
+    "newFolderPlaceholder": "Enter folder name"
   },
   "presets": {
     "title": "Transcode Presets",

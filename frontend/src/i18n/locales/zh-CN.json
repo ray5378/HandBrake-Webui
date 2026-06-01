@@ -142,7 +142,9 @@
     "confirmDeleteMessage": "确定要删除「{name}」吗？此操作不可撤销。",
     "confirmDeleteDirectory": "该目录及其所有内容将被删除。",
     "renameTitle": "重命名",
-    "renamePlaceholder": "请输入新名称"
+    "renamePlaceholder": "请输入新名称",
+    "newFolder": "新建文件夹",
+    "newFolderPlaceholder": "请输入文件夹名称"
   },
   "presets": {
     "title": "转码预设",

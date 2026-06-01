@@ -81,6 +81,7 @@ function Files() {
     name: string;
     isDirectory: boolean;
   } | null>(null);
+  const [createFolder, setCreateFolder] = useState(false);
 
   const [selectedVideoFile, setSelectedVideoFile] = useState<FileItem | null>(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -290,6 +291,19 @@ function Files() {
       fetchFiles();
     } catch (error) {
       console.error('Failed to delete:', error);
+    }
+  };
+
+  const handleCreateFolder = async (folderName: string) => {
+    try {
+      const newPath = currentPath.endsWith('/')
+        ? currentPath + folderName
+        : currentPath + '/' + folderName;
+      await api.post('/files/mkdir', { path: newPath });
+      setCreateFolder(false);
+      fetchFiles();
+    } catch (error) {
+      console.error('Failed to create folder:', error);
     }
   };
 
@@ -621,7 +635,7 @@ function Files() {
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
-        <div>
+        <div onContextMenu={handleEmptyContextMenu} className='min-h-[300px]'>
           <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
             <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
             <span>{t('files.rightClickHint')}</span>
@@ -645,7 +659,6 @@ function Files() {
             </div>
             {directories.length > 0 && (
               <div
-                onContextMenu={handleEmptyContextMenu}
                 className={clsx(
                   'grid gap-4',
                   viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
@@ -674,7 +687,6 @@ function Files() {
           </div>
 
           <div
-            onContextMenu={handleEmptyContextMenu}
             className={clsx(
               'grid gap-4',
               viewMode === 'grid'
@@ -812,24 +824,33 @@ function Files() {
           className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-2xl z-50 min-w-[180px] overflow-hidden'
           style={{
             left: Math.min(emptyContextMenu.x, window.innerWidth - 220),
-            top: Math.min(emptyContextMenu.y, window.innerHeight - 100)
+            top: Math.min(emptyContextMenu.y, window.innerHeight - 140)
           }}
         >
-          {clipboard ? (
-            <button
-              onClick={handlePaste}
-              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
-            >
-              <Clipboard className='w-4 h-4 text-primary' />
-              <span>
-                {t('files.paste')}
-                {clipboard.type === 'cut' ? ` (${t('files.cut')})` : ''}
-              </span>
-            </button>
-          ) : (
-            <div className='px-4 py-3 text-gray-500 text-sm text-center'>
-              {t('common.noContent', '无操作')}
-            </div>
+          <button
+            onClick={() => {
+              setCreateFolder(true);
+              setEmptyContextMenu(null);
+            }}
+            className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+          >
+            <FolderOpen className='w-4 h-4 text-warning' />
+            <span>{t('files.newFolder')}</span>
+          </button>
+          {clipboard && (
+            <>
+              <div className='border-t border-dark-700' />
+              <button
+                onClick={handlePaste}
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+              >
+                <Clipboard className='w-4 h-4 text-primary' />
+                <span>
+                  {t('files.paste')}
+                  {clipboard.type === 'cut' ? ` (${t('files.cut')})` : ''}
+                </span>
+              </button>
+            </>
           )}
         </div>
       )}
@@ -856,6 +877,10 @@ function Files() {
           onConfirm={handleRenameConfirm}
           onCancel={() => setRenameTarget(null)}
         />
+      )}
+
+      {createFolder && (
+        <CreateFolderModal onConfirm={handleCreateFolder} onCancel={() => setCreateFolder(false)} />
       )}
 
       {showBatchModal && selectedDirectory && (
@@ -930,6 +955,59 @@ function RenameModal({ currentName, onConfirm, onCancel }: RenameModalProps) {
             {t('common.cancel', '取消')}
           </button>
           <button onClick={() => onConfirm(value)} className='btn btn-primary flex-1'>
+            {t('common.confirm', '确认')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface CreateFolderModalProps {
+  onConfirm: (name: string) => void;
+  onCancel: () => void;
+}
+
+function CreateFolderModal({ onConfirm, onCancel }: CreateFolderModalProps) {
+  const { t } = useTranslation();
+  const [value, setValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && value.trim()) {
+      onConfirm(value.trim());
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  return (
+    <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4'>
+      <div className='bg-dark-800 rounded-xl max-w-md w-full p-6'>
+        <h3 className='text-lg font-bold text-white mb-4'>{t('files.newFolder')}</h3>
+        <input
+          ref={inputRef}
+          className='input w-full mb-4'
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={t('files.newFolderPlaceholder')}
+        />
+        <div className='flex space-x-3'>
+          <button onClick={onCancel} className='btn btn-secondary flex-1'>
+            {t('common.cancel', '取消')}
+          </button>
+          <button
+            onClick={() => value.trim() && onConfirm(value.trim())}
+            className='btn btn-primary flex-1'
+            disabled={!value.trim()}
+          >
             {t('common.confirm', '确认')}
           </button>
         </div>
