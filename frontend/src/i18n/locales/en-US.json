@@ -139,7 +139,7 @@
     "delete": "Delete",
     "rename": "Rename",
     "confirmDeleteTitle": "Confirm Delete",
-    "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "confirmDeleteMessage": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
     "confirmDeleteDirectory": "The directory and all its contents will be deleted.",
     "renameTitle": "Rename",
     "renamePlaceholder": "Enter a new name",
