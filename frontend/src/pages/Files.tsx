@@ -68,6 +68,16 @@ function Files() {
   const [currentPath, setCurrentPath] = useState('/drive');
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
+  const [lastClickedPath, setLastClickedPath] = useState<string | null>(null);
+  const [isDragSelecting, setIsDragSelecting] = useState(false);
+  const [dragRect, setDragRect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [emptyContextMenu, setEmptyContextMenu] = useState<EmptyContextMenuState | null>(null);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
@@ -77,8 +87,8 @@ function Files() {
   );
   const [renameTarget, setRenameTarget] = useState<{ path: string; name: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
-    path: string;
-    name: string;
+    paths: string[];
+    displayName: string;
     isDirectory: boolean;
   } | null>(null);
   const [createFolder, setCreateFolder] = useState(false);
@@ -186,6 +196,7 @@ function Files() {
   const handleContextMenu = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
     e.stopPropagation();
+    setEmptyContextMenu(null);
     const isFile = filteredFiles.some(f => f.path === path);
     const parts = path.split('/');
     const name = parts[parts.length - 1];
@@ -211,15 +222,58 @@ function Files() {
     });
   };
 
+  const handleDragStart = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-item-type]')) return;
+
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    setSelectedPaths([]);
+
+    const handleMouseMove = (moveE: MouseEvent) => {
+      if (!dragStartRef.current) return;
+      setIsDragSelecting(true);
+
+      const x1 = Math.min(dragStartRef.current.x, moveE.clientX);
+      const y1 = Math.min(dragStartRef.current.y, moveE.clientY);
+      const x2 = Math.max(dragStartRef.current.x, moveE.clientX);
+      const y2 = Math.max(dragStartRef.current.y, moveE.clientY);
+
+      setDragRect({ x: x1, y: y1, width: x2 - x1, height: y2 - y1 });
+
+      const newSelected: string[] = [];
+      document.querySelectorAll('[data-path]').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.left < x2 && rect.right > x1 && rect.top < y2 && rect.bottom > y1) {
+          newSelected.push(el.getAttribute('data-path')!);
+        }
+      });
+      setSelectedPaths(newSelected);
+    };
+
+    const handleMouseUp = () => {
+      dragStartRef.current = null;
+      setIsDragSelecting(false);
+      setDragRect(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   const handleCopy = () => {
     if (!contextMenu) return;
-    setClipboard({ type: 'copy', paths: [contextMenu.directory] });
+    const paths = selectedPaths.length > 0 ? [...selectedPaths] : [contextMenu.directory];
+    setClipboard({ type: 'copy', paths });
     closeContextMenu();
   };
 
   const handleCut = () => {
     if (!contextMenu) return;
-    setClipboard({ type: 'cut', paths: [contextMenu.directory] });
+    const paths = selectedPaths.length > 0 ? [...selectedPaths] : [contextMenu.directory];
+    setClipboard({ type: 'cut', paths });
     closeContextMenu();
   };
 
@@ -271,23 +325,32 @@ function Files() {
 
   const handleDeleteClick = () => {
     if (!contextMenu) return;
-    const parts = contextMenu.directory.split('/');
-    const name = parts[parts.length - 1];
-    setDeleteTarget({
-      path: contextMenu.directory,
-      name,
-      isDirectory: !contextMenu.isFile
-    });
+    if (selectedPaths.length > 1) {
+      setDeleteTarget({
+        paths: [...selectedPaths],
+        displayName: String(selectedPaths.length) + ' 项',
+        isDirectory: false
+      });
+    } else {
+      const parts = contextMenu.directory.split('/');
+      const name = parts[parts.length - 1];
+      setDeleteTarget({
+        paths: [contextMenu.directory],
+        displayName: name,
+        isDirectory: !contextMenu.isFile
+      });
+    }
     closeContextMenu();
   };
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     try {
-      await api.delete('/files', {
-        params: { path: deleteTarget.path }
-      });
+      for (const p of deleteTarget.paths) {
+        await api.delete('/files', { params: { path: p } });
+      }
       setDeleteTarget(null);
+      setSelectedPaths([]);
       fetchFiles();
     } catch (error) {
       console.error('Failed to delete:', error);
@@ -426,6 +489,29 @@ function Files() {
     });
     return sorted;
   }, [files, sortField, sortOrder]);
+
+  const allItems = useMemo(() => {
+    return [...directories.map(d => d.path), ...filteredFiles.map(f => f.path)];
+  }, [directories, filteredFiles]);
+
+  const selectRange = useCallback(
+    (path: string) => {
+      if (!lastClickedPath) {
+        setSelectedPaths([path]);
+        setLastClickedPath(path);
+        return;
+      }
+      const lastIdx = allItems.indexOf(lastClickedPath);
+      const currentIdx = allItems.indexOf(path);
+      if (lastIdx === -1 || currentIdx === -1) return;
+      const start = Math.min(lastIdx, currentIdx);
+      const end = Math.max(lastIdx, currentIdx);
+      const range = allItems.slice(start, end + 1);
+      setSelectedPaths(range);
+      setLastClickedPath(path);
+    },
+    [lastClickedPath, allItems]
+  );
 
   const pathParts = currentPath.split('/').filter(Boolean);
 
@@ -635,7 +721,11 @@ function Files() {
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
-        <div onContextMenu={handleEmptyContextMenu} className='min-h-[calc(100vh-240px)]'>
+        <div
+          onContextMenu={handleEmptyContextMenu}
+          onMouseDown={handleDragStart}
+          className='relative min-h-[calc(100vh-240px)]'
+        >
           <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
             <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
             <span>{t('files.rightClickHint')}</span>
@@ -669,11 +759,35 @@ function Files() {
                     key={dir.path}
                     data-item-type='directory'
                     data-path={dir.path}
-                    onClick={() => navigateToPath(dir.path)}
-                    onContextMenu={e => handleContextMenu(e, dir.path)}
+                    onClick={e => {
+                      if (e.ctrlKey) {
+                        e.stopPropagation();
+                        setSelectedPaths(prev =>
+                          prev.includes(dir.path)
+                            ? prev.filter(p => p !== dir.path)
+                            : [...prev, dir.path]
+                        );
+                        setLastClickedPath(dir.path);
+                        return;
+                      }
+                      if (e.shiftKey && lastClickedPath) {
+                        e.stopPropagation();
+                        selectRange(dir.path);
+                        return;
+                      }
+                      setSelectedPaths([]);
+                      navigateToPath(dir.path);
+                    }}
+                    onContextMenu={e => {
+                      if (!selectedPaths.includes(dir.path)) {
+                        setSelectedPaths([dir.path]);
+                      }
+                      handleContextMenu(e, dir.path);
+                    }}
                     className={clsx(
                       'flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-left relative',
-                      viewMode === 'grid' && 'flex-col text-center justify-center'
+                      viewMode === 'grid' && 'flex-col text-center justify-center',
+                      selectedPaths.includes(dir.path) && 'ring-2 ring-primary'
                     )}
                   >
                     <FolderOpen className='w-8 h-8 text-warning flex-shrink-0' />
@@ -704,10 +818,33 @@ function Files() {
                   key={file.path}
                   data-item-type='file'
                   data-path={file.path}
-                  className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
-                  onContextMenu={e => handleContextMenu(e, file.path)}
+                  className={clsx(
+                    'card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu',
+                    selectedPaths.includes(file.path) && 'ring-2 ring-primary'
+                  )}
+                  onContextMenu={e => {
+                    if (!selectedPaths.includes(file.path)) {
+                      setSelectedPaths([file.path]);
+                    }
+                    handleContextMenu(e, file.path);
+                  }}
                   onClick={e => {
                     e.stopPropagation();
+                    if (e.ctrlKey) {
+                      setSelectedPaths(prev =>
+                        prev.includes(file.path)
+                          ? prev.filter(p => p !== file.path)
+                          : [...prev, file.path]
+                      );
+                      setLastClickedPath(file.path);
+                      return;
+                    }
+                    if (e.shiftKey && lastClickedPath) {
+                      selectRange(file.path);
+                      return;
+                    }
+                    setSelectedPaths([]);
+                    setLastClickedPath(file.path);
                     handleFileClick(file);
                   }}
                 >
@@ -769,7 +906,7 @@ function Files() {
           }}
         >
           <div>
-            {contextMenu.isFile && (
+            {contextMenu.isFile && selectedPaths.length <= 1 && (
               <button
                 onClick={handlePlayVideo}
                 className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
@@ -778,42 +915,55 @@ function Files() {
                 <span>{t('nav.play')}</span>
               </button>
             )}
-            <button
-              onClick={handleBatchTranscode}
-              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
-            >
-              <Settings className='w-4 h-4 text-primary' />
-              <span>{t('nav.transcode')}</span>
-            </button>
+            {selectedPaths.length <= 1 && !contextMenu.isFile && (
+              <button
+                onClick={handleBatchTranscode}
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+              >
+                <Settings className='w-4 h-4 text-primary' />
+                <span>{t('nav.transcode')}</span>
+              </button>
+            )}
             <div className='border-t border-dark-700' />
             <button
               onClick={handleCopy}
               className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
             >
               <Copy className='w-4 h-4 text-gray-400' />
-              <span>{t('files.copy')}</span>
+              <span>
+                {t('files.copy')}
+                {selectedPaths.length > 1 ? ` (${selectedPaths.length})` : ''}
+              </span>
             </button>
             <button
               onClick={handleCut}
               className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
             >
               <Scissors className='w-4 h-4 text-gray-400' />
-              <span>{t('files.cut')}</span>
+              <span>
+                {t('files.cut')}
+                {selectedPaths.length > 1 ? ` (${selectedPaths.length})` : ''}
+              </span>
             </button>
             <button
               onClick={handleDeleteClick}
               className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
             >
               <Trash2 className='w-4 h-4 text-error' />
-              <span>{t('files.delete')}</span>
+              <span>
+                {t('files.delete')}
+                {selectedPaths.length > 1 ? ` (${selectedPaths.length})` : ''}
+              </span>
             </button>
-            <button
-              onClick={handleRenameClick}
-              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
-            >
-              <Pencil className='w-4 h-4 text-gray-400' />
-              <span>{t('files.rename')}</span>
-            </button>
+            {selectedPaths.length <= 1 && (
+              <button
+                onClick={handleRenameClick}
+                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+              >
+                <Pencil className='w-4 h-4 text-gray-400' />
+                <span>{t('files.rename')}</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -855,13 +1005,27 @@ function Files() {
         </div>
       )}
 
+      {isDragSelecting && dragRect && (
+        <div
+          className='fixed z-50 border-2 border-primary bg-primary/10 pointer-events-none'
+          style={{
+            left: dragRect.x,
+            top: dragRect.y,
+            width: dragRect.width,
+            height: dragRect.height
+          }}
+        />
+      )}
+
       <ConfirmDialog
         open={deleteTarget !== null}
         title={t('files.confirmDeleteTitle')}
         message={
           deleteTarget
-            ? t('files.confirmDeleteMessage', { name: deleteTarget.name }) +
-              (deleteTarget.isDirectory ? '\n' + t('files.confirmDeleteDirectory') : '')
+            ? deleteTarget.paths.length > 1
+              ? t('files.confirmDeleteMultiple', { count: deleteTarget.paths.length })
+              : t('files.confirmDeleteMessage', { name: deleteTarget.displayName }) +
+                (deleteTarget.isDirectory ? '\n' + t('files.confirmDeleteDirectory') : '')
             : ''
         }
         confirmText={t('common.confirm') || '确认'}
