@@ -7,7 +7,6 @@ import {
   Grid,
   List,
   Search,
-  ChevronRight,
   PlayCircle,
   X,
   MousePointer2,
@@ -228,19 +227,6 @@ function Files() {
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h1 className='text-3xl font-bold text-white'>{t('files.title')}</h1>
-          <div className='flex flex-wrap items-center gap-1 mt-2 text-sm text-gray-400'>
-            {pathParts.map((part, index) => (
-              <Fragment key={index}>
-                {index > 0 && <ChevronRight className='w-4 h-4 shrink-0' />}
-                <button
-                  onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
-                  className='hover:text-white transition-colors truncate max-w-[120px]'
-                >
-                  {part}
-                </button>
-              </Fragment>
-            ))}
-          </div>
         </div>
 
         <div className='flex items-center gap-2 flex-wrap'>
@@ -418,6 +404,22 @@ function Files() {
               </div>
             </div>
           )}
+
+          <div className='flex flex-wrap items-center gap-1 mb-4 px-1'>
+            {pathParts.map((part, index) => (
+              <Fragment key={index}>
+                {index > 0 && (
+                  <span className='text-purple-500 text-2xl font-light select-none'>/</span>
+                )}
+                <button
+                  onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
+                  className='text-purple-400 hover:text-purple-300 transition-colors truncate max-w-[200px] text-2xl font-medium'
+                >
+                  {part}
+                </button>
+              </Fragment>
+            ))}
+          </div>
 
           {filteredFiles.length > 0 ? (
             <div
