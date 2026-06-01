@@ -96,6 +96,7 @@ function Files() {
   const [selectedVideoFile, setSelectedVideoFile] = useState<FileItem | null>(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null);
+  const [batchSourcePaths, setBatchSourcePaths] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<{
     files: SearchResult[];
     directories: SearchResult[];
@@ -400,10 +401,14 @@ function Files() {
   };
 
   const handleBatchTranscode = () => {
-    if (contextMenu && contextMenu.directory) {
+    if (selectedPaths.length > 0) {
+      setSelectedDirectory(selectedPaths[0]);
+      setBatchSourcePaths([...selectedPaths]);
+    } else if (contextMenu && contextMenu.directory) {
       setSelectedDirectory(contextMenu.directory);
-      setShowBatchModal(true);
+      setBatchSourcePaths([]);
     }
+    setShowBatchModal(true);
     closeContextMenu();
   };
 
@@ -729,7 +734,7 @@ function Files() {
         <div
           onContextMenu={handleEmptyContextMenu}
           onMouseDown={handleDragStart}
-          className='relative min-h-[calc(100vh-240px)]'
+          className='relative min-h-[calc(100vh-240px)] select-none'
         >
           <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
             <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
@@ -1126,9 +1131,11 @@ function Files() {
       {showBatchModal && selectedDirectory && (
         <BatchTranscodeModal
           directory={selectedDirectory}
+          sourcePaths={batchSourcePaths.length > 0 ? batchSourcePaths : undefined}
           onClose={() => {
             setShowBatchModal(false);
             setSelectedDirectory(null);
+            setBatchSourcePaths([]);
           }}
           onSuccess={() => navigate('/jobs')}
         />

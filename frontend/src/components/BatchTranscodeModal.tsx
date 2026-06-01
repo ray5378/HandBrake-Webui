@@ -32,21 +32,44 @@ const VIDEO_EXTENSIONS = [
 
 interface BatchTranscodeModalProps {
   directory: string;
+  sourcePaths?: string[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeModalProps) {
+function BatchTranscodeModal({
+  directory,
+  sourcePaths,
+  onClose,
+  onSuccess
+}: BatchTranscodeModalProps) {
   const { t } = useTranslation();
-  const isSingleFile = VIDEO_EXTENSIONS.includes(
-    '.' + (directory || '').split('.').pop()?.toLowerCase()
-  );
+
+  const sourceList = useMemo(() => {
+    return sourcePaths && sourcePaths.length > 0 ? sourcePaths : [directory];
+  }, [sourcePaths, directory]);
+
+  const videoExtSet = useMemo(() => new Set(VIDEO_EXTENSIONS), []);
+
+  const isAllFiles = useMemo(() => {
+    return sourceList.every(src => {
+      const ext = '.' + (src || '').split('.').pop()?.toLowerCase();
+      return videoExtSet.has(ext);
+    });
+  }, [sourceList, videoExtSet]);
+
+  const isAllDirs = useMemo(() => {
+    return sourceList.every(src => {
+      const ext = '.' + (src || '').split('.').pop()?.toLowerCase();
+      return !videoExtSet.has(ext);
+    });
+  }, [sourceList, videoExtSet]);
 
   const sourceDirBasename = useMemo(() => {
-    if (isSingleFile) return '';
+    if (isAllFiles) return '';
     const parts = (directory || '').split('/').filter(Boolean);
     return parts.length > 0 ? parts.pop() || '' : '';
-  }, [directory, isSingleFile]);
+  }, [directory, isAllFiles]);
 
   const [presets, setPresets] = useState<
     Array<{ id: string; name: string; description: string; isBuiltIn: boolean }>
@@ -210,7 +233,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
         setSelectedPreset(sortedPresets[0].id);
       }
 
-      if (!isSingleFile) {
+      if (!isAllFiles) {
         const treeRes = await api.get('/files/tree', { params: { path: directory }, signal });
         setSourceTree(treeRes.data.data.directories || []);
       }
@@ -273,26 +296,29 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
     setError('');
 
     try {
-      if (isSingleFile) {
-        const fileName =
-          directory
-            .split('/')
-            .pop()!
-            .replace(/\.[^.]+$/, '') + '.mp4';
-        const outputFile = outputDirectory + '/' + fileName;
-        await api.post('/jobs', {
-          sourceFile: directory,
-          outputFile,
-          presetId: selectedPreset
-        });
-      } else {
-        await api.post('/jobs/batch', {
-          sourceDirectory: directory,
-          outputDirectory,
-          presetId: selectedPreset,
-          copyNonVideoFiles,
-          moveNonVideoFiles
-        });
+      for (const src of sourceList) {
+        const ext = '.' + (src || '').split('.').pop()?.toLowerCase();
+        if (videoExtSet.has(ext)) {
+          const fileName =
+            src
+              .split('/')
+              .pop()!
+              .replace(/\.[^.]+$/, '') + '.mp4';
+          const outputFile = outputDirectory + '/' + fileName;
+          await api.post('/jobs', {
+            sourceFile: src,
+            outputFile,
+            presetId: selectedPreset
+          });
+        } else {
+          await api.post('/jobs/batch', {
+            sourceDirectory: src,
+            outputDirectory,
+            presetId: selectedPreset,
+            copyNonVideoFiles,
+            moveNonVideoFiles
+          });
+        }
       }
 
       setLastUsedPresetId(selectedPreset);
@@ -414,15 +440,17 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
             <h2 className='text-2xl font-bold text-white flex items-center space-x-3'>
               <Video className='w-6 h-6' />
               <span>
-                {isSingleFile
+                {isAllFiles
                   ? t('batchTranscode.title', '转码')
                   : t('batchTranscode.batchTitle', '批量转码')}
               </span>
             </h2>
             <p className='text-gray-400 mt-1'>
-              {isSingleFile
+              {isAllFiles
                 ? t('batchTranscode.sourceFile', '源文件')
-                : t('batchTranscode.sourceDir', '源目录')}
+                : isAllDirs
+                  ? t('batchTranscode.sourceDir', '源目录')
+                  : '源'}
               : {directory}
             </p>
           </div>
@@ -575,7 +603,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                   </div>
                 </div>
 
-                {!isSingleFile && sourceTree.length > 0 && (
+                {isAllDirs && sourceTree.length > 0 && (
                   <div className='p-3 bg-dark-600 rounded-lg'>
                     <h4 className='text-sm font-semibold text-white mb-2 flex items-center space-x-1'>
                       <GitBranch className='w-4 h-4 text-primary' />
@@ -732,7 +760,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                   )}
                 </div>
 
-                {!isSingleFile && (
+                {isAllDirs && (
                   <div className='flex items-center space-x-2'>
                     <input
                       type='checkbox'
@@ -747,7 +775,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                   </div>
                 )}
 
-                {!isSingleFile && (
+                {isAllDirs && (
                   <div className='flex items-center space-x-2'>
                     <input
                       type='checkbox'
@@ -769,7 +797,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                 {t('batchTranscode.instructions', '说明')}
               </h3>
               <ul className='text-gray-400 text-sm space-y-2'>
-                {isSingleFile ? (
+                {isAllFiles ? (
                   <>
                     <li>&bull; {t('batchTranscode.singleFileDesc1', '转码单个视频文件')}</li>
                     <li>
@@ -818,7 +846,7 @@ function BatchTranscodeModal({ directory, onClose, onSuccess }: BatchTranscodeMo
                   <>
                     <Settings className='w-4 h-4' />
                     <span>
-                      {isSingleFile
+                      {isAllFiles
                         ? t('batchTranscode.startSingle', '开始转码')
                         : t('batchTranscode.startBatch', '开始批量转码')}
                     </span>
