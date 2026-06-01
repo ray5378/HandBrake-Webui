@@ -65,7 +65,7 @@ function Jobs() {
         .sort((a, b) => {
           if (a.status === 'processing' && b.status !== 'processing') return -1;
           if (a.status !== 'processing' && b.status === 'processing') return 1;
-          return 0;
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         });
     if (filter === 'completed')
       return jobs.filter(job => job.status === 'completed' || job.status === 'skipped');

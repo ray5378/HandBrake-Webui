@@ -56,7 +56,7 @@ function Dashboard() {
           .sort((a: Job, b: Job) => {
             if (a.status === 'processing' && b.status !== 'processing') return -1;
             if (a.status !== 'processing' && b.status === 'processing') return 1;
-            return 0;
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           })
       );
     } catch (error) {
