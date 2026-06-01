@@ -529,12 +529,20 @@ function Jobs() {
               </button>
             </div>
             <div className='space-y-3'>
-              <button onClick={handleRetryFailed} disabled={retrying} className='w-full btn btn-primary'>
+              <button
+                onClick={handleRetryFailed}
+                disabled={retrying}
+                className='w-full btn btn-primary'
+              >
                 <RefreshCw className={`w-4 h-4 mr-2 inline ${retrying ? 'animate-spin' : ''}`} />
-                {retrying ? t('jobs.retrying', '重试中...') : t('jobs.retryFailed', '失败任务批量重试')}
+                {retrying
+                  ? t('jobs.retrying', '重试中...')
+                  : t('jobs.retryFailed', '失败任务批量重试')}
               </button>
               <div className='border-t border-dark-700 pt-3'>
-                <p className='text-gray-400 mb-3 text-sm'>{t('jobs.confirmClearAll', '请选择清空方式：')}</p>
+                <p className='text-gray-400 mb-3 text-sm'>
+                  {t('jobs.confirmClearAll', '请选择清空方式：')}
+                </p>
                 <div className='space-y-3'>
                   <button onClick={handleClearAllForce} className='w-full btn btn-danger'>
                     {t('jobs.clearAllWithProcessing', '清空所有任务（含正在转码）')}
@@ -542,7 +550,10 @@ function Jobs() {
                   <button onClick={handleClearAll} className='w-full btn btn-danger'>
                     {t('jobs.clearAllQueuedOnly', '只清空队列任务')}
                   </button>
-                  <button onClick={() => setConfirmAction(null)} className='w-full btn btn-secondary'>
+                  <button
+                    onClick={() => setConfirmAction(null)}
+                    className='w-full btn btn-secondary'
+                  >
                     {t('common.cancel', '取消')}
                   </button>
                 </div>
