@@ -105,7 +105,7 @@
     "active": "Active",
     "sourceFile": "Source File",
     "clearAll": "Clear Queue",
-    "confirmClearAll": "Are you sure you want to clear all queued jobs? Processing and completed jobs will not be affected.",
+    "confirmClearAll": "",
     "clearHistory": "Clear History",
     "confirmClearHistory": "Are you sure you want to clear all completed/failed/cancelled history?",
     "clearCache": "Clear Cache",
