@@ -136,4 +136,59 @@ router.delete(
   }
 );
 
+router.get(
+  '/preferences',
+  authenticateToken,
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const db = getDatabase();
+      const rows = db
+        .prepare('SELECT key, value FROM user_preferences WHERE user_id = ?')
+        .all(req.user!.userId) as { key: string; value: string }[];
+
+      const preferences: Record<string, string> = {};
+      for (const row of rows) {
+        preferences[row.key] = row.value;
+      }
+
+      res.json({ success: true, data: { preferences } });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put(
+  '/preferences',
+  authenticateToken,
+  body('preferences').isObject(),
+  validate,
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const db = getDatabase();
+      const userId = req.user!.userId;
+      const preferences: Record<string, string> = req.body.preferences;
+
+      const upsert = db.prepare(`
+        INSERT INTO user_preferences (user_id, key, value, updated_at)
+        VALUES (?, ?, ?, datetime('now'))
+        ON CONFLICT(user_id, key)
+        DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+      `);
+
+      const transaction = db.transaction(() => {
+        for (const [key, value] of Object.entries(preferences)) {
+          upsert.run(userId, key, String(value));
+        }
+      });
+
+      transaction();
+
+      res.json({ success: true, message: 'Preferences updated' });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;

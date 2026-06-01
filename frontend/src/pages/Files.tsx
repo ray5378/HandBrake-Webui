@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useLocalStorage } from '../hooks';
 import {
   FolderOpen,
   Video,
@@ -76,8 +75,20 @@ function Files() {
   const sortPopupRef = useRef<HTMLDivElement>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
 
-  const [sortField, setSortField] = useLocalStorage<'name' | 'modified' | 'size'>('fileSortField', 'modified');
-  const [sortOrder, setSortOrder] = useLocalStorage<'asc' | 'desc'>('fileSortOrder', 'desc');
+  const [sortField, setSortFieldState] = useState<'name' | 'modified' | 'size'>('modified');
+  const [sortOrder, setSortOrderState] = useState<'asc' | 'desc'>('desc');
+
+  const setSortField = useCallback((field: 'name' | 'modified' | 'size') => {
+    setSortFieldState(field);
+    localStorage.setItem('fileSortField', field);
+    api.put('/users/preferences', { preferences: { fileSortField: field } }).catch(() => {});
+  }, []);
+
+  const setSortOrder = useCallback((order: 'asc' | 'desc') => {
+    setSortOrderState(order);
+    localStorage.setItem('fileSortOrder', order);
+    api.put('/users/preferences', { preferences: { fileSortOrder: order } }).catch(() => {});
+  }, []);
   const [showSortPopup, setShowSortPopup] = useState(false);
 
   const fetchFiles = useCallback(async () => {
@@ -239,6 +250,30 @@ function Files() {
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const savedField = localStorage.getItem('fileSortField');
+    const savedOrder = localStorage.getItem('fileSortOrder');
+    if (savedField && ['name', 'modified', 'size'].includes(savedField)) {
+      setSortFieldState(savedField as 'name' | 'modified' | 'size');
+    }
+    if (savedOrder && ['asc', 'desc'].includes(savedOrder)) {
+      setSortOrderState(savedOrder as 'asc' | 'desc');
+    }
+
+    api
+      .get<{ data: { preferences: Record<string, string> } }>('/users/preferences')
+      .then(res => {
+        const prefs = res.data.data.preferences;
+        if (prefs.fileSortField && ['name', 'modified', 'size'].includes(prefs.fileSortField)) {
+          setSortFieldState(prefs.fileSortField as 'name' | 'modified' | 'size');
+        }
+        if (prefs.fileSortOrder && ['asc', 'desc'].includes(prefs.fileSortOrder)) {
+          setSortOrderState(prefs.fileSortOrder as 'asc' | 'desc');
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const filteredFiles = useMemo(() => {
