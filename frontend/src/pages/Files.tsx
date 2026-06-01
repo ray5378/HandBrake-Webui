@@ -417,76 +417,74 @@ function Files() {
             )}
           </div>
 
-          {filteredFiles.length > 0 ? (
-            <div
-              className={clsx(
-                'grid gap-4',
-                viewMode === 'grid'
-                  ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                  : 'grid-cols-1'
-              )}
-            >
-              {filteredFiles.map(file => {
-                const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-                const isVideo = VIDEO_EXTENSIONS.includes(ext);
-                const thumbnail = isVideo ? thumbnails[file.path] : null;
+          <div
+            className={clsx(
+              'grid gap-4',
+              viewMode === 'grid'
+                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                : 'grid-cols-1'
+            )}
+          >
+            {filteredFiles.map(file => {
+              const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+              const isVideo = VIDEO_EXTENSIONS.includes(ext);
+              const thumbnail = isVideo ? thumbnails[file.path] : null;
 
-                return (
-                  <div
-                    key={file.path}
-                    className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
-                    onContextMenu={e => handleContextMenu(e, file.path)}
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleFileClick(file);
-                    }}
-                  >
-                    {viewMode === 'grid' ? (
-                      <>
-                        <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
-                          {thumbnail ? (
-                            <img
-                              src={thumbnail}
-                              alt={file.name}
-                              className='w-full h-full object-cover'
-                            />
-                          ) : isVideo ? (
-                            <Video className='w-12 h-12 text-gray-600' />
-                          ) : (
-                            <Video className='w-12 h-12 text-gray-600' />
-                          )}
-                        </div>
-                        <h3 className='font-medium text-white break-all whitespace-normal mb-2'>
-                          {file.name}
-                        </h3>
-                        <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
-                      </>
-                    ) : (
-                      <div className='flex items-center space-x-3'>
+              return (
+                <div
+                  key={file.path}
+                  className='card hover:bg-dark-600 hover:border-primary/50 transition-colors cursor-context-menu'
+                  onContextMenu={e => handleContextMenu(e, file.path)}
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleFileClick(file);
+                  }}
+                >
+                  {viewMode === 'grid' ? (
+                    <>
+                      <div className='aspect-video bg-dark-700 rounded-lg flex items-center justify-center mb-3 overflow-hidden'>
                         {thumbnail ? (
                           <img
                             src={thumbnail}
                             alt={file.name}
-                            className='w-12 h-8 object-cover rounded flex-shrink-0'
+                            className='w-full h-full object-cover'
                           />
+                        ) : isVideo ? (
+                          <Video className='w-12 h-12 text-gray-600' />
                         ) : (
-                          <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
+                          <Video className='w-12 h-12 text-gray-600' />
                         )}
-                        <div className='flex-1 min-w-0'>
-                          <p className='text-white font-medium break-all whitespace-normal'>
-                            {file.name}
-                          </p>
-                          <p className='text-sm text-gray-400'>
-                            {formatSize(file.size)} · {file.extension}
-                          </p>
-                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
+                      <h3 className='font-medium text-white break-all whitespace-normal mb-2'>
+                        {file.name}
+                      </h3>
+                      <p className='text-xs text-gray-400 mb-3'>{formatSize(file.size)}</p>
+                    </>
+                  ) : (
+                    <div className='flex items-center space-x-3'>
+                      {thumbnail ? (
+                        <img
+                          src={thumbnail}
+                          alt={file.name}
+                          className='w-12 h-8 object-cover rounded flex-shrink-0'
+                        />
+                      ) : (
+                        <Video className='w-8 h-8 text-gray-600 flex-shrink-0' />
+                      )}
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-white font-medium break-all whitespace-normal'>
+                          {file.name}
+                        </p>
+                        <p className='text-sm text-gray-400'>
+                          {formatSize(file.size)} · {file.extension}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
