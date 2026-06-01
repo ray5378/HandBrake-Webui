@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocalStorage } from '../hooks';
 import {
   FolderOpen,
   Video,
@@ -75,8 +76,8 @@ function Files() {
   const sortPopupRef = useRef<HTMLDivElement>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
 
-  const [sortField, setSortField] = useState<'name' | 'modified' | 'size'>('modified');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortField, setSortField] = useLocalStorage<'name' | 'modified' | 'size'>('fileSortField', 'modified');
+  const [sortOrder, setSortOrder] = useLocalStorage<'asc' | 'desc'>('fileSortOrder', 'desc');
   const [showSortPopup, setShowSortPopup] = useState(false);
 
   const fetchFiles = useCallback(async () => {
