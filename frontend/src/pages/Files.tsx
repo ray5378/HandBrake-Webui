@@ -73,6 +73,9 @@ function Files() {
   const abortRef = useRef<AbortController | null>(null);
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
+  const isSwiping = useRef<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const parentPathRef = useRef<string | null>(null);
 
   const parentPath =
     currentPath === '/drive' ? null : currentPath.substring(0, currentPath.lastIndexOf('/'));
@@ -154,19 +157,54 @@ function Files() {
     setContextMenu(null);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  };
+  parentPathRef.current = parentPath;
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!parentPath) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-    if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-      navigateToPath(parentPath);
-    }
-  };
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      isSwiping.current = false;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (isSwiping.current) {
+        e.preventDefault();
+        return;
+      }
+      const deltaX = e.touches[0].clientX - touchStartX.current;
+      const deltaY = e.touches[0].clientY - touchStartY.current;
+      if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        isSwiping.current = true;
+        e.preventDefault();
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!isSwiping.current) return;
+      const parent = parentPathRef.current;
+      if (!parent) return;
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+      if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        e.preventDefault();
+        setCurrentPath(parent);
+        setSearchTerm('');
+      }
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: false });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
 
   const handleFileClick = (file: FileItem) => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
@@ -243,12 +281,7 @@ function Files() {
   const pathParts = currentPath.split('/').filter(Boolean);
 
   return (
-    <div
-      className='space-y-6'
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      style={{ touchAction: 'pan-y' }}
-    >
+    <div ref={containerRef} className='space-y-6'>
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h1 className='text-3xl font-bold text-white'>{t('files.title')}</h1>

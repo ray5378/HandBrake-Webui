@@ -16,3 +16,4 @@ coverage/
 *~
 .cache/
 public/
+test-results/
