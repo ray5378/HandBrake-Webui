@@ -10,7 +10,9 @@ import {
   PlayCircle,
   X,
   MousePointer2,
-  Settings
+  Settings,
+  ArrowUpDown,
+  Check
 } from 'lucide-react';
 import VideoPlayer from '../components/VideoPlayer';
 import api from '../services/api';
@@ -70,6 +72,11 @@ function Files() {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const sortPopupRef = useRef<HTMLDivElement>(null);
+
+  const [sortField, setSortField] = useState<'name' | 'modified' | 'size'>('modified');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showSortPopup, setShowSortPopup] = useState(false);
 
   const fetchFiles = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -218,13 +225,29 @@ function Files() {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
         closeContextMenu();
       }
+      if (sortPopupRef.current && !sortPopupRef.current.contains(e.target as Node)) {
+        setShowSortPopup(false);
+      }
     };
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const filteredFiles = useMemo(() => files, [files]);
+  const filteredFiles = useMemo(() => {
+    const sorted = [...files].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'name') {
+        cmp = a.name.localeCompare(b.name);
+      } else if (sortField === 'modified') {
+        cmp = new Date(a.modified).getTime() - new Date(b.modified).getTime();
+      } else if (sortField === 'size') {
+        cmp = a.size - b.size;
+      }
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+    return sorted;
+  }, [files, sortField, sortOrder]);
 
   const pathParts = currentPath.split('/').filter(Boolean);
 
@@ -342,6 +365,65 @@ function Files() {
                     )}
                   </>
                 )}
+              </div>
+            )}
+          </div>
+
+          <div className='relative shrink-0'>
+            <button
+              onClick={() => setShowSortPopup(prev => !prev)}
+              className={clsx(
+                'p-2 rounded-lg transition-colors',
+                showSortPopup || sortField !== 'modified' || sortOrder !== 'desc'
+                  ? 'bg-primary text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-dark-700'
+              )}
+            >
+              <ArrowUpDown className='w-4 h-4' />
+            </button>
+            {showSortPopup && (
+              <div
+                ref={sortPopupRef}
+                className='absolute top-full right-0 mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 min-w-[180px] overflow-hidden'
+              >
+                <div className='px-3 py-2 text-xs text-gray-500 border-b border-dark-700'>
+                  排序方式
+                </div>
+                <div className='p-1'>
+                  {([
+                    { value: 'name', label: '名称' },
+                    { value: 'modified', label: '修改日期' },
+                    { value: 'size', label: '大小' }
+                  ] as const).map(field => (
+                    <button
+                      key={field.value}
+                      onClick={() => setSortField(field.value)}
+                      className='w-full flex items-center justify-between px-3 py-2 text-sm text-white hover:bg-dark-700 rounded transition-colors'
+                    >
+                      {field.label}
+                      {sortField === field.value && <Check className='w-3.5 h-3.5 text-primary' />}
+                    </button>
+                  ))}
+                </div>
+                <div className='px-3 py-2 text-xs text-gray-500 border-t border-dark-700'>
+                  排列顺序
+                </div>
+                <div className='p-1'>
+                  <button
+                    onClick={() => setSortOrder('asc')}
+                    className='w-full flex items-center justify-between px-3 py-2 text-sm text-white hover:bg-dark-700 rounded transition-colors'
+                  >
+                    递增
+                    {sortOrder === 'asc' && <Check className='w-3.5 h-3.5 text-primary' />}
+                  </button>
+                  <button
+                    onClick={() => setSortOrder('desc')}
+                    className='w-full flex items-center justify-between px-3 py-2 text-sm text-white hover:bg-dark-700 rounded transition-colors'
+                  >
+                    递减
+                    {sortOrder === 'desc' && <Check className='w-3.5 h-3.5 text-primary' />}
+                  </button>
+                </div>
               </div>
             )}
           </div>
