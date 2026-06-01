@@ -398,7 +398,9 @@ function Files() {
                 <div
                   className={clsx(
                     'grid gap-4',
-                    viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
+                    viewMode === 'grid'
+                      ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6'
+                      : 'grid-cols-1'
                   )}
                 >
                   {directories.map(dir => (
