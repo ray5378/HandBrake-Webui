@@ -124,6 +124,11 @@ function Files() {
     api.put('/users/preferences', { preferences: { fileSortOrder: order } }).catch(() => {});
   }, []);
   const [showSortPopup, setShowSortPopup] = useState(false);
+  const [showSortSubmenu, setShowSortSubmenu] = useState(false);
+  const [sortSubmenuAnchor, setSortSubmenuAnchor] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0
+  });
 
   const fetchFiles = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -915,15 +920,13 @@ function Files() {
                 <span>{t('nav.play')}</span>
               </button>
             )}
-            {selectedPaths.length <= 1 && !contextMenu.isFile && (
-              <button
-                onClick={handleBatchTranscode}
-                className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
-              >
-                <Settings className='w-4 h-4 text-primary' />
-                <span>{t('nav.transcode')}</span>
-              </button>
-            )}
+            <button
+              onClick={handleBatchTranscode}
+              className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
+            >
+              <Settings className='w-4 h-4 text-primary' />
+              <span>{t('nav.transcode')}</span>
+            </button>
             <div className='border-t border-dark-700' />
             <button
               onClick={handleCopy}
@@ -989,8 +992,8 @@ function Files() {
           </button>
           <button
             onClick={() => {
-              setShowSortPopup(true);
-              setEmptyContextMenu(null);
+              setShowSortSubmenu(true);
+              setSortSubmenuAnchor({ x: emptyContextMenu.x, y: emptyContextMenu.y });
             }}
             className='w-full px-4 py-3 text-left text-white hover:bg-dark-700 transition-colors flex items-center space-x-3'
           >
@@ -1012,6 +1015,69 @@ function Files() {
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {showSortSubmenu && (
+        <div
+          className='fixed bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 min-w-[180px] overflow-hidden'
+          style={{
+            left:
+              sortSubmenuAnchor.x > window.innerWidth / 2
+                ? Math.min(sortSubmenuAnchor.x - 190, window.innerWidth - 200)
+                : Math.min(sortSubmenuAnchor.x + 190, window.innerWidth - 200),
+            top: Math.min(sortSubmenuAnchor.y, window.innerHeight - 280)
+          }}
+          onMouseLeave={() => setShowSortSubmenu(false)}
+        >
+          <div className='px-3 py-2 text-xs text-gray-500 border-b border-dark-700'>排序方式</div>
+          <div className='p-1'>
+            {(
+              [
+                { value: 'name', label: '名称' },
+                { value: 'modified', label: '修改日期' },
+                { value: 'size', label: '大小' }
+              ] as const
+            ).map(field => (
+              <button
+                key={field.value}
+                onClick={() => {
+                  setSortField(field.value);
+                  setShowSortSubmenu(false);
+                  setEmptyContextMenu(null);
+                }}
+                className='w-full flex items-center justify-between px-3 py-2 text-sm text-white hover:bg-dark-700 rounded transition-colors'
+              >
+                {field.label}
+                {sortField === field.value && <Check className='w-3.5 h-3.5 text-primary' />}
+              </button>
+            ))}
+          </div>
+          <div className='px-3 py-2 text-xs text-gray-500 border-t border-dark-700'>排列顺序</div>
+          <div className='p-1'>
+            <button
+              onClick={() => {
+                setSortOrder('asc');
+                setShowSortSubmenu(false);
+                setEmptyContextMenu(null);
+              }}
+              className='w-full flex items-center justify-between px-3 py-2 text-sm text-white hover:bg-dark-700 rounded transition-colors'
+            >
+              递增
+              {sortOrder === 'asc' && <Check className='w-3.5 h-3.5 text-primary' />}
+            </button>
+            <button
+              onClick={() => {
+                setSortOrder('desc');
+                setShowSortSubmenu(false);
+                setEmptyContextMenu(null);
+              }}
+              className='w-full flex items-center justify-between px-3 py-2 text-sm text-white hover:bg-dark-700 rounded transition-colors'
+            >
+              递减
+              {sortOrder === 'desc' && <Check className='w-3.5 h-3.5 text-primary' />}
+            </button>
+          </div>
         </div>
       )}
 
