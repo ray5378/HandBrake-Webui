@@ -376,9 +376,6 @@ function Files() {
 
           {(directories.length > 0 || files.length > 0) && (
             <div className='mb-6'>
-              <h2 className='text-sm font-medium text-gray-400 mb-3'>
-                {t('common.directories') || 'Directories'}
-              </h2>
               <div className='flex flex-wrap items-center gap-1 mb-4'>
                 {pathParts.map((part, index) => (
                   <Fragment key={index}>
