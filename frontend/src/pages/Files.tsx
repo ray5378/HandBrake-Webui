@@ -379,6 +379,21 @@ function Files() {
               <h2 className='text-sm font-medium text-gray-400 mb-3'>
                 {t('common.directories') || 'Directories'}
               </h2>
+              <div className='flex flex-wrap items-center gap-1 mb-4'>
+                {pathParts.map((part, index) => (
+                  <Fragment key={index}>
+                    {index > 0 && (
+                      <span className='text-purple-500 text-2xl font-light select-none'>/</span>
+                    )}
+                    <button
+                      onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
+                      className='text-purple-400 hover:text-purple-300 transition-colors truncate max-w-[200px] text-2xl font-medium'
+                    >
+                      {part}
+                    </button>
+                  </Fragment>
+                ))}
+              </div>
               <div
                 className={clsx(
                   'grid gap-4',
@@ -404,22 +419,6 @@ function Files() {
               </div>
             </div>
           )}
-
-          <div className='flex flex-wrap items-center gap-1 mb-4 px-1'>
-            {pathParts.map((part, index) => (
-              <Fragment key={index}>
-                {index > 0 && (
-                  <span className='text-purple-500 text-2xl font-light select-none'>/</span>
-                )}
-                <button
-                  onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
-                  className='text-purple-400 hover:text-purple-300 transition-colors truncate max-w-[200px] text-2xl font-medium'
-                >
-                  {part}
-                </button>
-              </Fragment>
-            ))}
-          </div>
 
           {filteredFiles.length > 0 ? (
             <div
