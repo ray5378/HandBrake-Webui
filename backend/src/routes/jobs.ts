@@ -80,6 +80,11 @@ router.get(
         }
       ).count;
 
+      const orderClause =
+        statusParam && statusParam.includes(',')
+          ? `ORDER BY CASE WHEN j.status = 'processing' THEN 0 ELSE 1 END, j.created_at ASC`
+          : 'ORDER BY j.created_at DESC';
+
       const jobs = db
         .prepare(
           `
@@ -87,7 +92,7 @@ router.get(
         FROM jobs j
         LEFT JOIN presets p ON j.preset_id = p.id
         ${whereClause}
-        ORDER BY j.created_at DESC
+        ${orderClause}
         LIMIT ? OFFSET ?
       `
         )
