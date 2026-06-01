@@ -124,23 +124,17 @@ router.get(
   '/',
   authenticateToken,
   query('directory').optional(),
-  query('page').optional().isInt({ min: 1 }),
-  query('limit').optional().isInt({ min: 1, max: 100 }),
   validate,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const directory = resolveSafePath(req.query.directory as string);
-      const page = parseInt((req.query.page as string) || '1');
-      const limit = parseInt((req.query.limit as string) || '20');
-      const offset = (page - 1) * limit;
 
       if (!fs.existsSync(directory)) {
         res.json({
           success: true,
           data: {
             files: [],
-            directories: [],
-            pagination: { total: 0, page, limit }
+            directories: []
           }
         });
         return;
@@ -187,21 +181,13 @@ router.get(
 
       files.sort((a, b) => b.modifiedAtMs - a.modifiedAtMs);
 
-      const total = files.length;
-      const paginatedFiles = files.slice(offset, offset + limit);
-      const cleanFiles = paginatedFiles.map(({ modifiedAtMs: _, ...rest }) => rest);
+      const cleanFiles = files.map(({ modifiedAtMs: _, ...rest }) => rest);
 
       res.json({
         success: true,
         data: {
           files: cleanFiles,
-          directories,
-          pagination: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
-          }
+          directories
         }
       });
     } catch (error) {
