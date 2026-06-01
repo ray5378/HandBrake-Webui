@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Video, FolderOpen, ArrowRight, Layers, Settings } from 'lucide-react';
@@ -6,28 +6,65 @@ import api from '../services/api';
 import { formatFileSize, formatETA } from '../utils/format';
 import { SystemInfo, Job } from '../types';
 
+const PAGE_SIZE = 10;
+
 function Dashboard() {
   const { t } = useTranslation();
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
   const [activeJobs, setActiveJobs] = useState<Job[]>([]);
+  const [activePage, setActivePage] = useState(1);
+  const [activeTotal, setActiveTotal] = useState(0);
+  const [activeCount, setActiveCount] = useState(0);
+  const [hasProcessing, setHasProcessing] = useState(false);
+  const [hasQueued, setHasQueued] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const hasProcessingTasks = useMemo(() => {
-    return activeJobs.some(j => j.status === 'processing');
-  }, [activeJobs]);
+  const totalActivePages = Math.max(1, Math.ceil(activeTotal / PAGE_SIZE));
 
-  const hasQueuedTasks = useMemo(() => {
-    return activeJobs.some(j => j.status === 'queued');
-  }, [activeJobs]);
+  const fetchDashboardData = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+    try {
+      const [systemRes, statsRes, jobsRes] = await Promise.all([
+        api.get('/system/info', { signal }),
+        api.get('/jobs/stats', { signal }),
+        api.get('/jobs', {
+          params: { status: 'processing,queued', page: activePage, limit: PAGE_SIZE },
+          signal
+        })
+      ]);
+
+      setSystemInfo(systemRes.data.data);
+
+      const { counts, hasProcessing: hp, hasQueued: hq } = statsRes.data.data;
+      setActiveCount(counts.active);
+      setHasProcessing(hp);
+      setHasQueued(hq);
+
+      const jobs = jobsRes.data.data.jobs || [];
+      const sorted = [...jobs].sort((a: Job, b: Job) => {
+        if (a.status === 'processing' && b.status !== 'processing') return -1;
+        if (a.status !== 'processing' && b.status === 'processing') return 1;
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
+      setActiveJobs(sorted);
+      setActiveTotal(jobsRes.data.data.pagination?.total || 0);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    }
+  }, [activePage]);
 
   useEffect(() => {
     fetchDashboardData();
+  }, [fetchDashboardData]);
 
+  useEffect(() => {
     let intervalTime = 120000;
-    if (hasProcessingTasks) {
+    if (hasProcessing) {
       intervalTime = 2000;
-    } else if (hasQueuedTasks) {
+    } else if (hasQueued) {
       intervalTime = 30000;
     }
 
@@ -37,32 +74,7 @@ function Dashboard() {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [hasProcessingTasks, hasQueuedTasks]);
-
-  const fetchDashboardData = async () => {
-    if (abortRef.current) abortRef.current.abort();
-    abortRef.current = new AbortController();
-    const signal = abortRef.current.signal;
-    try {
-      const [systemRes, jobsRes] = await Promise.all([
-        api.get('/system/info', { signal }),
-        api.get('/jobs', { params: { limit: 9999 }, signal })
-      ]);
-
-      setSystemInfo(systemRes.data.data);
-      setActiveJobs(
-        (jobsRes.data.data.jobs || [])
-          .filter((j: Job) => j.status === 'processing' || j.status === 'queued')
-          .sort((a: Job, b: Job) => {
-            if (a.status === 'processing' && b.status !== 'processing') return -1;
-            if (a.status !== 'processing' && b.status === 'processing') return 1;
-            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          })
-      );
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    }
-  };
+  }, [fetchDashboardData, hasProcessing, hasQueued]);
 
   const formatBytes = formatFileSize;
 
@@ -91,6 +103,9 @@ function Dashboard() {
             <div className='flex items-center justify-between mb-4'>
               <h2 className='text-xl font-semibold text-white'>
                 {t('dashboard.activeJobs', '进行中的任务')}
+                {activeCount > 0 && (
+                  <span className='ml-2 text-sm font-normal text-gray-400'>({activeCount})</span>
+                )}
               </h2>
               <Link
                 to='/jobs'
@@ -102,52 +117,77 @@ function Dashboard() {
             </div>
 
             {activeJobs.length > 0 ? (
-              <div className='space-y-3 max-h-[420px] overflow-y-auto p-1 -m-1 scrollbar-hide'>
-                {activeJobs.map(job => (
-                  <div
-                    key={job.id}
-                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                      job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700'
-                    }`}
-                  >
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-white truncate'>
-                        {job.source_file.split('/').pop()}
-                      </p>
-                      <p className='text-xs text-gray-400 truncate'>
-                        {new Date(job.created_at).toLocaleString()}
-                      </p>
-                      {job.status === 'processing' && (
-                        <div className='mt-2'>
-                          <div className='flex items-center justify-between text-sm'>
-                            <span className='text-white font-mono text-xs'>
-                              {job.progress.toFixed(1)}%
-                            </span>
-                            {formatETA(job.eta_seconds) && (
-                              <span className='text-white text-xs'>
-                                {formatETA(job.eta_seconds)}
+              <>
+                <div className='space-y-3'>
+                  {activeJobs.map(job => (
+                    <div
+                      key={job.id}
+                      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        job.status === 'processing' ? 'bg-[#fbbf24]/20' : 'bg-dark-700'
+                      }`}
+                    >
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-sm font-medium text-white truncate'>
+                          {job.source_file.split('/').pop()}
+                        </p>
+                        <p className='text-xs text-gray-400 truncate'>
+                          {new Date(job.created_at).toLocaleString()}
+                        </p>
+                        {job.status === 'processing' && (
+                          <div className='mt-2'>
+                            <div className='flex items-center justify-between text-sm'>
+                              <span className='text-white font-mono text-xs'>
+                                {job.progress.toFixed(1)}%
                               </span>
-                            )}
+                              {formatETA(job.eta_seconds) && (
+                                <span className='text-white text-xs'>
+                                  {formatETA(job.eta_seconds)}
+                                </span>
+                              )}
+                            </div>
+                            <div className='w-full bg-dark-600 rounded-full h-1.5 mt-1 overflow-hidden'>
+                              <div
+                                className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
+                                style={{ width: `${job.progress}%` }}
+                              />
+                            </div>
                           </div>
-                          <div className='w-full bg-dark-600 rounded-full h-1.5 mt-1 overflow-hidden'>
-                            <div
-                              className='h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000'
-                              style={{ width: `${job.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                      <div className='flex items-center space-x-2 shrink-0'>
+                        {job.status !== 'processing' && (
+                          <span className={`badge badge-${job.status}`}>
+                            {getJobStatusLabel(job.status)}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className='flex items-center space-x-2 shrink-0'>
-                      {job.status !== 'processing' && (
-                        <span className={`badge badge-${job.status}`}>
-                          {getJobStatusLabel(job.status)}
-                        </span>
-                      )}
-                    </div>
+                  ))}
+                </div>
+
+                {totalActivePages > 1 && (
+                  <div className='flex items-center justify-center space-x-4 mt-4'>
+                    <button
+                      onClick={() => setActivePage(p => Math.max(1, p - 1))}
+                      disabled={activePage === 1}
+                      className='btn btn-secondary text-sm'
+                    >
+                      ← {t('common.previous', '上一页')}
+                    </button>
+                    <span className='text-gray-400 text-sm'>
+                      {t('jobs.page', '第')} {activePage} / {totalActivePages}{' '}
+                      {t('jobs.pageSuffix', '页')}
+                    </span>
+                    <button
+                      onClick={() => setActivePage(p => Math.min(totalActivePages, p + 1))}
+                      disabled={activePage === totalActivePages}
+                      className='btn btn-secondary text-sm'
+                    >
+                      {t('common.next', '下一页')} →
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             ) : (
               <div className='text-center py-8 text-gray-400'>
                 <Video className='w-12 h-12 mx-auto mb-2 opacity-50' />
