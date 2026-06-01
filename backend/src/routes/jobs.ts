@@ -736,4 +736,55 @@ router.post(
   }
 );
 
+router.post(
+  '/retry-failed',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const db = getDatabase();
+
+      const failedJobs = db
+        .prepare('SELECT * FROM jobs WHERE status = ? AND user_id = ?')
+        .all('failed', req.user!.userId) as Job[];
+
+      let retried = 0;
+      for (const failedJob of failedJobs) {
+        const newJobId = uuidv4();
+
+        db.prepare(
+          `INSERT INTO jobs (id, user_id, source_file, output_file, preset_id, settings, status, source_file_size)
+           VALUES (?, ?, ?, ?, ?, ?, 'queued', ?)`
+        ).run(
+          newJobId,
+          req.user!.userId,
+          failedJob.source_file,
+          failedJob.output_file,
+          failedJob.preset_id,
+          failedJob.settings,
+          failedJob.source_file_size
+        );
+
+        const newJob = db.prepare('SELECT * FROM jobs WHERE id = ?').get(newJobId) as Job;
+
+        try {
+          await startTranscode(newJob);
+          retried++;
+        } catch (startError: unknown) {
+          const error = startError as Error;
+          logger.error('Failed to start retry job', { jobId: newJobId, error: error.message });
+        }
+      }
+
+      res.json({
+        success: true,
+        data: {
+          retried
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;

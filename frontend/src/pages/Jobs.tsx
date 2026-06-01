@@ -7,9 +7,9 @@ import {
   CheckCircle,
   XCircle,
   Trash2,
-  AlertTriangle,
   Trash,
   SkipForward,
+  RefreshCw,
   X
 } from 'lucide-react';
 import api from '../services/api';
@@ -32,6 +32,7 @@ function Jobs() {
   const [page, setPage] = useState(1);
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [confirmJobAction, setConfirmJobAction] = useState<JobAction | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -185,6 +186,19 @@ function Jobs() {
     setConfirmAction(null);
   };
 
+  const handleRetryFailed = async () => {
+    setRetrying(true);
+    try {
+      const res = await api.post('/jobs/retry-failed');
+      console.log(`Retried ${res.data.data.retried} failed jobs`);
+      fetchJobs();
+    } catch (error) {
+      console.error('Failed to retry failed jobs:', error);
+    }
+    setRetrying(false);
+    setConfirmAction(null);
+  };
+
   const handlePlayFile = (filePath: string) => {
     const name = filePath.split('/').pop() || filePath;
     setSelectedVideoFile({ path: filePath, name });
@@ -252,8 +266,8 @@ function Jobs() {
             onClick={() => setConfirmAction('clearAll')}
             className='btn btn-danger inline-flex items-center space-x-2'
           >
-            <AlertTriangle className='w-4 h-4' />
-            <span>{t('jobs.clearAll') || '清理任务'}</span>
+            <ListTodo className='w-4 h-4' />
+            <span>{t('jobs.taskManagement', '任务管理')}</span>
           </button>
           <button
             onClick={() => setConfirmAction('clearHistory')}
@@ -502,9 +516,9 @@ function Jobs() {
           <div className='bg-dark-800 rounded-xl max-w-md w-full p-6'>
             <div className='flex items-start justify-between mb-4'>
               <div className='flex items-center space-x-3'>
-                <AlertTriangle className='w-6 h-6 text-error' />
+                <ListTodo className='w-6 h-6 text-primary' />
                 <h3 className='text-lg font-bold text-white'>
-                  {t('jobs.confirmClearAllTitle', '清空队列')}
+                  {t('jobs.confirmTaskManagementTitle', '任务管理')}
                 </h3>
               </div>
               <button
@@ -514,17 +528,25 @@ function Jobs() {
                 <X className='w-5 h-5 text-gray-400' />
               </button>
             </div>
-            <p className='text-gray-400 mb-5'>{t('jobs.confirmClearAll', '请选择清空方式：')}</p>
             <div className='space-y-3'>
-              <button onClick={handleClearAllForce} className='w-full btn btn-danger'>
-                {t('jobs.clearAllWithProcessing', '清空所有任务（含正在转码）')}
+              <button onClick={handleRetryFailed} disabled={retrying} className='w-full btn btn-primary'>
+                <RefreshCw className={`w-4 h-4 mr-2 inline ${retrying ? 'animate-spin' : ''}`} />
+                {retrying ? t('jobs.retrying', '重试中...') : t('jobs.retryFailed', '失败任务批量重试')}
               </button>
-              <button onClick={handleClearAll} className='w-full btn btn-danger'>
-                {t('jobs.clearAllQueuedOnly', '只清空队列任务')}
-              </button>
-              <button onClick={() => setConfirmAction(null)} className='w-full btn btn-secondary'>
-                {t('common.cancel', '取消')}
-              </button>
+              <div className='border-t border-dark-700 pt-3'>
+                <p className='text-gray-400 mb-3 text-sm'>{t('jobs.confirmClearAll', '请选择清空方式：')}</p>
+                <div className='space-y-3'>
+                  <button onClick={handleClearAllForce} className='w-full btn btn-danger'>
+                    {t('jobs.clearAllWithProcessing', '清空所有任务（含正在转码）')}
+                  </button>
+                  <button onClick={handleClearAll} className='w-full btn btn-danger'>
+                    {t('jobs.clearAllQueuedOnly', '只清空队列任务')}
+                  </button>
+                  <button onClick={() => setConfirmAction(null)} className='w-full btn btn-secondary'>
+                    {t('common.cancel', '取消')}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
