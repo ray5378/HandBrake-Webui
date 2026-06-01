@@ -70,7 +70,7 @@ export interface FileItem {
   path: string;
   size: number;
   extension: string;
-  modified: string;
+  modifiedAt: string;
 }
 
 export interface ApiResponse<T = unknown> {

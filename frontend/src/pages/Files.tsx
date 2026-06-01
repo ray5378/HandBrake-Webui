@@ -240,7 +240,7 @@ function Files() {
       if (sortField === 'name') {
         cmp = a.name.localeCompare(b.name);
       } else if (sortField === 'modified') {
-        cmp = new Date(a.modified).getTime() - new Date(b.modified).getTime();
+        cmp = new Date(a.modifiedAt).getTime() - new Date(b.modifiedAt).getTime();
       } else if (sortField === 'size') {
         cmp = a.size - b.size;
       }
