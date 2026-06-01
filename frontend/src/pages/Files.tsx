@@ -178,7 +178,7 @@ function Files() {
         name,
         size: 0,
         extension: '',
-        modified: ''
+        modifiedAt: ''
       });
       setShowVideoPlayer(true);
     }
@@ -390,11 +390,13 @@ function Files() {
                   排序方式
                 </div>
                 <div className='p-1'>
-                  {([
-                    { value: 'name', label: '名称' },
-                    { value: 'modified', label: '修改日期' },
-                    { value: 'size', label: '大小' }
-                  ] as const).map(field => (
+                  {(
+                    [
+                      { value: 'name', label: '名称' },
+                      { value: 'modified', label: '修改日期' },
+                      { value: 'size', label: '大小' }
+                    ] as const
+                  ).map(field => (
                     <button
                       key={field.value}
                       onClick={() => setSortField(field.value)}
