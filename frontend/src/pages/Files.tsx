@@ -78,6 +78,8 @@ function Files() {
     height: number;
   } | null>(null);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const filesPageRef = useRef<HTMLDivElement>(null);
+  const fileContainerRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [emptyContextMenu, setEmptyContextMenu] = useState<EmptyContextMenuState | null>(null);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
@@ -228,46 +230,56 @@ function Files() {
     });
   };
 
-  const handleDragStart = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    const target = e.target as HTMLElement;
-    if (target.closest('[data-item-type]')) return;
+  useEffect(() => {
+    const handleDocumentMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      const target = e.target as HTMLElement;
+      if (target.closest('button, input, select, a, [data-item-type]')) return;
 
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
-    setSelectedPaths([]);
+      if (fileContainerRef.current) {
+        const rect = fileContainerRef.current.getBoundingClientRect();
+        if (e.clientY < rect.top - 10) return;
+      }
 
-    const handleMouseMove = (moveE: MouseEvent) => {
-      if (!dragStartRef.current) return;
-      setIsDragSelecting(true);
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      setSelectedPaths([]);
 
-      const x1 = Math.min(dragStartRef.current.x, moveE.clientX);
-      const y1 = Math.min(dragStartRef.current.y, moveE.clientY);
-      const x2 = Math.max(dragStartRef.current.x, moveE.clientX);
-      const y2 = Math.max(dragStartRef.current.y, moveE.clientY);
+      const handleMouseMove = (moveE: MouseEvent) => {
+        if (!dragStartRef.current) return;
+        setIsDragSelecting(true);
 
-      setDragRect({ x: x1, y: y1, width: x2 - x1, height: y2 - y1 });
+        const x1 = Math.min(dragStartRef.current.x, moveE.clientX);
+        const y1 = Math.min(dragStartRef.current.y, moveE.clientY);
+        const x2 = Math.max(dragStartRef.current.x, moveE.clientX);
+        const y2 = Math.max(dragStartRef.current.y, moveE.clientY);
 
-      const newSelected: string[] = [];
-      document.querySelectorAll('[data-path]').forEach(el => {
-        const rect = el.getBoundingClientRect();
-        if (rect.left < x2 && rect.right > x1 && rect.top < y2 && rect.bottom > y1) {
-          newSelected.push(el.getAttribute('data-path')!);
-        }
-      });
-      setSelectedPaths(newSelected);
+        setDragRect({ x: x1, y: y1, width: x2 - x1, height: y2 - y1 });
+
+        const newSelected: string[] = [];
+        document.querySelectorAll('[data-path]').forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.left < x2 && rect.right > x1 && rect.top < y2 && rect.bottom > y1) {
+            newSelected.push(el.getAttribute('data-path')!);
+          }
+        });
+        setSelectedPaths(newSelected);
+      };
+
+      const handleMouseUp = () => {
+        dragStartRef.current = null;
+        setIsDragSelecting(false);
+        setDragRect(null);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     };
 
-    const handleMouseUp = () => {
-      dragStartRef.current = null;
-      setIsDragSelecting(false);
-      setDragRect(null);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
+    document.addEventListener('mousedown', handleDocumentMouseDown);
+    return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
+  }, []);
 
   const handleCopy = () => {
     if (!contextMenu) return;
@@ -526,7 +538,7 @@ function Files() {
   const pathParts = currentPath.split('/').filter(Boolean);
 
   return (
-    <div className='space-y-6'>
+    <div ref={filesPageRef} className='space-y-6'>
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h1 className='text-3xl font-bold text-white'>{t('files.title')}</h1>
@@ -732,8 +744,8 @@ function Files() {
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
         <div
+          ref={fileContainerRef}
           onContextMenu={handleEmptyContextMenu}
-          onMouseDown={handleDragStart}
           className='relative min-h-[calc(100vh-240px)] select-none'
         >
           <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
