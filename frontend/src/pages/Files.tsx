@@ -71,6 +71,11 @@ function Files() {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+
+  const parentPath =
+    currentPath === '/drive' ? null : currentPath.substring(0, currentPath.lastIndexOf('/'));
 
   const fetchFiles = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -147,6 +152,20 @@ function Files() {
 
   const closeContextMenu = () => {
     setContextMenu(null);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!parentPath) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+      navigateToPath(parentPath);
+    }
   };
 
   const handleFileClick = (file: FileItem) => {
