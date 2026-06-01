@@ -374,7 +374,7 @@ function Files() {
             </div>
           )}
 
-          {directories.length > 0 && (
+          {(directories.length > 0 || files.length > 0) && (
             <div className='mb-6'>
               <h2 className='text-sm font-medium text-gray-400 mb-3'>
                 {t('common.directories') || 'Directories'}
@@ -383,40 +383,42 @@ function Files() {
                 {pathParts.map((part, index) => (
                   <Fragment key={index}>
                     {index > 0 && (
-                      <span className='text-purple-500 text-2xl font-light select-none'>/</span>
+                      <span className='text-purple-500 text-lg font-light select-none'>/</span>
                     )}
                     <button
                       onClick={() => navigateToPath('/' + pathParts.slice(0, index + 1).join('/'))}
-                      className='text-purple-400 hover:text-purple-300 transition-colors truncate max-w-[200px] text-2xl font-medium'
+                      className='text-purple-400 hover:text-purple-300 transition-colors truncate max-w-[200px] text-lg font-medium'
                     >
                       {part}
                     </button>
                   </Fragment>
                 ))}
               </div>
-              <div
-                className={clsx(
-                  'grid gap-4',
-                  viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
-                )}
-              >
-                {directories.map(dir => (
-                  <button
-                    key={dir.path}
-                    onClick={() => navigateToPath(dir.path)}
-                    onContextMenu={e => handleContextMenu(e, dir.path)}
-                    className={clsx(
-                      'flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-left relative',
-                      viewMode === 'grid' && 'flex-col text-center justify-center'
-                    )}
-                  >
-                    <FolderOpen className='w-8 h-8 text-warning flex-shrink-0' />
-                    <span className='text-white break-all whitespace-normal text-center'>
-                      {dir.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              {directories.length > 0 && (
+                <div
+                  className={clsx(
+                    'grid gap-4',
+                    viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' : 'grid-cols-1'
+                  )}
+                >
+                  {directories.map(dir => (
+                    <button
+                      key={dir.path}
+                      onClick={() => navigateToPath(dir.path)}
+                      onContextMenu={e => handleContextMenu(e, dir.path)}
+                      className={clsx(
+                        'flex items-center space-x-3 p-4 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-left relative',
+                        viewMode === 'grid' && 'flex-col text-center justify-center'
+                      )}
+                    >
+                      <FolderOpen className='w-8 h-8 text-warning flex-shrink-0' />
+                      <span className='text-white break-all whitespace-normal text-center'>
+                        {dir.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
