@@ -36,7 +36,7 @@ function ConfirmDialog({
             <X className='w-5 h-5 text-gray-400' />
           </button>
         </div>
-        <p className='text-gray-400 mb-6'>{message}</p>
+        <p className='text-gray-400 mb-6 whitespace-pre-line'>{message}</p>
         <div className='flex space-x-3'>
           <button onClick={onCancel} className='btn btn-secondary flex-1'>
             {cancelText || '取消'}

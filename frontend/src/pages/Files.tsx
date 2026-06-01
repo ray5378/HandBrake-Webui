@@ -635,7 +635,7 @@ function Files() {
       {loading ? (
         <div className='text-center py-12 text-gray-400'>{t('common.loading')}</div>
       ) : (
-        <div onContextMenu={handleEmptyContextMenu} className='min-h-[300px]'>
+        <div onContextMenu={handleEmptyContextMenu} className='min-h-[calc(100vh-240px)]'>
           <div className='flex items-center space-x-2 text-sm text-gray-500 mb-5 bg-dark-700/50 rounded-lg px-4 py-2.5'>
             <MousePointer2 className='w-4 h-4 text-primary shrink-0' />
             <span>{t('files.rightClickHint')}</span>
