@@ -192,6 +192,7 @@ function Jobs() {
       const res = await api.post('/jobs/retry-failed');
       console.log(`Retried ${res.data.data.retried} failed jobs`);
       fetchJobs();
+      setFilter('active');
     } catch (error) {
       console.error('Failed to retry failed jobs:', error);
     }

@@ -102,8 +102,8 @@ function Files() {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null);
   const [batchSourcePaths, setBatchSourcePaths] = useState<string[]>([]);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteMousePos, setDeleteMousePos] = useState<{ x: number; y: number } | null>(null);
+  const [operationMessage, setOperationMessage] = useState<string | null>(null);
+  const [operationMousePos, setOperationMousePos] = useState<{ x: number; y: number } | null>(null);
   const [searchResults, setSearchResults] = useState<{
     files: SearchResult[];
     directories: SearchResult[];
@@ -287,16 +287,16 @@ function Files() {
   }, []);
 
   useEffect(() => {
-    if (!isDeleting) {
-      setDeleteMousePos(null);
+    if (!operationMessage) {
+      setOperationMousePos(null);
       return;
     }
     const handleMouseMove = (e: MouseEvent) => {
-      setDeleteMousePos({ x: e.clientX, y: e.clientY });
+      setOperationMousePos({ x: e.clientX, y: e.clientY });
     };
     document.addEventListener('mousemove', handleMouseMove);
     return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, [isDeleting]);
+  }, [operationMessage]);
 
   const handleCopy = () => {
     if (!contextMenu) return;
@@ -314,6 +314,7 @@ function Files() {
 
   const handlePaste = async () => {
     if (!clipboard || !currentPath) return;
+    setOperationMessage(t('files.pasting'));
     try {
       const destinationDir = currentPath;
       if (clipboard.type === 'copy') {
@@ -330,8 +331,20 @@ function Files() {
       setClipboard(null);
       closeContextMenu();
       fetchFiles();
+      addToast({
+        message: t('files.pasteSuccess'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (error) {
       console.error('Failed to paste:', error);
+      addToast({
+        message: t('files.pasteError'),
+        type: 'error',
+        duration: 5000
+      });
+    } finally {
+      setOperationMessage(null);
     }
   };
 
@@ -380,7 +393,7 @@ function Files() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    setIsDeleting(true);
+    setOperationMessage(t('files.deleting'));
     const paths = [...deleteTarget.paths];
     setDeleteTarget(null);
     try {
@@ -390,19 +403,19 @@ function Files() {
       setSelectedPaths([]);
       fetchFiles();
       addToast({
-        message: t('files.deleteSuccess', '删除成功'),
+        message: t('files.deleteSuccess'),
         type: 'success',
         duration: 5000
       });
     } catch (error) {
       console.error('Failed to delete:', error);
       addToast({
-        message: t('files.deleteError', '删除失败'),
+        message: t('files.deleteError'),
         type: 'error',
         duration: 5000
       });
     } finally {
-      setIsDeleting(false);
+      setOperationMessage(null);
     }
   };
 
@@ -1161,13 +1174,13 @@ function Files() {
         danger
       />
 
-      {deleteMousePos && (
+      {operationMousePos && (
         <div
           className='fixed z-[110] pointer-events-none flex items-center space-x-2 px-3 py-2 rounded-lg bg-dark-800/95 border border-dark-600 shadow-xl'
-          style={{ left: deleteMousePos.x + 15, top: deleteMousePos.y + 15 }}
+          style={{ left: operationMousePos.x + 15, top: operationMousePos.y + 15 }}
         >
           <Loader2 className='w-4 h-4 text-primary animate-spin' />
-          <span className='text-sm text-white whitespace-nowrap'>{t('files.deleting')}</span>
+          <span className='text-sm text-white whitespace-nowrap'>{operationMessage}</span>
         </div>
       )}
 
