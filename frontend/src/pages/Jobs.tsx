@@ -16,6 +16,7 @@ import api from '../services/api';
 import clsx from 'clsx';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import VideoPlayer from '../components/VideoPlayer';
+import { useToastStore } from '../stores/toastStore';
 import { formatFileSize, formatETA } from '../utils/format';
 import { Job } from '../types';
 
@@ -26,6 +27,7 @@ interface JobAction {
 
 function Jobs() {
   const { t } = useTranslation();
+  const addToast = useToastStore(state => state.addToast);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('active');
@@ -136,12 +138,20 @@ function Jobs() {
     try {
       if (confirmJobAction.type === 'cancel') {
         await api.post(`/jobs/${confirmJobAction.jobId}/cancel`);
+        addToast({ message: t('jobs.cancelSuccess'), type: 'success', duration: 5000 });
       } else {
         await api.delete(`/jobs/${confirmJobAction.jobId}`);
+        addToast({ message: t('jobs.deleteJobSuccess'), type: 'success', duration: 5000 });
       }
       fetchJobs();
     } catch (error) {
       console.error('Failed to perform job action:', error);
+      addToast({
+        message:
+          confirmJobAction.type === 'cancel' ? t('jobs.cancelError') : t('jobs.deleteJobError'),
+        type: 'error',
+        duration: 5000
+      });
     }
     setConfirmJobAction(null);
   };
@@ -150,8 +160,10 @@ function Jobs() {
     try {
       await api.delete('/jobs/all');
       fetchJobs();
+      addToast({ message: t('jobs.clearHistorySuccess'), type: 'success', duration: 5000 });
     } catch (error) {
       console.error('Failed to clear history:', error);
+      addToast({ message: t('jobs.clearHistoryError'), type: 'error', duration: 5000 });
     }
     setConfirmAction(null);
   };
@@ -160,8 +172,10 @@ function Jobs() {
     try {
       await api.delete('/jobs/queue');
       fetchJobs();
+      addToast({ message: t('jobs.clearAllSuccess'), type: 'success', duration: 5000 });
     } catch (error) {
       console.error('Failed to clear queued jobs:', error);
+      addToast({ message: t('jobs.clearAllError'), type: 'error', duration: 5000 });
     }
     setConfirmAction(null);
   };
@@ -170,8 +184,10 @@ function Jobs() {
     try {
       await api.delete('/jobs/all-force');
       fetchJobs();
+      addToast({ message: t('jobs.clearAllForceSuccess'), type: 'success', duration: 5000 });
     } catch (error) {
       console.error('Failed to force clear all jobs:', error);
+      addToast({ message: t('jobs.clearAllForceError'), type: 'error', duration: 5000 });
     }
     setConfirmAction(null);
   };
@@ -180,8 +196,10 @@ function Jobs() {
     try {
       const res = await api.post('/system/cache-clear', { type });
       console.log(res.data.message);
+      addToast({ message: t('jobs.clearCacheSuccess'), type: 'success', duration: 5000 });
     } catch (error) {
       console.error('Failed to clear cache:', error);
+      addToast({ message: t('jobs.clearCacheError'), type: 'error', duration: 5000 });
     }
     setConfirmAction(null);
   };
@@ -193,8 +211,10 @@ function Jobs() {
       console.log(`Retried ${res.data.data.retried} failed jobs`);
       fetchJobs();
       setFilter('active');
+      addToast({ message: t('jobs.retrySuccess'), type: 'success', duration: 5000 });
     } catch (error) {
       console.error('Failed to retry failed jobs:', error);
+      addToast({ message: t('jobs.retryError'), type: 'error', duration: 5000 });
     }
     setRetrying(false);
     setConfirmAction(null);

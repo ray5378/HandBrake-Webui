@@ -366,8 +366,18 @@ function Files() {
       });
       setRenameTarget(null);
       fetchFiles();
+      addToast({
+        message: t('files.renameSuccess'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (error) {
       console.error('Failed to rename:', error);
+      addToast({
+        message: t('files.renameError'),
+        type: 'error',
+        duration: 5000
+      });
     }
   };
 
@@ -427,8 +437,18 @@ function Files() {
       await api.post('/files/mkdir', { path: newPath });
       setCreateFolder(false);
       fetchFiles();
+      addToast({
+        message: t('files.createFolderSuccess'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (error) {
       console.error('Failed to create folder:', error);
+      addToast({
+        message: t('files.createFolderError'),
+        type: 'error',
+        duration: 5000
+      });
     }
   };
 

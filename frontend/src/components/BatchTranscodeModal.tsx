@@ -16,6 +16,7 @@ import {
 import api from '../services/api';
 import clsx from 'clsx';
 import { useLocalStorage } from '../hooks';
+import { useToastStore } from '../stores/toastStore';
 
 const VIDEO_EXTENSIONS = [
   '.mp4',
@@ -44,6 +45,7 @@ function BatchTranscodeModal({
   onSuccess
 }: BatchTranscodeModalProps) {
   const { t } = useTranslation();
+  const addToast = useToastStore(state => state.addToast);
 
   const sourceList = useMemo(() => {
     return sourcePaths && sourcePaths.length > 0 ? sourcePaths : [directory];
@@ -199,8 +201,18 @@ function BatchTranscodeModal({
     try {
       await api.post('/system/cache-dir', { path: cacheDir, maxConcurrentJobs });
       setShowCacheSettingsModal(false);
+      addToast({
+        message: t('settings.saveSuccess', '转码配置保存成功'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (err) {
       console.error('Failed to save cache dir:', err);
+      addToast({
+        message: t('settings.saveFailed', '保存配置失败'),
+        type: 'error',
+        duration: 5000
+      });
     } finally {
       setSavingCacheDir(false);
     }
@@ -260,11 +272,17 @@ function BatchTranscodeModal({
       setShowNewDirInput(false);
       setNewDirName('');
       fetchBrowseDirs(browsePath);
+      addToast({
+        message: t('batchTranscode.createDirSuccess', '目录创建成功'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: string } } };
-      setError(
-        axiosErr.response?.data?.error || t('batchTranscode.createDirFailed', '创建目录失败')
-      );
+      const errorMsg =
+        axiosErr.response?.data?.error || t('batchTranscode.createDirFailed', '创建目录失败');
+      setError(errorMsg);
+      addToast({ message: errorMsg, type: 'error', duration: 5000 });
     }
   };
 

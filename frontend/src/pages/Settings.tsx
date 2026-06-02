@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderOpen, Save, Loader2, AlertCircle, CheckCircle, ChevronRight } from 'lucide-react';
 import api from '../services/api';
+import { useToastStore } from '../stores/toastStore';
 
 interface FileDirectory {
   name: string;
@@ -10,6 +11,7 @@ interface FileDirectory {
 
 function Settings() {
   const { t } = useTranslation();
+  const addToast = useToastStore(state => state.addToast);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
@@ -80,9 +82,15 @@ function Settings() {
     try {
       await api.post('/system/cache-dir', { path: cacheDir, maxConcurrentJobs });
       setSuccess(t('settings.saveSuccess', '转码配置保存成功'));
+      addToast({ message: t('settings.saveSuccess'), type: 'success', duration: 5000 });
     } catch (err) {
       const axiosErr = err as { response?: { data?: { error?: string } } };
       setError(axiosErr.response?.data?.error || t('settings.saveFailed', '保存配置失败'));
+      addToast({
+        message: axiosErr.response?.data?.error || t('settings.saveFailed', '保存配置失败'),
+        type: 'error',
+        duration: 5000
+      });
     } finally {
       setSavingCacheDir(false);
     }

@@ -126,7 +126,21 @@
     "pageSuffix": "页",
     "confirmCancelTitle": "取消任务",
     "confirmDeleteTitle": "删除任务",
-    "confirmCancel": "确定要取消这个任务吗？"
+    "confirmCancel": "确定要取消这个任务吗？",
+    "cancelSuccess": "任务已取消",
+    "cancelError": "取消失败",
+    "deleteJobSuccess": "任务已删除",
+    "deleteJobError": "删除失败",
+    "clearHistorySuccess": "任务历史已清空",
+    "clearHistoryError": "清空失败",
+    "clearAllSuccess": "队列任务已清空",
+    "clearAllError": "清空失败",
+    "clearAllForceSuccess": "所有任务已清空",
+    "clearAllForceError": "清空失败",
+    "retrySuccess": "失败任务已重新提交",
+    "retryError": "重试失败",
+    "clearCacheSuccess": "缓存已清除",
+    "clearCacheError": "清除失败"
   },
   "files": {
     "title": "文件",
@@ -148,10 +162,14 @@
     "pasting": "粘贴文件中...",
     "pasteSuccess": "粘贴成功",
     "pasteError": "粘贴失败",
+    "renameSuccess": "重命名成功",
+    "renameError": "重命名失败",
     "renameTitle": "重命名",
     "renamePlaceholder": "请输入新名称",
     "newFolder": "新建文件夹",
-    "newFolderPlaceholder": "请输入文件夹名称"
+    "newFolderPlaceholder": "请输入文件夹名称",
+    "createFolderSuccess": "新建文件夹成功",
+    "createFolderError": "新建文件夹失败"
   },
   "presets": {
     "title": "转码预设",
@@ -172,7 +190,10 @@
     "codecGroup": "编码",
     "resolutionGroup": "分辨率",
     "vendorGroup": "厂商",
-    "noMatchPreset": "无匹配预设"
+    "noMatchPreset": "无匹配预设",
+    "saveSuccess": "预设保存成功",
+    "deleteSuccess": "预设已删除",
+    "copySuccess": "预设已复制"
   },
   "presetTabs": {
     "summary": "基本信息",
@@ -402,6 +423,7 @@
     "startSingle": "开始转码",
     "startBatch": "开始批量转码",
     "createDirFailed": "创建目录失败",
+    "createDirSuccess": "目录创建成功",
     "selectOutputDir": "请选择输出目录",
     "selectPresetError": "请选择转码预设",
     "cacheDirRequired": "请先设置缓存目录",

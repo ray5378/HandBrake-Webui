@@ -126,7 +126,21 @@
     "pageSuffix": "",
     "confirmCancelTitle": "Cancel Job",
     "confirmDeleteTitle": "Delete Job",
-    "confirmCancel": "Are you sure you want to cancel this job?"
+    "confirmCancel": "Are you sure you want to cancel this job?",
+    "cancelSuccess": "Job cancelled",
+    "cancelError": "Failed to cancel",
+    "deleteJobSuccess": "Job deleted",
+    "deleteJobError": "Failed to delete",
+    "clearHistorySuccess": "History cleared",
+    "clearHistoryError": "Failed to clear",
+    "clearAllSuccess": "Queue cleared",
+    "clearAllError": "Failed to clear",
+    "clearAllForceSuccess": "All jobs cleared",
+    "clearAllForceError": "Failed to clear",
+    "retrySuccess": "Failed jobs resubmitted",
+    "retryError": "Failed to retry",
+    "clearCacheSuccess": "Cache cleared",
+    "clearCacheError": "Failed to clear cache"
   },
   "files": {
     "title": "Files",
@@ -148,10 +162,14 @@
     "pasting": "Pasting files...",
     "pasteSuccess": "Pasted successfully",
     "pasteError": "Failed to paste",
+    "renameSuccess": "Renamed successfully",
+    "renameError": "Failed to rename",
     "renameTitle": "Rename",
     "renamePlaceholder": "Enter a new name",
     "newFolder": "New Folder",
-    "newFolderPlaceholder": "Enter folder name"
+    "newFolderPlaceholder": "Enter folder name",
+    "createFolderSuccess": "Folder created successfully",
+    "createFolderError": "Failed to create folder"
   },
   "presets": {
     "title": "Transcode Presets",
@@ -172,7 +190,10 @@
     "codecGroup": "Codec",
     "resolutionGroup": "Resolution",
     "vendorGroup": "Vendor",
-    "noMatchPreset": "No matching presets"
+    "noMatchPreset": "No matching presets",
+    "saveSuccess": "Preset saved",
+    "deleteSuccess": "Preset deleted",
+    "copySuccess": "Preset copied"
   },
   "presetTabs": {
     "summary": "Summary",
@@ -402,6 +423,7 @@
     "startSingle": "Start Transcode",
     "startBatch": "Start Batch Transcode",
     "createDirFailed": "Failed to create directory",
+    "createDirSuccess": "Directory created",
     "selectOutputDir": "Please select an output directory",
     "selectPresetError": "Please select a transcode preset",
     "cacheDirRequired": "Please set the cache directory first",

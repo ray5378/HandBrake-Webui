@@ -94,6 +94,11 @@ function Presets() {
       setShowModal(false);
       resetForm();
       fetchPresets();
+      addToast({
+        message: t('presets.saveSuccess', '预设保存成功'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (error) {
       console.error('Failed to save preset:', error);
       const axiosErr = error as { response?: { data?: { error?: string } } };
@@ -127,6 +132,11 @@ function Presets() {
     try {
       await api.delete(`/presets/${confirmDeletePresetId}`);
       fetchPresets();
+      addToast({
+        message: t('presets.deleteSuccess', '预设已删除'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (error) {
       console.error('Failed to delete preset:', error);
       const axiosErr = error as { response?: { data?: { error?: string } } };
@@ -161,6 +171,11 @@ function Presets() {
         settings: preset.settings
       });
       fetchPresets();
+      addToast({
+        message: t('presets.copySuccess', '预设已复制'),
+        type: 'success',
+        duration: 5000
+      });
       const newId = res.data.data?.preset?.id;
       if (newId) {
         setEditingPreset({ ...preset, id: newId });
