@@ -142,6 +142,7 @@
     "confirmDeleteMessage": "确定要删除「{{name}}」吗？此操作不可撤销。",
     "confirmDeleteMultiple": "确定要删除选中的 {{count}} 项吗？此操作不可撤销。",
     "confirmDeleteDirectory": "该目录及其所有内容将被删除。",
+    "deleting": "删除文件中...",
     "renameTitle": "重命名",
     "renamePlaceholder": "请输入新名称",
     "newFolder": "新建文件夹",

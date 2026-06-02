@@ -17,7 +17,8 @@ import {
   Scissors,
   Clipboard,
   Pencil,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import VideoPlayer from '../components/VideoPlayer';
 import api from '../services/api';
@@ -99,6 +100,7 @@ function Files() {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null);
   const [batchSourcePaths, setBatchSourcePaths] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [searchResults, setSearchResults] = useState<{
     files: SearchResult[];
     directories: SearchResult[];
@@ -363,15 +365,19 @@ function Files() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
+    setIsDeleting(true);
+    const paths = [...deleteTarget.paths];
+    setDeleteTarget(null);
     try {
-      for (const p of deleteTarget.paths) {
+      for (const p of paths) {
         await api.delete('/files', { params: { path: p } });
       }
-      setDeleteTarget(null);
       setSelectedPaths([]);
       fetchFiles();
     } catch (error) {
       console.error('Failed to delete:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1129,6 +1135,15 @@ function Files() {
         onCancel={() => setDeleteTarget(null)}
         danger
       />
+
+      {isDeleting && (
+        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[110]'>
+          <div className='flex flex-col items-center space-y-4'>
+            <Loader2 className='w-10 h-10 text-primary animate-spin' />
+            <span className='text-white text-lg font-medium'>{t('files.deleting') || '删除文件中...'}</span>
+          </div>
+        </div>
+      )}
 
       {renameTarget && (
         <RenameModal
