@@ -103,6 +103,7 @@ function Files() {
   const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null);
   const [batchSourcePaths, setBatchSourcePaths] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteMousePos, setDeleteMousePos] = useState<{ x: number; y: number } | null>(null);
   const [searchResults, setSearchResults] = useState<{
     files: SearchResult[];
     directories: SearchResult[];
@@ -284,6 +285,18 @@ function Files() {
     document.addEventListener('mousedown', handleDocumentMouseDown);
     return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
   }, []);
+
+  useEffect(() => {
+    if (!isDeleting) {
+      setDeleteMousePos(null);
+      return;
+    }
+    const handleMouseMove = (e: MouseEvent) => {
+      setDeleteMousePos({ x: e.clientX, y: e.clientY });
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [isDeleting]);
 
   const handleCopy = () => {
     if (!contextMenu) return;
@@ -1148,14 +1161,13 @@ function Files() {
         danger
       />
 
-      {isDeleting && (
-        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[110]'>
-          <div className='flex flex-col items-center space-y-4'>
-            <Loader2 className='w-10 h-10 text-primary animate-spin' />
-            <span className='text-white text-lg font-medium'>
-              {t('files.deleting') || '删除文件中...'}
-            </span>
-          </div>
+      {deleteMousePos && (
+        <div
+          className='fixed z-[110] pointer-events-none flex items-center space-x-2 px-3 py-2 rounded-lg bg-dark-800/95 border border-dark-600 shadow-xl'
+          style={{ left: deleteMousePos.x + 15, top: deleteMousePos.y + 15 }}
+        >
+          <Loader2 className='w-4 h-4 text-primary animate-spin' />
+          <span className='text-sm text-white whitespace-nowrap'>{t('files.deleting')}</span>
         </div>
       )}
 
