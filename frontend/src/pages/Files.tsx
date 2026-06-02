@@ -1152,7 +1152,9 @@ function Files() {
         <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-[110]'>
           <div className='flex flex-col items-center space-y-4'>
             <Loader2 className='w-10 h-10 text-primary animate-spin' />
-            <span className='text-white text-lg font-medium'>{t('files.deleting') || '删除文件中...'}</span>
+            <span className='text-white text-lg font-medium'>
+              {t('files.deleting') || '删除文件中...'}
+            </span>
           </div>
         </div>
       )}
