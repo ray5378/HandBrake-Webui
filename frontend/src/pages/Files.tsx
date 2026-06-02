@@ -25,6 +25,7 @@ import api from '../services/api';
 import clsx from 'clsx';
 import BatchTranscodeModal from '../components/BatchTranscodeModal';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import { useToastStore } from '../stores/toastStore';
 import { formatFileSize } from '../utils/format';
 import { FileItem, SearchResult } from '../types';
 
@@ -62,6 +63,7 @@ interface EmptyContextMenuState {
 
 function Files() {
   const { t } = useTranslation();
+  const addToast = useToastStore(state => state.addToast);
   const navigate = useNavigate();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<FileDirectory[]>([]);
@@ -374,8 +376,18 @@ function Files() {
       }
       setSelectedPaths([]);
       fetchFiles();
+      addToast({
+        message: t('files.deleteSuccess', '删除成功'),
+        type: 'success',
+        duration: 5000
+      });
     } catch (error) {
       console.error('Failed to delete:', error);
+      addToast({
+        message: t('files.deleteError', '删除失败'),
+        type: 'error',
+        duration: 5000
+      });
     } finally {
       setIsDeleting(false);
     }

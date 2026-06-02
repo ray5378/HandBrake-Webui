@@ -143,6 +143,8 @@
     "confirmDeleteMultiple": "Are you sure you want to delete {{count}} selected items? This action cannot be undone.",
     "confirmDeleteDirectory": "The directory and all its contents will be deleted.",
     "deleting": "Deleting files...",
+    "deleteSuccess": "Deleted successfully",
+    "deleteError": "Failed to delete",
     "renameTitle": "Rename",
     "renamePlaceholder": "Enter a new name",
     "newFolder": "New Folder",
