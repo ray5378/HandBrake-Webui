@@ -1,0 +1,38 @@
+#!/bin/bash
+# ============================================================
+# 升级后回调 — 验证新版本并清理旧备份
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+log_info "===== 升级后验证 ====="
+
+# 验证服务
+for i in $(seq 1 12); do
+    if curl -s "http://localhost:${INTERNAL_PORT}/api/system/health" >/dev/null 2>&1; then
+        log_info "新版本服务运行正常"
+        set_config "upgrade_status" "success"
+        set_config "upgrade_time" "$(date '+%Y-%m-%d %H:%M:%S')"
+
+        # 清理超过 3 天的旧备份
+        find "${APP_CONFIG}/backup" -type d -mtime +3 -exec rm -rf {} + 2>/dev/null || true
+
+        log_info "===== 升级后验证完成 ====="
+        exit 0
+    fi
+    sleep 5
+done
+
+log_error "升级后服务未能在 60 秒内就绪"
+set_config "upgrade_status" "failed"
+
+log_warn "如需回滚，请执行:"
+log_warn "  docker stop ${CONTAINER_NAME} && docker rm ${CONTAINER_NAME}"
+log_warn "  docker run -d --name ${CONTAINER_NAME} ... \$(get_config pre_upgrade_image)"
+
+exit 1

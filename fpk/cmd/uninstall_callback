@@ -1,0 +1,23 @@
+#!/bin/bash
+# ============================================================
+# 卸载后回调 — 清理工作
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+log_info "===== 卸载后清理 ====="
+
+# 清理 Docker 镜像（可选，节省空间）
+KEEP_IMAGE=$(get_config "keep_image_on_uninstall" "false")
+if [ "$KEEP_IMAGE" = "false" ]; then
+    log_info "清理 Docker 镜像: ${IMAGE_NAME}"
+    docker rmi "${IMAGE_NAME}" 2>/dev/null || log_warn "镜像清理失败（可能被其他容器使用）"
+fi
+
+log_info "===== 卸载后清理完成 ====="
+exit 0

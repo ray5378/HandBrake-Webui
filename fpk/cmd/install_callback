@@ -1,0 +1,27 @@
+#!/bin/bash
+# ============================================================
+# 安装后回调 — 安装完成后的收尾工作
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+log_info "===== 安装后处理 ====="
+
+# 检查服务是否正常运行
+if curl -s "http://localhost:${INTERNAL_PORT}/api/system/health" >/dev/null 2>&1; then
+    log_info "HandBrake-Webui 服务运行正常"
+else
+    log_warn "服务暂未响应，可能在启动中，请稍候检查"
+fi
+
+# 记录安装信息
+set_config "install_version" "1.0.0"
+set_config "install_time" "$(date '+%Y-%m-%d %H:%M:%S')"
+
+log_info "===== 安装后处理完成 ====="
+exit 0

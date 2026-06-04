@@ -1,0 +1,28 @@
+#!/bin/bash
+# ============================================================
+# 卸载前回调 — 询问用户是否保留数据
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+log_info "===== 卸载前准备 ====="
+
+# 通知用户数据保留选项
+log_info "卸载时将保留配置和数据目录: ${APP_CONFIG}"
+log_info "如需清理数据，卸载后手动删除: rm -rf ${APP_CONFIG}"
+
+# 保存用户选择（fnOS 框架会通过环境变量传递用户选择）
+if [ "${UNINSTALL_KEEP_DATA}" = "false" ]; then
+    set_config "keep_data_on_uninstall" "false"
+    log_info "用户选择清理数据"
+else
+    set_config "keep_data_on_uninstall" "true"
+    log_info "用户选择保留数据"
+fi
+
+exit 0

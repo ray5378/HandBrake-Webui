@@ -1,0 +1,165 @@
+#!/bin/bash
+# ============================================================
+# HandBrake-Webui fpk — 公共函数库
+# 被 cmd/main 和所有回调脚本 source 引用
+# ============================================================
+
+set -e
+
+# ---- 应用信息 ----
+APP_NAME="App.ThirdParty.HandBrakeWebui"
+CONTAINER_NAME="handbrake-webui"
+IMAGE_NAME="ray5378/handbrake-webui:latest"
+INTERNAL_PORT="52389"
+
+# ---- 路径解析 ----
+# fnOS 应用路径约定:
+#   /var/apps/{appname}/           — 应用根目录
+#   /var/apps/{appname}/var/       — 可写数据目录
+#   /var/apps/{appname}/target/    — 链接到 /usr/local/apps/@appcenter/{appname}/
+#   /usr/local/apps/@appdata/{appname}/  — 应用数据持久化目录
+
+# 尝试多个可能的路径来定位应用根目录
+find_app_root() {
+    local candidates=(
+        "/var/apps/${APP_NAME}"
+        "/usr/local/apps/@appcenter/${APP_NAME}"
+    )
+    for dir in "${candidates[@]}"; do
+        if [ -d "$dir" ]; then
+            echo "$dir"
+            return 0
+        fi
+    done
+    # 默认回退
+    echo "/var/apps/${APP_NAME}"
+}
+
+APP_ROOT=$(find_app_root)
+APP_VAR="${APP_ROOT}/var"
+APP_CONFIG="${APP_VAR}/config"
+
+# ---- 日志函数 ----
+log_info() {
+    echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - $*"
+}
+
+log_error() {
+    echo "[ERROR] $(date '+%Y-%m-%d %H:%M:%S') - $*" >&2
+}
+
+log_warn() {
+    echo "[WARN] $(date '+%Y-%m-%d %H:%M:%S') - $*"
+}
+
+# ---- Docker 操作 ----
+
+# 确保 Docker 守护进程可用
+ensure_docker() {
+    if ! command -v docker &>/dev/null; then
+        log_error "Docker 不可用，请确认 fnOS Docker 服务已启动"
+        return 1
+    fi
+    if ! docker info &>/dev/null; then
+        log_error "Docker 守护进程未运行"
+        return 1
+    fi
+    log_info "Docker 就绪"
+    return 0
+}
+
+# 检查容器是否存在
+container_exists() {
+    docker ps -a --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"
+}
+
+# 检查容器是否运行中
+container_running() {
+    docker ps --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"
+}
+
+# 获取容器状态
+get_container_status() {
+    if container_running; then
+        echo "running"
+    elif container_exists; then
+        echo "existed"
+    else
+        echo "absent"
+    fi
+}
+
+# ---- 持久化配置管理 ----
+
+# 确保配置目录存在
+ensure_config_dir() {
+    mkdir -p "${APP_CONFIG}"
+    log_info "配置目录: ${APP_CONFIG}"
+}
+
+# 读取持久化配置值
+get_config() {
+    local key="$1"
+    local default="$2"
+    local config_file="${APP_CONFIG}/fpk.conf"
+    if [ -f "$config_file" ]; then
+        grep -s "^${key}=" "$config_file" | cut -d= -f2- || echo "$default"
+    else
+        echo "$default"
+    fi
+}
+
+# 写入持久化配置值
+set_config() {
+    local key="$1"
+    local value="$2"
+    local config_file="${APP_CONFIG}/fpk.conf"
+    ensure_config_dir
+    if grep -qs "^${key}=" "$config_file" 2>/dev/null; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "$config_file"
+    else
+        echo "${key}=${value}" >> "$config_file"
+    fi
+}
+
+# ---- 数据卷映射 ----
+
+# 获取用户配置的视频数据目录
+get_data_volume() {
+    local saved_path
+    saved_path=$(get_config "drive_path" "")
+    if [ -n "$saved_path" ] && [ -d "$saved_path" ]; then
+        echo "$saved_path"
+    else
+        echo ""
+    fi
+}
+
+# ---- 容器启动模板 ----
+generate_docker_run_cmd() {
+    local data_vol="$1"
+    local cmd="docker run -d \\
+        --name ${CONTAINER_NAME} \\
+        --restart unless-stopped \\
+        --network host \\
+        -v ${APP_CONFIG}:/config \\
+        -e PORT=${INTERNAL_PORT} \\
+        -e CONFIG_DIR=/config \\
+        -e NODE_ENV=production"
+
+    if [ -n "$data_vol" ]; then
+        cmd="${cmd} \\
+        -v ${data_vol}:/drive"
+    fi
+
+    # 透传 GPU 加速设备
+    if [ -e /dev/dri ]; then
+        cmd="${cmd} \\
+        --device /dev/dri:/dev/dri"
+    fi
+
+    cmd="${cmd} \\
+        ${IMAGE_NAME}"
+
+    echo "$cmd"
+}

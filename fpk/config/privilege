@@ -1,0 +1,23 @@
+#!/bin/bash
+# ============================================================
+# 权限配置
+# 定义应用运行所需的系统权限和设备访问
+# ============================================================
+
+# Docker 访问权限（应用通过 Docker CLI 管理容器）
+allow_docker=true
+
+# 硬件设备透传 — Intel QSV / VA-API 视频硬件加速
+allow_dev_dri=true
+
+# 网络配置 — 使用 host 网络模式
+allow_network_host=true
+
+# 特权模式
+privileged=false
+
+# 允许的 capability
+capabilities=()
+
+echo "privilege configuration loaded"
+exit 0

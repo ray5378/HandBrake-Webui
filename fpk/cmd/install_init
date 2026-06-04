@@ -1,0 +1,35 @@
+#!/bin/bash
+# ============================================================
+# 安装前初始化 — 检查环境和前置条件
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+log_info "===== 安装前检查 ====="
+
+# 1. 检查 Docker 是否可用
+if ! command -v docker &>/dev/null; then
+    log_error "Docker 未安装。请确认 fnOS 系统正常。"
+    exit 1
+fi
+
+# 2. 检查磁盘空间（至少需要 2GB 用于 Docker 镜像）
+AVAILABLE_KB=$(df /var/apps | tail -1 | awk '{print $4}')
+if [ "$AVAILABLE_KB" -lt 2097152 ]; then
+    log_error "磁盘空间不足。需要至少 2GB 可用空间。"
+    exit 1
+fi
+log_info "磁盘空间: $((AVAILABLE_KB / 1024))MB 可用"
+
+# 3. 检查是否已安装（避免同名容器冲突）
+if docker ps -a --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"; then
+    log_warn "发现同名容器 ${CONTAINER_NAME}，将在安装时复用"
+fi
+
+log_info "环境检查通过"
+exit 0

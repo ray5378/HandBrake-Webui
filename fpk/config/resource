@@ -1,0 +1,19 @@
+#!/bin/bash
+# ============================================================
+# 资源配置
+# 定义应用的资源限制和建议值
+# ============================================================
+
+# CPU 限制
+cpu_shares=1024
+
+# 内存限制（0 = 不限制）
+memory_limit=0
+memory_reservation=1024
+
+# 磁盘 I/O（0 = 不限制）
+io_read_bps=0
+io_write_bps=0
+
+echo "resource configuration loaded"
+exit 0

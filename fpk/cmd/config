@@ -1,0 +1,31 @@
+#!/bin/bash
+# ============================================================
+# 配置初始化脚本
+# 在首次安装时生成默认配置
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+ensure_config_dir
+
+CONFIG_FILE="${APP_CONFIG}/fpk.conf"
+if [ ! -f "$CONFIG_FILE" ]; then
+    cat > "$CONFIG_FILE" << 'EOFCONF'
+# HandBrake-Webui fpk 持久化配置
+# 此文件由生命周期脚本自动管理
+install_version=1.0.0
+keep_data_on_uninstall=true
+keep_image_on_uninstall=false
+drive_path=
+EOFCONF
+    log_info "默认配置文件已生成: ${CONFIG_FILE}"
+else
+    log_info "配置文件已存在: ${CONFIG_FILE}"
+fi
+
+exit 0

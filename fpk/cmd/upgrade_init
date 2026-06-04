@@ -1,0 +1,33 @@
+#!/bin/bash
+# ============================================================
+# 升级前回调 — 备份当前配置
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/common" ]; then
+    source "${SCRIPT_DIR}/common"
+else
+    source "/var/apps/${APP_NAME}/cmd/common" 2>/dev/null || exit 1
+fi
+
+log_info "===== 升级前备份 ====="
+
+# 备份配置目录
+BACKUP_DIR="${APP_CONFIG}/backup/pre-upgrade-$(date '+%Y%m%d%H%M%S')"
+mkdir -p "${BACKUP_DIR}"
+
+if [ -d "${APP_CONFIG}" ]; then
+    cp -r "${APP_CONFIG}"/* "${BACKUP_DIR}/" 2>/dev/null || true
+    log_info "配置已备份到: ${BACKUP_DIR}"
+fi
+
+# 保存旧版本信息
+if container_exists; then
+    local old_version
+    old_version=$(docker inspect "${CONTAINER_NAME}" --format '{{.Config.Image}}' 2>/dev/null || echo "unknown")
+    set_config "pre_upgrade_image" "$old_version"
+    log_info "旧版本镜像: ${old_version}"
+fi
+
+log_info "===== 升级前备份完成 ====="
+exit 0

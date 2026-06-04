@@ -1,0 +1,12 @@
+{
+    ".url": {
+        "App.ThirdParty.HandBrakeWebui.Web": {
+            "title": "HandBrake 转码",
+            "icon": "images/icon-{0}.png",
+            "type": "iframe",
+            "protocol": "http",
+            "url": "/cgi/ThirdParty/App.ThirdParty.HandBrakeWebui/index.cgi/",
+            "allUsers": true
+        }
+    }
+}
